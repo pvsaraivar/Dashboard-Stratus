@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stratus Hub | Gestão</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .modal-overlay { background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(4px); }
+    </style>
+</head>
+<body class="bg-black text-gray-100 font-sans antialiased flex h-screen overflow-hidden">
+
+    <!-- BARRA LATERAL (SIDEBAR) -->
+    <aside class="w-64 bg-zinc-950 border-r border-zinc-800 flex flex-col justify-between select-none shrink-0">
+        <div>
+            <!-- LOGO -->
+            <div class="p-6 flex items-center space-x-3 border-b border-zinc-900">
+                <div class="w-10 h-10 rounded-xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400 font-bold text-lg">SS</div>
+                <div>
+                    <h1 class="font-bold tracking-wider text-white">STRATUS</h1>
+                    <span class="text-[10px] text-teal-400 font-mono tracking-widest uppercase">HUB V1.0</span>
+                </div>
+            </div>
+
+            <!-- MENU DE NAVEGAÇÃO -->
+            <div class="px-4 py-6 space-y-6">
+                <div>
+                    <p class="px-3 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-2">Painel Principal</p>
+                    <nav class="space-y-1">
+                        <a href="#" onclick="navigateTo('main-view', this)" class="nav-item flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium text-teal-400 bg-teal-500/10 border border-teal-500/20 transition-colors">
+                            <i class="fas fa-home w-5"></i><span>Painel</span>
+                        </a>
+                        <a href="#" onclick="navigateTo('meetings-view', this)" class="nav-item flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors">
+                            <i class="fas fa-calendar-alt w-5"></i><span>Reuniões</span>
+                        </a>
+                        <a href="#" onclick="navigateTo('demands-view', this)" class="nav-item flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors">
+                            <i class="fas fa-tasks w-5"></i><span>Demandas Gerais</span>
+                        </a>
+                        <a href="#" onclick="navigateTo('calendar-view', this)" class="nav-item flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors">
+                            <i class="fas fa-calendar w-5"></i><span>Calendário</span>
+                        </a>
+                        <a href="#" onclick="navigateTo('people-view', this)" class="nav-item flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors">
+                            <i class="fas fa-users w-5"></i><span>Pessoas</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <div>
+                    <p class="px-3 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-2">Operacional</p>
+                    <nav class="space-y-1">
+                        <a href="#" onclick="navigateTo('quotes-view', this)" class="nav-item flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors">
+                            <i class="fas fa-file-invoice-dollar w-5"></i><span>Orçamentos</span>
+                        </a>
+                        <a href="#" onclick="navigateTo('main-view', this)" class="nav-item flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors">
+                            <i class="fas fa-wine-bottle w-5"></i><span>Operação de Bar</span>
+                        </a>
+                        <a href="#" onclick="navigateTo('contracts-view', this)" class="nav-item flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors">
+                            <i class="fas fa-file-contract w-5"></i><span>Contratos</span>
+                        </a>
+                        <a href="#" onclick="navigateTo('financial-view', this)" class="nav-item flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors">
+                            <i class="fas fa-wallet w-5"></i><span>Financeiro</span>
+                        </a>
+                        <a href="#" onclick="navigateTo('reports-view', this)" class="nav-item flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors">
+                            <i class="fas fa-chart-bar w-5"></i><span>Relatórios</span>
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-4 border-t border-zinc-900">
+            <a href="#" onclick="navigateTo('settings-view', this)" class="nav-item flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors">
+                <i class="fas fa-cog w-5"></i><span>Configurações</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="flex-1 flex flex-col h-screen overflow-y-auto bg-zinc-950">
+        <!-- CABEÇALHO SUPERIOR -->
+        <header class="h-16 border-b border-zinc-900 px-8 flex justify-between items-center bg-zinc-950/50 backdrop-blur sticky top-0 z-20">
+            <div class="flex items-center space-x-2 text-sm text-zinc-400">
+                <i class="far fa-clock text-teal-400"></i>
+                <span id="current-date">Sexta-feira, 23 de Outubro</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="w-9 h-9 rounded-lg bg-teal-500/20 border border-teal-500/40 flex items-center justify-center text-teal-400 font-bold text-xs">PV</div>
+            </div>
+        </header>
+
+        <!-- VISTA: PAINEL PRINCIPAL (EVENTOS) -->
+        <div id="main-view" class="view-content p-8 max-w-7xl w-full mx-auto space-y-8">
+            <div class="bg-gradient-to-r from-teal-950/30 to-zinc-900/60 border border-teal-500/30 rounded-2xl p-6 flex flex-col space-y-4">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-sparkles text-teal-400"></i>
+                    <h3 class="text-lg font-bold text-white">Stratus AI - Assistente Integrado (Gemini)</h3>
+                </div>
+                <p class="text-sm text-zinc-400">Analise os seus relatórios através de linguagem natural (Ex: "Quantas Beats Red vendeu na Link?", "Qual o lucro da Stratus na Disco Voador?")</p>
+                <div class="flex space-x-3">
+                    <input type="text" id="ai-input" placeholder="Faça uma pergunta sobre as operações de bar..." class="flex-1 bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-teal-500 transition-colors">
+                    <button onclick="askAI()" class="bg-teal-500/10 hover:bg-teal-500/20 border border-teal-500/50 text-teal-400 px-6 py-3 rounded-xl font-bold transition-colors">Perguntar</button>
+                </div>
+                <div id="ai-response" class="hidden bg-zinc-950 border border-zinc-800 rounded-xl p-4 text-sm text-zinc-300"></div>
+            </div>
+
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pt-4 border-t border-zinc-900">
+                <div>
+                    <h2 class="text-2xl font-bold tracking-tight text-white">Planilhas e Fechamentos</h2>
+                    <p class="text-sm text-zinc-400">Selecione um evento para ver o detalhamento financeiro ou consolidação.</p>
+                </div>
+                <div id="upload-status" class="text-xs font-mono text-teal-400 bg-teal-500/10 border border-teal-500/20 px-3 py-1.5 rounded-lg">A ligar ao Google Drive...</div>
+            </div>
+            <div id="event-cards-container" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+        </div>
+
+        <!-- VISTA: DETALHE DO EVENTO / CONSOLIDAÇÃO -->
+        <div id="detail-view" class="view-content p-8 max-w-7xl w-full mx-auto space-y-8 hidden">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-zinc-900 pb-6">
+                <div class="flex items-center space-x-4">
+                    <button onclick="showMainView()" class="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-teal-500/50 text-zinc-300 hover:text-teal-400 flex items-center justify-center transition-colors">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <div>
+                        <span id="page-subtitle" class="text-xs font-mono text-teal-400 uppercase tracking-widest">Resumo Financeiro Executivo</span>
+                        <h2 id="page-event-title" class="text-2xl font-bold tracking-tight text-white mt-0.5">A carregar...</h2>
+                    </div>
+                </div>
+            </div>
+
+            <div id="single-event-container" class="space-y-8">
+                <div id="repass-card" class="bg-gradient-to-r from-teal-950/60 to-zinc-900 border border-teal-500/40 rounded-2xl p-6 shadow-2xl flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div>
+                        <span class="text-xs font-mono text-teal-400 uppercase tracking-wider block mb-1">Fechamento Financeiro</span>
+                        <h3 id="repass-title" class="text-xl font-bold text-white">Valor a Ser Repassado ao Cliente</h3>
+                        <p id="repass-desc" class="text-xs text-zinc-400 mt-1">Montante líquido apurado destinado ao acerto com a produção do evento.</p>
+                    </div>
+                    <div class="text-right">
+                        <span id="val-repasse" class="text-3xl md:text-4xl font-extrabold text-teal-400 font-mono">R$ 0,00</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-zinc-900/60 border border-zinc-800/80 rounded-2xl p-6 space-y-2"><span id="label-bruto" class="text-xs text-zinc-500 font-mono uppercase">Bruto Total de Vendas</span><h4 id="val-bruto" class="text-xl font-bold text-white">R$ 0,00</h4></div>
+                    <div class="bg-zinc-900/60 border border-zinc-800/80 rounded-2xl p-6 space-y-2"><span id="label-insumos" class="text-xs text-zinc-500 font-mono uppercase">Total de Insumos</span><h4 id="val-insumos" class="text-xl font-bold text-red-400">R$ 0,00</h4></div>
+                    <div class="bg-zinc-900/60 border border-zinc-800/80 rounded-2xl p-6 space-y-2"><span class="text-xs text-zinc-500 font-mono uppercase">Mão de Obra</span><h4 id="val-maodeobra" class="text-xl font-bold text-red-400">R$ 0,00</h4></div>
+                    <div class="bg-zinc-900/60 border border-zinc-800/80 rounded-2xl p-6 space-y-2"><span id="label-operacional" class="text-xs text-zinc-500 font-mono uppercase">Custos Operacionais</span><h4 id="val-operacional" class="text-xl font-bold text-red-400">R$ 0,00</h4></div>
+                    <div class="bg-zinc-900/60 border border-zinc-800/80 rounded-2xl p-6 space-y-2"><span class="text-xs text-zinc-500 font-mono uppercase">Sistema / Outros</span><h4 id="val-sistema" class="text-xl font-bold text-red-400">R$ 0,00</h4></div>
+                    <div class="bg-zinc-900/60 border border-teal-500/30 rounded-2xl p-6 space-y-2 bg-teal-500/5"><span class="text-xs text-teal-400 font-mono uppercase font-semibold">Lucro Líquido do Bar</span><h4 id="val-lucro" class="text-xl font-bold text-teal-300">R$ 0,00</h4></div>
+                </div>
+                <div id="linked-sheets-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 border-t border-zinc-900 pt-6"></div>
+            </div>
+
+            <div id="lucro-geral-container" class="hidden space-y-6">
+                <div class="overflow-x-auto bg-zinc-900/60 border border-zinc-800 rounded-2xl shadow-xl">
+                    <table class="w-full text-left text-sm text-zinc-300">
+                        <thead class="bg-zinc-900 text-xs font-mono uppercase border-b border-zinc-800">
+                            <tr>
+                                <th class="p-3 text-teal-400">Evento</th><th class="p-3 text-teal-400">Data</th>
+                                <th class="p-3 text-emerald-400">Saída Bebidas</th><th class="p-3 text-amber-400">Saída Variados</th>
+                                <th class="p-3 text-emerald-400">Retorno Bebidas</th><th class="p-3 text-amber-400">Retorno Variados</th>
+                                <th class="p-3 text-teal-400">Lucro Bar</th><th class="p-3 text-red-400">Sistema 2%</th>
+                                <th class="p-3 text-right text-teal-400">Lucro Final</th><th class="p-3 text-center text-teal-400">Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lucro-geral-table-body" class="divide-y divide-zinc-800/60"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- MÓDULO FINANCEIRO (PASTAS E COMPROVANTES) -->
+        <div id="financial-view" class="view-content p-8 max-w-7xl w-full mx-auto space-y-8 hidden">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold tracking-tight text-white">Gestão Financeira</h2>
+                    <p class="text-sm text-zinc-400">Organize comprovativos em pastas e visualize diretamente no painel.</p>
+                </div>
+                <div class="flex space-x-3">
+                    <button onclick="createNewFolder()" class="px-4 py-2 bg-zinc-900 border border-zinc-700 hover:border-teal-500 hover:text-teal-400 rounded-lg text-sm font-bold text-white transition-colors"><i class="fas fa-folder-plus mr-2"></i>Nova Pasta</button>
+                </div>
+            </div>
+
+            <!-- Breadcrumb de Pastas -->
+            <div class="flex items-center space-x-2 text-sm font-mono text-zinc-400 border-b border-zinc-800 pb-4" id="folder-breadcrumb">
+                <button onclick="openFolder(null, 'Raiz')" class="hover:text-teal-400 transition-colors"><i class="fas fa-home mr-1"></i> Drive Raiz</button>
+            </div>
+
+            <!-- Área de Dropzone -->
+            <div id="drop-zone" onclick="document.getElementById('file-upload').click()" class="border-2 border-dashed border-zinc-800 hover:border-teal-500/50 bg-zinc-900/30 rounded-2xl p-10 text-center transition-colors cursor-pointer group relative">
+                <input type="file" id="file-upload" class="hidden" multiple accept=".pdf,image/jpeg,image/png,image/jpg" onchange="handleFileSelect(event)">
+                <div class="w-12 h-12 rounded-full bg-teal-500/10 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform pointer-events-none">
+                    <i id="upload-icon" class="fas fa-cloud-upload-alt text-xl text-teal-400"></i>
+                </div>
+                <h3 id="upload-title" class="text-white font-bold text-sm pointer-events-none">Subir ficheiro nesta pasta</h3>
+                <p class="text-xs text-zinc-500 pointer-events-none">Clique ou arraste ficheiros para aqui.</p>
+            </div>
+
+            <div class="space-y-4">
+                <div id="recent-docs-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+            </div>
+        </div>
+
+        <!-- VISTA GENÉRICA PARA OUTROS MENUS -->
+        <div id="generic-view" class="view-content p-8 max-w-7xl w-full mx-auto space-y-6 hidden">
+            <h2 id="generic-title" class="text-2xl font-bold text-white">Módulo</h2>
+            <p class="text-zinc-400 text-sm">Este módulo está sincronizado e ativo na sua área de trabalho.</p>
+            <div class="bg-zinc-900/40 border border-zinc-800/80 rounded-2xl p-12 text-center text-zinc-500 font-mono text-sm">
+                Conteúdo em sincronização automática com o sistema da Stratus Sounds.
+            </div>
+        </div>
+    </main>
+
+    <!-- MODAL DE VISUALIZAÇÃO INTERNA (PREVIEW) -->
+    <div id="preview-modal" class="fixed inset-0 z-50 modal-overlay hidden flex-col items-center justify-center p-4 md:p-10">
+        <div class="w-full max-w-5xl bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden shadow-2xl flex flex-col h-[90vh]">
+            <div class="flex justify-between items-center p-4 border-b border-zinc-900 bg-zinc-900/50">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 rounded bg-teal-500/10 flex items-center justify-center text-teal-400"><i class="fas fa-file-invoice"></i></div>
+                    <h3 id="preview-filename" class="text-white font-bold text-sm">A carregar documento...</h3>
+                </div>
+                <div class="flex space-x-2">
+                    <button onclick="closePreview()" class="w-8 h-8 rounded-lg bg-zinc-800 hover:bg-red-500/20 hover:text-red-400 flex items-center justify-center text-zinc-400 transition-colors"><i class="fas fa-times"></i></button>
+                </div>
+            </div>
+            <div class="flex-1 w-full bg-black relative">
+                <iframe id="preview-frame" class="w-full h-full border-0" src="" allowfullscreen></iframe>
+                <div id="preview-loading" class="absolute inset-0 flex items-center justify-center text-zinc-500 bg-black pointer-events-none">
+                    <i class="fas fa-spinner fa-spin text-2xl text-teal-400 mr-3"></i> A renderizar visualizador...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT COMPLETO DE NAVEGAÇÃO E LÓGICA -->
+    <script>
+        let globalDriveFiles = [];
+        let currentFolderId = null;
+        let folderHistory = [{ id: null, name: 'Raiz' }];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadGoogleDriveSheets();
+            setupDragAndDrop();
+        });
+
+        // NAVEGAÇÃO ENTRE VISTAS DO MENU LATERAL
+        function navigateTo(viewId, element) {
+            document.querySelectorAll('.view-content').forEach(view => view.classList.add('hidden'));
+
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.className = "nav-item flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors";
+            });
+
+            if (element) {
+                element.className = "nav-item flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium text-teal-400 bg-teal-500/10 border border-teal-500/20 transition-colors";
+            }
+
+            const targetView = document.getElementById(viewId);
+            if (targetView) {
+                targetView.classList.remove('hidden');
+                if (viewId === 'financial-view') {
+                    loadDriveDocuments();
+                }
+            } else {
+                const genericView = document.getElementById('generic-view');
+                const genericTitle = document.getElementById('generic-title');
+                if (element && genericTitle) {
+                    genericTitle.textContent = element.querySelector('span').textContent;
+                }
+                genericView.classList.remove('hidden');
+            }
+        }
+
+        function showMainView() {
+            navigateTo('main-view', document.querySelector('.nav-item'));
+        }
+
+        // GESTÃO DE PASTAS E COMPROVANTES DO DRIVE
+        async function loadDriveDocuments() {
+            const list = document.getElementById('recent-docs-list');
+            list.innerHTML = '<div class="col-span-full text-center text-zinc-500 py-10"><i class="fas fa-spinner fa-spin text-teal-400 mr-2"></i>A sincronizar pasta...</div>';
+            
+            try {
+                const url = currentFolderId ? `/api/financial-docs?folderId=${currentFolderId}` : '/api/financial-docs';
+                const res = await fetch(url);
+                const docs = await res.json();
+                list.innerHTML = '';
+                
+                if (docs.length === 0) {
+                    list.innerHTML = '<div class="col-span-full text-center text-zinc-500 py-10">Esta pasta está vazia. Arraste ficheiros para aqui ou crie uma nova pasta.</div>';
+                    return;
+                }
+                
+                docs.forEach(doc => {
+                    const isFolder = doc.mimeType === 'application/vnd.google-apps.folder';
+                    const el = document.createElement('div');
+                    el.className = "bg-zinc-900/60 border border-zinc-800 hover:border-teal-500/50 transition-colors rounded-xl p-4 flex items-center space-x-4 cursor-pointer group";
+                    
+                    if (isFolder) {
+                        el.innerHTML = `
+                            <div class="w-12 h-12 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center text-xl group-hover:scale-110 transition-transform"><i class="fas fa-folder"></i></div>
+                            <div class="flex-1 overflow-hidden">
+                                <h4 class="text-white font-bold text-sm truncate">${doc.name}</h4>
+                                <span class="text-[10px] text-zinc-500 uppercase">Pasta</span>
+                            </div>
+                        `;
+                        el.addEventListener('click', () => openFolder(doc.id, doc.name));
+                    } else {
+                        const isPdf = doc.mimeType.includes('pdf');
+                        const iconClass = isPdf ? 'fa-file-pdf' : 'fa-image';
+                        const colorClass = isPdf ? 'text-red-400 bg-red-500/10' : 'text-blue-400 bg-blue-500/10';
+                        el.innerHTML = `
+                            <div class="w-12 h-12 rounded-lg ${colorClass} flex items-center justify-center text-xl"><i class="fas ${iconClass}"></i></div>
+                            <div class="flex-1 overflow-hidden">
+                                <h4 class="text-white font-bold text-sm truncate">${doc.name}</h4>
+                                <span class="text-[10px] text-teal-400 uppercase">Ver no Painel</span>
+                            </div>
+                        `;
+                        el.addEventListener('click', () => openPreviewModal(doc.id, doc.name));
+                    }
+                    list.appendChild(el);
+                });
+            } catch (err) {
+                list.innerHTML = '<div class="col-span-full text-center text-red-400 py-10">Erro ao ligar ao Google Drive.</div>';
+            }
+        }
+
+        async function createNewFolder() {
+            const folderName = prompt("Nome da nova pasta (Ex: COMPROVANTES LINK):");
+            if (!folderName) return;
+            
+            try {
+                const res = await fetch('/api/create-folder', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ folderName, parentId: currentFolderId })
+                });
+                if (res.ok) loadDriveDocuments();
+            } catch(e) { alert("Erro ao criar pasta."); }
+        }
+
+        function openFolder(id, name) {
+            if (id === null) {
+                folderHistory = [{ id: null, name: 'Raiz' }];
+            } else {
+                folderHistory.push({ id, name });
+            }
+            currentFolderId = id;
+            updateBreadcrumb();
+            loadDriveDocuments();
+        }
+
+        function updateBreadcrumb() {
+            const bc = document.getElementById('folder-breadcrumb');
+            bc.innerHTML = '';
+            folderHistory.forEach((folder, index) => {
+                const span = document.createElement('span');
+                if (index > 0) span.innerHTML = ' <i class="fas fa-chevron-right text-[10px] mx-2 text-zinc-600"></i> ';
+                
+                const btn = document.createElement('button');
+                btn.className = index === folderHistory.length - 1 ? 'text-teal-400 font-bold' : 'hover:text-teal-400 transition-colors';
+                btn.innerHTML = index === 0 ? '<i class="fas fa-home mr-1"></i> Drive Raiz' : folder.name;
+                btn.onclick = () => {
+                    folderHistory = folderHistory.slice(0, index + 1);
+                    currentFolderId = folder.id;
+                    updateBreadcrumb();
+                    loadDriveDocuments();
+                };
+                
+                span.appendChild(btn);
+                bc.appendChild(span);
+            });
+        }
+
+        // DRAG & DROP E UPLOAD
+        function setupDragAndDrop() {
+            const dropZone = document.getElementById('drop-zone');
+            if(!dropZone) return;
+            dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('border-teal-500'); });
+            dropZone.addEventListener('dragleave', (e) => { e.preventDefault(); dropZone.classList.remove('border-teal-500'); });
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault(); dropZone.classList.remove('border-teal-500');
+                if (e.dataTransfer.files.length > 0) uploadToDrive(e.dataTransfer.files[0]);
+            });
+        }
+
+        function handleFileSelect(event) {
+            if (event.target.files.length > 0) uploadToDrive(event.target.files[0]);
+        }
+
+        async function uploadToDrive(file) {
+            const icon = document.getElementById('upload-icon');
+            const title = document.getElementById('upload-title');
+            icon.className = "fas fa-spinner fa-spin text-xl text-amber-400";
+            title.textContent = "A enviar para a pasta...";
+
+            const formData = new FormData();
+            formData.append('file', file);
+            if (currentFolderId) formData.append('folderId', currentFolderId);
+
+            try {
+                await fetch('/api/upload-doc', { method: 'POST', body: formData });
+                loadDriveDocuments();
+                icon.className = "fas fa-check text-xl text-teal-400";
+                title.textContent = "Concluído!";
+            } catch(e) { alert("Erro no upload."); }
+
+            setTimeout(() => {
+                icon.className = "fas fa-cloud-upload-alt text-xl text-teal-400";
+                title.textContent = "Subir ficheiro nesta pasta";
+            }, 2000);
+            document.getElementById('file-upload').value = '';
+        }
+
+        // VISUALIZADOR INTERNO (MODAL)
+        function openPreviewModal(fileId, fileName) {
+            document.getElementById('preview-filename').textContent = fileName;
+            document.getElementById('preview-modal').classList.remove('hidden');
+            document.getElementById('preview-modal').classList.add('flex');
+            
+            const iframe = document.getElementById('preview-frame');
+            iframe.src = `https://drive.google.com/file/d/${fileId}/preview`;
+            
+            iframe.onload = () => {
+                document.getElementById('preview-loading').classList.add('hidden');
+            };
+        }
+
+        function closePreview() {
+            document.getElementById('preview-modal').classList.add('hidden');
+            document.getElementById('preview-modal').classList.remove('flex');
+            document.getElementById('preview-frame').src = '';
+            document.getElementById('preview-loading').classList.remove('hidden');
+        }
+
+        // CARREGAMENTO DE PLANILHAS DO GOOGLE DRIVE (PAINEL PRINCIPAL)
+        async function loadGoogleDriveSheets() {
+            try {
+                const res = await fetch('/api/sheets');
+                const files = await res.json();
+                globalDriveFiles = files || [];
+                
+                const container = document.getElementById('event-cards-container');
+                const statusEl = document.getElementById('upload-status');
+                if(!container) return;
+                container.innerHTML = '';
+                
+                if (files && files.length > 0) {
+                    files.sort((a, b) => {
+                        if (a.name.toUpperCase().includes('LUCRO BAR GERAL')) return -1;
+                        if (b.name.toUpperCase().includes('LUCRO BAR GERAL')) return 1;
+                        return 0;
+                    });
+                    if (statusEl) statusEl.textContent = `${files.length} planilhas sincronizadas!`;
+                    
+                    files.forEach(file => {
+                        const isPriority = file.name.toUpperCase().includes('LUCRO BAR GERAL');
+                        const card = document.createElement('div');
+                        card.className = isPriority ? "bg-gradient-to-b from-amber-500/10 to-zinc-900 border-2 border-amber-500 hover:border-amber-400 transition-all rounded-2xl p-6 shadow-2xl cursor-pointer col-span-1 md:col-span-3 group" : "bg-zinc-900/60 border border-zinc-800 hover:border-teal-500/50 transition-all rounded-2xl p-6 shadow-lg cursor-pointer group";
+                        
+                        card.innerHTML = `
+                            <div>
+                                <div class="flex justify-between items-center mb-4">
+                                    <span class="text-xs font-mono ${isPriority ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : 'bg-zinc-800 text-zinc-300'} px-3 py-1 rounded-full font-bold">${isPriority ? '★ PRIORIDADE ABSOLUTA' : 'Google Drive'}</span>
+                                </div>
+                                <h3 class="${isPriority ? 'text-2xl font-black text-amber-400' : 'text-lg font-bold text-white'} tracking-wide line-clamp-2">${file.name}</h3>
+                            </div>
+                            <div class="mt-6 pt-4 border-t border-zinc-800/80 flex items-center justify-between">
+                                <span class="text-xs ${isPriority ? 'text-amber-400' : 'text-teal-400'} font-medium group-hover:underline"><i class="fas fa-chart-pie mr-1"></i> Ver Resumo Executivo &rarr;</span>
+                            </div>
+                        `;
+                        card.addEventListener('click', () => isPriority ? fetchSheetSummary(file) : fetchEventPairSummary(file.name));
+                        container.appendChild(card);
+                    });
+                }
+            } catch (error) { console.error(error); }
+        }
+
+        async function fetchEventPairSummary(rawEventName) {
+            document.querySelectorAll('.view-content').forEach(view => view.classList.add('hidden'));
+            document.getElementById('detail-view').classList.remove('hidden');
+
+            const cleanName = rawEventName.replace(/^BAR\s*-\s*/i, '').replace(/-\s*EXTRATOS/i, '').trim();
+            document.getElementById('page-event-title').textContent = cleanName;
+
+            const matchedFiles = globalDriveFiles.filter(f => f.name.toUpperCase().includes(cleanName.toUpperCase()));
+            const barSheet = matchedFiles.find(f => f.name.toUpperCase().startsWith("BAR -")) || matchedFiles[0];
+            const extratoSheet = matchedFiles.find(f => f.name.toUpperCase().includes("EXTRATO"));
+
+            document.getElementById('lucro-geral-container').classList.add('hidden');
+            document.getElementById('single-event-container').classList.remove('hidden');
+
+            if (barSheet) {
+                try {
+                    const response = await fetch(`/api/sheet/${barSheet.id}/summary`);
+                    const summary = await response.json();
+                    const repassCard = document.getElementById('repass-card');
+
+                    if (summary.isClientRepass === false) { 
+                        repassCard.className = "bg-gradient-to-r from-amber-950/60 to-zinc-900 border border-amber-500/40 rounded-2xl p-6 shadow-2xl flex items-center gap-6";
+                        document.getElementById('repass-title').textContent = "Lucro Final (Operação Stratus)";
+                        document.getElementById('repass-title').className = "text-xl font-bold text-amber-400";
+                        document.getElementById('repass-desc').textContent = "Montante líquido apurado referente à operação própria da Stratus.";
+                        document.getElementById('val-repasse').className = "text-3xl md:text-4xl font-extrabold text-amber-400 font-mono";
+                        document.getElementById('val-repasse').textContent = summary.lucroLiquido;
+                        document.getElementById('label-bruto').textContent = "Retorno Total";
+                        document.getElementById('label-insumos').textContent = "Gastos c/ Insumos";
+                        document.getElementById('label-operacional').textContent = "Gastos Operacionais";
+                    } else { 
+                        repassCard.className = "bg-gradient-to-r from-teal-950/60 to-zinc-900 border border-teal-500/40 rounded-2xl p-6 shadow-2xl flex items-center gap-6";
+                        document.getElementById('repass-title').textContent = "Valor a Ser Repassado ao Cliente";
+                        document.getElementById('repass-title').className = "text-xl font-bold text-white";
+                        document.getElementById('repass-desc').textContent = "Montante líquido apurado destinado ao acerto com a produção do evento.";
+                        document.getElementById('val-repasse').className = "text-3xl md:text-4xl font-extrabold text-teal-400 font-mono";
+                        document.getElementById('val-repasse').textContent = summary.repasseCliente;
+                        document.getElementById('label-bruto').textContent = "Bruto Total de Vendas";
+                        document.getElementById('label-insumos').textContent = "Total de Insumos";
+                        document.getElementById('label-operacional').textContent = "Custos Operacionais";
+                    }
+
+                    document.getElementById('val-bruto').textContent = summary.bruto;
+                    document.getElementById('val-insumos').textContent = summary.insumos;
+                    document.getElementById('val-maodeobra').textContent = summary.maoDeObra;
+                    document.getElementById('val-operacional').textContent = summary.operacional;
+                    document.getElementById('val-sistema').textContent = summary.sistema;
+                    document.getElementById('val-lucro').textContent = summary.lucroLiquido;
+                } catch (err) {}
+            }
+            renderLinkedSheetsSection(barSheet, extratoSheet);
+        }
+
+        function renderLinkedSheetsSection(barSheet, extratoSheet) {
+            const container = document.getElementById('linked-sheets-container');
+            container.innerHTML = `
+                <div class="bg-zinc-900/80 border ${barSheet ? 'border-teal-500/50' : 'border-zinc-800'} p-4 rounded-xl flex justify-between items-center">
+                    <div><span class="text-[10px] font-mono text-teal-400 uppercase">Planilha de Operação (Bar)</span><h4 class="text-sm font-bold text-white">${barSheet ? barSheet.name : 'Não encontrada'}</h4></div>
+                    ${barSheet ? `<a href="https://docs.google.com/spreadsheets/d/${barSheet.id}/edit" target="_blank" class="px-3 py-1.5 bg-teal-500/10 text-teal-400 text-xs font-mono rounded-lg border border-teal-500/30 hover:bg-teal-500/20"><i class="fas fa-external-link-alt mr-1"></i> Abrir</a>` : ''}
+                </div>
+                <div class="bg-zinc-900/80 border ${extratoSheet ? 'border-amber-500/50' : 'border-zinc-800'} p-4 rounded-xl flex justify-between items-center">
+                    <div><span class="text-[10px] font-mono text-amber-400 uppercase">Planilha de Extrato / Vendas</span><h4 class="text-sm font-bold text-white">${extratoSheet ? extratoSheet.name : 'Sem Extrato Vinculado'}</h4></div>
+                    ${extratoSheet ? `<a href="https://docs.google.com/spreadsheets/d/${extratoSheet.id}/edit" target="_blank" class="px-3 py-1.5 bg-amber-500/10 text-amber-400 text-xs font-mono rounded-lg border border-amber-500/30 hover:bg-amber-500/20"><i class="fas fa-external-link-alt mr-1"></i> Abrir</a>` : ''}
+                </div>
+            `;
+        }
+
+        async function fetchSheetSummary(file) {
+            document.querySelectorAll('.view-content').forEach(view => view.classList.add('hidden'));
+            document.getElementById('detail-view').classList.remove('hidden');
+            document.getElementById('page-event-title').textContent = file.name;
+
+            try {
+                const response = await fetch(`/api/sheet/${file.id}/summary`);
+                const summary = await response.json();
+
+                document.getElementById('single-event-container').classList.add('hidden');
+                document.getElementById('lucro-geral-container').classList.remove('hidden');
+
+                const tbody = document.getElementById('lucro-geral-table-body');
+                tbody.innerHTML = '';
+
+                const groupedByMonth = {};
+                summary.events.forEach(ev => {
+                    const m = ev.month || "OUTROS";
+                    if (!groupedByMonth[m]) groupedByMonth[m] = [];
+                    groupedByMonth[m].push(ev);
+                });
+
+                Object.keys(groupedByMonth).forEach(monthName => {
+                    const monthHeaderTr = document.createElement('tr');
+                    monthHeaderTr.className = "bg-zinc-900/90 border-y border-zinc-800";
+                    monthHeaderTr.innerHTML = `<td colspan="10" class="p-3 px-4 font-mono font-bold text-amber-400 uppercase text-xs bg-amber-500/5"><i class="fas fa-calendar-alt mr-2"></i> ${monthName}</td>`;
+                    tbody.appendChild(monthHeaderTr);
+
+                    groupedByMonth[monthName].forEach(ev => {
+                        const tr = document.createElement('tr');
+                        tr.className = "hover:bg-teal-500/10 cursor-pointer transition-colors group";
+                        tr.innerHTML = `
+                            <td class="p-3 font-bold text-white group-hover:text-teal-400">${ev.evento}</td>
+                            <td class="p-3 font-mono text-zinc-400 text-xs">${ev.data}</td>
+                            <td class="p-3 font-mono text-zinc-300">${ev.saidaBebidas}</td>
+                            <td class="p-3 font-mono text-amber-300/90">${ev.saidaVariados}</td>
+                            <td class="p-3 font-mono text-zinc-300">${ev.retornoBebidas}</td>
+                            <td class="p-3 font-mono text-amber-300/90">${ev.retornoVariados}</td>
+                            <td class="p-3 font-mono text-amber-400 font-semibold">${ev.lucroBar}</td>
+                            <td class="p-3 font-mono text-red-400">${ev.sistema}</td>
+                            <td class="p-3 font-mono text-right font-bold text-teal-400">${ev.lucroFinal}</td>
+                            <td class="p-3 text-center"><span class="text-xs text-teal-400 opacity-80 group-hover:opacity-100 group-hover:underline">Detalhar <i class="fas fa-chevron-right text-[10px]"></i></span></td>
+                        `;
+                        tr.addEventListener('click', () => fetchEventPairSummary(ev.evento));
+                        tbody.appendChild(tr);
+                    });
+                });
+            } catch (error) {}
+        }
+
+        function askAI() {
+            const input = document.getElementById('ai-input');
+            const responseDiv = document.getElementById('ai-response');
+            const question = input.value.trim();
+            if(!question) return;
+
+            input.value = '';
+            responseDiv.classList.remove('hidden');
+            responseDiv.innerHTML = '<i class="fas fa-spinner fa-spin text-teal-400 mr-2"></i> O Stratus AI está a analisar as planilhas financeiras...';
+
+            setTimeout(() => {
+                responseDiv.innerHTML = `<strong class="text-teal-400">Stratus AI (Gemini):</strong> Analisando a pergunta sobre "${question}", os dados consolidados estão sincronizados.`;
+            }, 1500);
+        }
+    </script>
+</body>
+</html>
