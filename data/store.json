@@ -1,0 +1,136 @@
+{
+  "pessoas": [
+    {
+      "id": "nan9p6s",
+      "cat": "Operação de Bar",
+      "nome": "Equipe Stratus Bar",
+      "funcao": "Bartenders / Caixa",
+      "status": "Ativo",
+      "tel": ""
+    },
+    {
+      "id": "xijo3n4",
+      "cat": "Som",
+      "nome": "Técnico Principal",
+      "funcao": "Áudio & Sonorização",
+      "status": "Fornecedor",
+      "tel": ""
+    },
+    {
+      "id": "ewrf466",
+      "cat": "Iluminação",
+      "nome": "Iluminação Oficial",
+      "funcao": "Montagem cênica",
+      "status": "Fornecedor",
+      "tel": ""
+    },
+    {
+      "id": "w8vrqh9",
+      "cat": "Grades",
+      "nome": "Locadora de Grades",
+      "funcao": "Estruturas de contenção",
+      "status": "Fornecedor",
+      "tel": ""
+    },
+    {
+      "id": "4g8awzb",
+      "cat": "Frete",
+      "nome": "Motorista / Logística",
+      "funcao": "Frete e carreto",
+      "status": "Prestador",
+      "tel": ""
+    },
+    {
+      "id": "0w49xv4",
+      "cat": "Segurança",
+      "nome": "Coordenação de Segurança",
+      "funcao": "Equipe de portaria",
+      "status": "Prestador",
+      "tel": ""
+    },
+    {
+      "id": "bgjkl25",
+      "cat": "Bilheteria",
+      "nome": "Equipe de Bilheteria",
+      "funcao": "Check-in & vendas",
+      "status": "Operacional",
+      "tel": ""
+    },
+    {
+      "id": "bcgwgst",
+      "cat": "Limpeza",
+      "nome": "Equipe de Limpeza",
+      "funcao": "Manutenção e higiene",
+      "status": "Prestador",
+      "tel": ""
+    },
+    {
+      "id": "um3o702",
+      "cat": "Alimentação",
+      "nome": "Fornecedor de Catering",
+      "funcao": "Camarim & staff",
+      "status": "Fornecedor",
+      "tel": ""
+    }
+  ],
+  "demandas": [
+    {
+      "id": "8uozckt",
+      "tipoPagamento": "Pix",
+      "titulo": "Enviar proposta para o Lambe Lambe",
+      "responsavel": "Saraiva",
+      "prioridade": "Alta",
+      "prazo": "2026-10-29",
+      "evento": "",
+      "status": "Em andamento"
+    }
+  ],
+  "reunioes": [
+    {
+      "id": "9195j1w",
+      "titulo": "Alinhamento semanal (exemplo)",
+      "data": "2026-10-28",
+      "hora": "10:00",
+      "participantes": "",
+      "pauta": "Pendências dos eventos",
+      "status": "Agendada"
+    }
+  ],
+  "estabelecimentos": [
+    {
+      "id": "o4c52jy",
+      "nome": "Lambe Lambe",
+      "tipo": "Pub / Bar",
+      "statusNegociacao": "Proposta Enviada",
+      "endereco": "José Avelino, 387 - Praia de Iracema.",
+      "contato": "Matheus - 85986071913",
+      "sistemaAtual": "Outgo.",
+      "capacidade": 600,
+      "obs": "Crédito - 3%, Débito - 3%, Dinheiro - 1,5%, Pix - 1,5%.",
+      "responsavel": "",
+      "telefone": "",
+      "taxaCreditoAtual": 0,
+      "taxaDebitoAtual": 0,
+      "taxaPixAtual": 0
+    }
+  ],
+  "pastasBar": [
+    "BAILE DA BATEU - 03/10",
+    "DISCO VOADOR",
+    "GASGUITA CLANDESTINA",
+    "LINK"
+  ],
+  "comprovantes": [
+    {
+      "id": "3ietr7c",
+      "tipoPagamento": "Pix",
+      "nome": "Fundo de caixa",
+      "pasta": "LINK",
+      "evento": "Link",
+      "categoria": "Outros",
+      "valor": 243,
+      "data": "2026-10-16",
+      "arquivoNome": "Fundo de Caixa - Link.jpg"
+    }
+  ]
+}

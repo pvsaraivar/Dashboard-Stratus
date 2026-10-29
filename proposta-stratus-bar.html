@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proposta Comercial — Stratus Sounds</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+background: #ffffff;
+color: #1a1a1a;
+line-height: 1.5;
+-webkit-font-smoothing: antialiased;
+}
+/* ═══════ HEADER BLACK ═════ */
+.header-black {
+background: #000000;
+color: #ffffff;
+padding: 48px 60px 40px;
+position: relative;
+}
+.header-top {
+display: flex;
+justify-content: space-between;
+align-items: flex-start;
+margin-bottom: 32px;
+}
+.logo-area img {
+height: 36px;
+width: auto;
+filter: brightness(0) invert(1);
+}
+.header-right {
+text-align: right;
+}
+.header-right .label {
+font-size: 0.65rem;
+letter-spacing: 3px;
+text-transform: uppercase;
+color: rgba(255,255,255,0.6);
+font-weight: 600;
+margin-bottom: 4px;
+}
+.header-right h1 {
+font-size: 3rem;
+font-weight: 900;
+letter-spacing: 2px;
+text-transform: uppercase;
+line-height: 1.1;
+margin-bottom: 8px;
+}
+.header-right .sub {
+font-size: 0.65rem;
+letter-spacing: 3px;
+text-transform: uppercase;
+color: rgba(255,255,255,0.5);
+font-weight: 500;
+}
+.event-name {
+margin-bottom: 28px;
+}
+.event-name .label {
+font-size: 0.65rem;
+letter-spacing: 3px;
+text-transform: uppercase;
+color: rgba(255,255,255,0.5);
+font-weight: 600;
+margin-bottom: 6px;
+}
+.event-name h2 {
+font-size: 2.4rem;
+font-weight: 900;
+letter-spacing: 1px;
+text-transform: uppercase;
+}
+.brand-info {
+text-align: right;
+font-size: 0.85rem;
+color: rgba(255,255,255,0.7);
+font-weight: 500;
+}
+.brand-info strong {
+color: #fff;
+font-weight: 700;
+}
+/* ═══════ FILM STRIP ═══════ */
+.film-strip {
+height: 24px;
+background: repeating-linear-gradient(
+90deg,
+#000 0px, #000 12px,
+#fff 12px, #fff 24px
+);
+}
+/* ═══════ METRICS BAR ══════ */
+.metrics-bar {
+display: grid;
+grid-template-columns: repeat(4, 1fr);
+border-bottom: 1px solid #e0e0e0;
+background: #fafafa;
+}
+.metric {
+padding: 28px 32px;
+border-right: 1px solid #e0e0e0;
+}
+.metric:last-child { border-right: none; }
+.metric .label {
+font-size: 0.6rem;
+letter-spacing: 2.5px;
+text-transform: uppercase;
+color: #888;
+font-weight: 600;
+margin-bottom: 8px;
+}
+.metric .value {
+font-size: 2rem;
+font-weight: 900;
+color: #1a1a1a;
+line-height: 1.2;
+}
+.metric .sub-value {
+font-size: 0.7rem;
+color: #888;
+font-weight: 500;
+letter-spacing: 1px;
+text-transform: uppercase;
+margin-top: 4px;
+}
+/* ═══════ SECTION TITLE ═══════ */
+.section-title {
+padding: 0 60px;
+margin-top: 48px;
+margin-bottom: 0;
+display: flex;
+justify-content: space-between;
+align-items: baseline;
+}
+.section-title h2 {
+font-size: 1.1rem;
+font-weight: 900;
+text-transform: uppercase;
+letter-spacing: 3px;
+}
+.section-title .note {
+font-size: 0.7rem;
+color: #888;
+letter-spacing: 1.5px;
+text-transform: uppercase;
+font-weight: 500;
+}
+/* ══════ TABLE ══════ */
+.table-wrap {
+margin: 20px 60px 40px;
+border: 1px solid #d0d0d0;
+}
+table {
+width: 100%;
+border-collapse: collapse;
+font-size: 0.85rem;
+}
+thead th {
+font-size: 0.6rem;
+letter-spacing: 2px;
+text-transform: uppercase;
+color: #888;
+font-weight: 700;
+padding: 14px 16px;
+text-align: left;
+border-bottom: 2px solid #1a1a1a;
+background: #fafafa;
+}
+thead th:not(:first-child) { text-align: right; }
+tbody td {
+padding: 14px 16px;
+border-bottom: 1px solid #e8e8e8;
+vertical-align: middle;
+}
+tbody td:not(:first-child) { text-align: right; }
+tbody tr:nth-child(even) { background: #f5f5f5; }
+tbody tr:last-child td { border-bottom: none; }
+.category-row td {
+font-size: 0.7rem;
+font-weight: 800;
+letter-spacing: 2.5px;
+text-transform: uppercase;
+color: #1a1a1a;
+padding: 16px 16px 10px;
+background: #f0f0f0;
+border-bottom: 1px solid #d0d0d0;
+}
+.item-name { font-weight: 500; color: #1a1a1a; }
+.cost-val { color: #666; font-weight: 500; }
+.price-val { color: #1a1a1a; font-weight: 700; }
+.qty-val { color: #1a1a1a; font-weight: 600; }
+.total-val { color: #1a1a1a; font-weight: 600; }
+.subtotal-val { color: #1a1a1a; font-weight: 800; }
+/* ═══════ EQUIPMENT SECTION ══════ */
+.equip-section {
+margin: 0 60px 40px;
+border: 1px solid #d0d0d0;
+}
+.equip-grid {
+display: grid;
+grid-template-columns: 1fr 1fr;
+}
+.equip-card {
+padding: 28px 28px;
+border-right: 1px solid #e8e8e8;
+}
+.equip-card:last-child { border-right: none; }
+.equip-card .num {
+font-size: 2.4rem;
+font-weight: 900;
+color: #1a1a1a;
+line-height: 1;
+margin-bottom: 6px;
+}
+.equip-card h3 {
+font-size: 0.75rem;
+font-weight: 800;
+text-transform: uppercase;
+letter-spacing: 2px;
+margin-bottom: 10px;
+}
+.equip-card p {
+font-size: 0.82rem;
+color: #555;
+line-height: 1.6;
+}
+.equip-header {
+background: #f0f0f0;
+padding: 12px 28px;
+font-size: 0.7rem;
+font-weight: 800;
+letter-spacing: 2.5px;
+text-transform: uppercase;
+border-bottom: 1px solid #d0d0d0;
+}
+/* ══════ CONDITIONS ════ */
+.conditions {
+margin: 0 60px 60px;
+border-left: 3px solid #1a1a1a;
+padding: 24px 28px;
+font-size: 0.9rem;
+color: #444;
+line-height: 1.8;
+}
+.conditions strong { color: #1a1a1a; font-weight: 700; }
+/* ═════ FOOTER ══════ */
+.footer {
+background: #000;
+color: #fff;
+text-align: center;
+padding: 32px 60px;
+}
+.footer-brand {
+font-size: 1rem;
+font-weight: 800;
+letter-spacing: 3px;
+text-transform: uppercase;
+margin-bottom: 4px;
+}
+.footer-url {
+font-size: 0.75rem;
+color: rgba(255,255,255,0.5);
+letter-spacing: 2px;
+}
+.footer-copy {
+margin-top: 16px;
+font-size: 0.65rem;
+color: rgba(255,255,255,0.3);
+letter-spacing: 1px;
+}
+/* ════ RESPONSIVE ═════ */
+@media (max-width: 768px) {
+.header-black { padding: 32px 24px 28px; }
+.header-right h1 { font-size: 2rem; }
+.event-name h2 { font-size: 1.6rem; }
+.metrics-bar { grid-template-columns: repeat(2, 1fr); }
+.metric:nth-child(2) { border-right: none; }
+.section-title { padding: 0 24px; flex-direction: column; gap: 4px; }
+.table-wrap { margin: 16px 24px 32px; overflow-x: auto; }
+.equip-section { margin: 0 24px 32px; }
+.equip-grid { grid-template-columns: 1fr; }
+.equip-card { border-right: none; border-bottom: 1px solid #e8e8e8; }
+.conditions { margin: 0 24px 40px; }
+table { font-size: 0.75rem; }
+}
+</style>
+</head>
+<body>
+<!-- ════ HEADER BLACK ═════ -->
+<div class="header-black">
+<div class="header-top">
+<div class="logo-area">
+<img src="logo-stratus.jpg" alt="Stratus Sounds">
+</div>
+<div class="header-right">
+<div class="label">Documento Oficial</div>
+<h1>Orçamento</h1>
+<div class="sub">Documento de Proposta · Não é Cobrança</div>
+</div>
+</div>
+<div style="display:flex;justify-content:space-between;align-items:flex-end;">
+<div class="event-name">
+<div class="label">Cliente</div>
+<h2>Lambe Lambe</h2>
+</div>
+<div class="brand-info">
+<strong>Stratus Sounds</strong><br>stratussounds.com
+</div>
+</div>
+</div>
+<!-- ═══════ FILM STRIP ═══════ -->
+<div class="film-strip"></div>
+<!-- ═══════ METRICS BAR ═══════ -->
+<div class="metrics-bar">
+<div class="metric">
+<div class="label">Data do Evento</div>
+<div class="value" style="font-size:1.4rem;">—</div>
+</div>
+<div class="metric">
+<div class="label">Local</div>
+<div class="value" style="font-size:1.4rem;">—</div>
+</div>
+<div class="metric">
+<div class="label">Contratante</div>
+<div class="value" style="font-size:1.4rem;">Lambe Lambe</div>
+</div>
+<div class="metric">
+<div class="label">Equipamentos</div>
+<div class="value">9 + 1</div>
+<div class="sub-value">Máquinas + Autoatend.</div>
+</div>
+</div>
+<!-- ══════ EQUIPMENT SECTION ═══ -->
+<div class="section-title">
+<h2>Estrutura Disponibilizada</h2>
+</div>
+<div class="equip-section" style="margin-top:16px;">
+<div class="equip-header">Modelo Especial</div>
+<div class="equip-grid">
+<div class="equip-card">
+<div class="num">9</div>
+<h3>Máquinas</h3>
+<p>Fornecidas integralmente em regime de comodato, assegurando suporte completo à operação de vendas.</p>
+</div>
+<div class="equip-card">
+<div class="num">1</div>
+<h3>Autoatendimento com Token</h3>
+<p>Equipamento dedicado à operação autônoma com sistema de token, garantindo agilidade e eficiência no atendimento ao público do evento.</p>
+</div>
+</div>
+</div>
+<!-- ════ RATES TABLE ═════ -->
+<div class="section-title">
+<h2>Tabela de Taxas Operacionais</h2>
+<span class="note">cobrança por consumo real</span>
+</div>
+<div class="table-wrap" style="margin-top:16px;">
+<table>
+<thead>
+<tr>
+<th>Modalidade</th>
+<th>Taxa</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="item-name">Dinheiro</td>
+<td class="subtotal-val">1%</td>
+</tr>
+<tr>
+<td class="item-name">PIX</td>
+<td class="subtotal-val">1,25%</td>
+</tr>
+<tr>
+<td class="item-name">Débito</td>
+<td class="subtotal-val">2,5%</td>
+</tr>
+<tr>
+<td class="item-name">Crédito</td>
+<td class="subtotal-val">3%</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- ══════ CONDITIONS ═══════ -->
+<div class="conditions">
+Os <strong>9 equipamentos</strong> serão disponibilizados em regime de comodato, assegurando suporte completo à operação de vendas. Deste conjunto, <strong>1 equipamento</strong> será destinado ao modelo de autoatendimento com token, garantindo agilidade e eficiência no atendimento ao público do evento.
+</div>
+<!-- ══════ FOOTER ═══════ -->
+<div class="footer">
+<div class="footer-brand">Stratus Sounds</div>
+<div class="footer-url">stratussounds.com</div>
+<div class="footer-copy">&copy; 2026 Stratus Sounds &mdash; Todos os direitos reservados</div>
+</div>
+</body>
+</html>

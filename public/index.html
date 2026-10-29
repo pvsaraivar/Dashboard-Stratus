@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stratus Hub | Gestão Integrada</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  ::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-thumb{background:#3f3f46;border-radius:10px}
+  .nav.on{color:#2dd4bf;background:rgba(20,184,166,.1);border:1px solid rgba(20,184,166,.2)}
+  details>summary{cursor:pointer;list-style:none}details>summary::-webkit-details-marker{display:none}
+</style>
+</head>
+<body class="bg-black text-gray-100 font-sans antialiased flex h-screen overflow-hidden">
+
+<aside class="w-64 bg-zinc-950 border-r border-zinc-800 flex flex-col justify-between select-none shrink-0">
+  <div>
+    <div class="p-6 flex items-center space-x-3 border-b border-zinc-900">
+      <div class="w-10 h-10 rounded-xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400 font-bold text-lg">SS</div>
+      <div><h1 class="font-bold tracking-wider text-white">STRATUS</h1><span class="text-[10px] text-teal-400 font-mono tracking-widest">HUB V1.0</span></div>
+    </div>
+    <div id="sidebar" class="px-4 py-6 space-y-6"></div>
+  </div>
+  <div class="p-4 border-t border-zinc-900" id="sidebar-foot"></div>
+</aside>
+
+<main class="flex-1 h-screen overflow-y-auto bg-zinc-950">
+  <header class="h-16 border-b border-zinc-900 px-8 flex justify-between items-center bg-zinc-950/80 backdrop-blur sticky top-0 z-20">
+    <div class="flex items-center space-x-2 text-sm text-zinc-400"><i class="far fa-clock text-teal-400"></i><span id="today"></span></div>
+    <div class="w-9 h-9 rounded-lg bg-teal-500/20 border border-teal-500/40 flex items-center justify-center text-teal-400 font-bold text-xs">PV</div>
+  </header>
+
+  <div id="mod-view" class="view p-8 max-w-7xl mx-auto space-y-6 hidden"></div>
+
+  <!-- LISTA DE CARDS - OPERAÇÃO DE BAR -->
+  <div id="bar-view" class="view p-8 max-w-7xl mx-auto space-y-8">
+    <div class="pt-4">
+      <h2 class="text-2xl font-bold text-white">Operação de Bar - Eventos</h2>
+      <p class="text-zinc-400 text-sm">Prestação de Contas (Produtor) vs Gestão Interna (Stratus).</p>
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div class="space-y-4">
+        <div class="flex items-center space-x-3 pb-2 border-b border-zinc-800">
+          <div class="w-8 h-8 rounded-lg bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400"><i class="fas fa-file-invoice-dollar"></i></div>
+          <div><h3 class="text-lg font-bold text-white">Planilhas dos Clientes</h3><p class="text-xs text-zinc-400">DRE oficial do evento.</p></div>
+        </div>
+        <div id="producer-cards" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+      </div>
+      <div class="space-y-4">
+        <div class="flex items-center space-x-3 pb-2 border-b border-zinc-800">
+          <div class="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400"><i class="fas fa-lock"></i></div>
+          <div><h3 class="text-lg font-bold text-white">Controle Interno & Consolidado</h3><p class="text-xs text-zinc-400">Dashboard executivo Lucro Bar Geral.</p></div>
+        </div>
+        <div id="stratus-cards" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESUMO DO EVENTO / CLIENTE -->
+  <div id="event-view" class="view p-8 max-w-7xl mx-auto space-y-6 hidden">
+    <div class="flex items-center justify-between pb-4 border-b border-zinc-800">
+      <div class="flex items-center space-x-4">
+        <button onclick="show('bar-view')" class="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-700 text-teal-400"><i class="fas fa-arrow-left"></i></button>
+        <div><h2 id="ev-title" class="text-2xl font-bold text-white"></h2><p id="ev-sub" class="text-xs text-zinc-400">Resumo da apuração</p></div>
+      </div>
+      <a id="ev-link" target="_blank" rel="noopener" class="px-4 py-2 bg-teal-500/15 border border-teal-500/40 text-teal-400 rounded-xl text-sm font-bold"><i class="fas fa-external-link-alt mr-2"></i>Abrir no Google Planilhas</a>
+    </div>
+    <div id="ev-body" class="space-y-6"></div>
+  </div>
+
+  <!-- DASHBOARD MESTRE -->
+  <div id="master-view" class="view p-8 max-w-7xl mx-auto space-y-6 hidden">
+    <div class="flex items-center justify-between pb-4 border-b border-zinc-800">
+      <div class="flex items-center space-x-4">
+        <button onclick="show('bar-view')" class="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-700 text-teal-400"><i class="fas fa-arrow-left"></i></button>
+        <div><h2 class="text-2xl font-bold text-white">Lucro Bar Geral</h2><p class="text-xs text-amber-400">Consolidado interno Stratus</p></div>
+      </div>
+      <a id="ms-link" target="_blank" rel="noopener" class="px-4 py-2 bg-amber-500/15 border border-amber-500/40 text-amber-400 rounded-xl text-sm font-bold"><i class="fas fa-external-link-alt mr-2"></i>Abrir no Google Planilhas</a>
+    </div>
+    <div id="ms-body" class="space-y-6"></div>
+  </div>
+
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const R = (v) => 'R$ ' + (Number(v) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const P = (a, b) => (b && a != null && !isNaN(a) ? ((a / b) * 100).toFixed(1).replace('.', ',') + '%' : '-');
+const sheetUrl = (id) => 'https://docs.google.com/spreadsheets/d/' + id;
+let files = [];
+
+/* ---------- NAVEGAÇÃO ---------- */
+function show(id) { document.querySelectorAll('.view').forEach((v) => v.classList.add('hidden')); $(id).classList.remove('hidden'); $('bar-view') && window.scrollTo(0, 0); }
+function nav(id, el) {
+  document.querySelectorAll('.nav').forEach((n) => n.classList.remove('on')); el && el.classList.add('on');
+  if (id === 'bar-view') return show('bar-view');
+  cur = id; show('mod-view'); render();
+}
+const item = (id, icon, label, on) => `<a href="#" data-v="${id}" class="nav flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm text-zinc-400 hover:text-white hover:bg-zinc-900 ${on ? 'on' : ''}"><i class="fas ${icon} w-5"></i><span>${label}</span></a>`;
+const groups = [
+  ['Painel Principal', [['main-view', 'fa-home', 'Painel'], ['meetings', 'fa-calendar-alt', 'Reuniões'], ['demands', 'fa-tasks', 'Demandas Gerais'], ['calendar', 'fa-calendar', 'Calendário'], ['people', 'fa-users', 'Pessoas']]],
+  ['Operacional', [['bar-view', 'fa-glass-cheers', 'Op. de Bar - Eventos'], ['est', 'fa-store', 'Estabelecimentos'], ['contracts', 'fa-file-contract', 'Contratos'], ['fin', 'fa-wallet', 'Financeiro'], ['reports', 'fa-chart-bar', 'Relatórios']]],
+];
+$('sidebar').innerHTML = groups.map(([t, l]) => `<div><p class="px-3 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-2">${t}</p><nav class="space-y-1">${l.map((x) => item(x[0], x[1], x[2], x[0] === 'bar-view')).join('')}</nav></div>`).join('');
+$('sidebar-foot').innerHTML = item('settings', 'fa-cog', 'Configurações');
+document.querySelectorAll('.nav').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); nav(a.dataset.v, a); }));
+$('today').textContent = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+
+/* ---------- CARDS DA OPERAÇÃO DE BAR ---------- */
+const isMaster = (n) => n.toUpperCase().includes('LUCRO BAR GERAL');
+const isInternal = (n) => /stratus|estoque/i.test(n) || isMaster(n);
+
+function card(f) {
+  const m = isMaster(f.name), i = isInternal(f.name);
+  const c = document.createElement('div');
+  c.className = `bg-zinc-900/60 border ${m ? 'border-emerald-500/30 bg-emerald-950/10' : 'border-zinc-800'} ${i ? 'hover:border-amber-500/50' : 'hover:border-teal-500/50'} transition-all rounded-2xl p-5 cursor-pointer`;
+  c.innerHTML = `<h4 class="text-base font-bold text-white">${esc(f.name)}</h4><span class="text-xs mt-3 inline-block ${m ? 'text-emerald-400' : i ? 'text-amber-400' : 'text-teal-400'}"><i class="fas fa-chart-pie mr-1"></i>${m ? 'Abrir Dashboard BI' : 'Abrir Apuração'} &rarr;</span>`;
+  c.addEventListener('click', () => (m ? openMaster(f) : openEvent(f)));
+  return c;
+}
+
+async function loadFiles() {
+  try {
+    const r = await fetch('/api/sheets');
+    files = await r.json();
+    if (!r.ok) throw new Error(files.details || files.error);
+    files.sort((a, b) => (isMaster(b.name) - isMaster(a.name)) || a.name.localeCompare(b.name, 'pt-BR'));
+    $('producer-cards').innerHTML = ''; $('stratus-cards').innerHTML = '';
+    files.forEach((f) => $(isInternal(f.name) ? 'stratus-cards' : 'producer-cards').appendChild(card(f)));
+    if (!files.length) $('producer-cards').innerHTML = '<p class="text-xs text-zinc-500">Nenhuma planilha encontrada. Compartilhe as planilhas com o e-mail da conta de serviço.</p>';
+  } catch (e) {
+    $('producer-cards').innerHTML = `<p class="text-xs text-red-400">Não foi possível listar as planilhas: ${esc(e.message)}</p>`;
+  }
+}
+
+async function api(id, tab) {
+  const r = await fetch('/api/sheet-data?id=' + encodeURIComponent(id) + (tab ? '&tab=' + encodeURIComponent(tab) : ''));
+  const d = await r.json();
+  if (!r.ok) throw new Error(d.details || d.error);
+  return d;
+}
+
+/* ---------- COMPONENTES DA OPERAÇÃO DE BAR ---------- */
+const kpi = (label, val, cls = 'text-white', sub = '') => `<div class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-5"><p class="text-xs text-zinc-500">${label}</p><h3 class="text-xl font-bold mt-1 ${cls}">${val}</h3>${sub ? `<p class="text-[11px] text-zinc-500 mt-1">${sub}</p>` : ''}</div>`;
+const box = (title, icon, inner, extra = '') => `<div class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-5 space-y-3 ${extra}"><h4 class="text-sm font-bold text-white flex items-center gap-2"><i class="fas ${icon} text-teal-400"></i>${title}</h4>${inner}</div>`;
+const bar = (label, val, max, color, right) => `<div><div class="flex justify-between text-xs mb-1"><span class="text-zinc-300">${esc(label)}</span><span class="font-mono text-zinc-400">${right ?? R(val)}</span></div><div class="h-1.5 bg-zinc-800 rounded"><div class="h-full rounded ${color}" style="width:${max > 0 ? Math.max(0, Math.min(100, (val / max) * 100)) : 0}%"></div></div></div>`;
+const line = (a, b, c = '') => `<div class="flex justify-between items-center bg-zinc-950 p-2 rounded-lg border border-zinc-800 text-xs"><span class="text-zinc-300">${esc(a)}</span><span class="font-mono text-zinc-400">${c ? esc(c) + ' &middot; ' : ''}${b}</span></div>`;
+
+const gridHtml = (rows) => {
+  if (!rows || !rows.length) return none('Aba vazia.');
+  return `<div class="overflow-auto max-h-[38rem] border border-zinc-800 rounded-2xl bg-zinc-950/80 custom-scrollbar relative shadow-xl">
+      <table class="text-xs text-zinc-300 whitespace-nowrap w-full text-left border-collapse">
+          <thead class="sticky top-0 z-20 bg-zinc-950 shadow-md">
+              <tr class="border-b border-zinc-800">${rows[0].map((c, j) => {
+                  const isFirst = j === 0;
+                  const isLast = j === rows[0].length - 1;
+                  return `<th class="px-4 py-3 font-bold text-teal-400 uppercase tracking-wider text-[11px] ${isFirst ? 'sticky left-0 bg-zinc-950 z-30 shadow-[2px_0_0_#27272a]' : ''} ${isLast ? 'sticky right-0 bg-zinc-950 z-30 shadow-[-2px_0_0_#27272a] text-right' : ''}">${esc(c)}</th>`;
+              }).join('')}</tr>
+          </thead>
+          <tbody class="divide-y divide-zinc-800/50">
+              ${rows.slice(1).map((r) => {
+                  const isHighlight = r.some((cell) => /BEBIDAS|ITENS VARIADOS|INICIAL|TOTAL|SUBTOTAL|RESUMO/i.test(cell));
+                  const isCategoryHeader = r[0] && /BEBIDAS|ITENS VARIADOS|INICIAL/i.test(r[0]) && r.slice(1).every((cell) => !cell || cell === '-');
+                  
+                  if (isCategoryHeader) {
+                      return `<tr class="bg-amber-500/10 font-bold text-amber-400 border-y border-amber-500/20">
+                          <td colspan="${r.length}" class="px-4 py-2.5 text-sm tracking-wide sticky left-0 z-10">${esc(r[0])}</td>
+                      </tr>`;
+                  }
+
+                  return `<tr class="hover:bg-zinc-800/40 transition-colors ${isHighlight ? 'bg-zinc-900/90 font-bold text-white' : ''}">
+                      ${r.map((c, j) => {
+                          const isFirst = j === 0;
+                          const isLast = j === r.length - 1;
+                          return `<td class="px-4 py-2.5 ${isFirst ? `sticky left-0 z-10 shadow-[2px_0_0_#27272a] ${isHighlight ? 'bg-zinc-900' : 'bg-zinc-950'}` : ''} ${isLast ? `sticky right-0 z-10 font-mono font-bold text-emerald-400 text-right shadow-[-2px_0_0_#27272a] ${isHighlight ? 'bg-zinc-900' : 'bg-zinc-950'}` : ''}">${esc(c)}</td>`;
+                      }).join('')}
+                  </tr>`;
+              }).join('')}
+          </tbody>
+      </table>
+  </div>`;
+};
+
+const extrasHtml = (d) => ((d.extras || []).length ? `<div class="space-y-3"><h4 class="text-sm font-bold text-white"><i class="fas fa-folder-open text-teal-400 mr-2"></i>Outras abas da planilha</h4>${d.extras.map((x) => `<details class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-5"><summary class="text-sm font-bold text-white"><i class="fas fa-chevron-down text-teal-400 mr-2 text-xs"></i>${esc(x.tab)}</summary><div class="mt-3">${gridHtml(x.rows)}</div></details>`).join('')}</div>` : '');
+
+/* ---------- RESUMO DO EVENTO ---------- */
+async function openEvent(f, tab) {
+  curFile = f; show('event-view');
+  const internal = isInternal(f.name);
+  $('ev-title').textContent = f.name; $('ev-link').href = sheetUrl(f.id);
+  $('ev-sub').textContent = internal ? 'Resumo interno Stratus: onde estamos ganhando' : 'Resumo da apuração';
+  $('ev-body').innerHTML = '<p class="text-zinc-400 text-sm">Carregando planilha...</p>';
+  try {
+    const [d, mst] = await Promise.all([api(f.id, tab), internal ? getMaster().catch(() => null) : null]);
+    $('ev-body').innerHTML = internal ? renderInternal(d, f.id, mst, f) : renderEvent(d, f.id);
+  } catch (e) { $('ev-body').innerHTML = `<p class="text-red-400 text-sm">Falha ao ler a planilha: ${esc(e.message)}</p>`; }
+}
+
+function renderEvent(d, id) {
+  const s = d.resumo, p = d.produtos;
+  const chips = (d.abas || []).length > 1 ? `<div class="flex flex-wrap gap-2 items-center text-xs mb-6"><span class="text-zinc-500">Aba:</span>${d.abas.map((a) => `<button data-tab="${esc(a)}" class="px-4 py-1.5 font-medium rounded-lg border transition-colors ${a === d.tab ? 'border-teal-500 text-teal-400 bg-teal-500/10' : 'border-zinc-800 text-zinc-400 hover:bg-zinc-900 hover:text-white'}">${esc(a)}</button>`).join('')}</div>` : '';
+  const sm = (arr, k) => arr.reduce((a, x) => a + x[k], 0);
+  const ing = (x) => /BILHET|PORTA|INGRESSO/i.test(x.categoria);
+  const bebs = p.filter((x) => !ing(x)), porta = p.filter(ing);
+  const vend = sm(p, 'vendas'), bruto = s.bruto || d.totais?.vendas || vend;
+
+  if (!bruto && !p.length) {
+      return chips + box('Aba "' + esc(d.tab) + '"', 'fa-table', '<p class="text-xs text-zinc-500 mb-4">Visualização detalhada da grade de dados.</p>' + gridHtml(d.grade)) + extrasHtml(d);
+  }
+
+  const liq = s.lucroLiquido ?? s.lucroBar, rep = s.repasse != null ? { v: s.repasse } : liq != null ? { v: liq - (s.dinheiroEntregue || 0), calc: 1 } : { v: null }, un = sm(bebs, 'vendido'), vBar = sm(bebs, 'vendas');
+  const sorted = (arr, f) => [...arr].sort((a, b) => f(b) - f(a));
+  const list = (arr, fmt) => arr.slice(0, 5).map((x) => line(x.nome, fmt(x))).join('') || '<p class="text-xs text-zinc-500">Sem dados.</p>';
+  const mg = (x) => x.lucro / x.vendas;
+  const comCusto = p.filter((x) => x.custo > 0 && x.vendas > 0);
+  const custos = [['Bebidas (CMV)', s.cBebidas, 'bg-red-400'], ['Mão de obra', s.cMaoDeObra, 'bg-amber-400'], ['Insumos', s.cInsumos, 'bg-blue-400'], ['Operacional', s.cOperacional, 'bg-purple-400'], ['Sistema / Máquinas', s.cSistema, 'bg-zinc-400']].filter((c) => c[1]);
+  const cats = {};
+  p.forEach((x) => { const c = (cats[x.categoria] ||= { v: 0, l: 0, u: 0 }); c.v += x.vendas; c.l += x.lucro; c.u += x.vendido; });
+  const maxL = Math.max(...Object.values(cats).map((c) => c.l), 1);
+  let last = '', trs = '';
+  p.forEach((x) => {
+    if (x.categoria !== last) { last = x.categoria; trs += `<tr class="bg-amber-500/10"><td colspan="7" class="px-3 py-2 font-bold text-amber-400">${esc(last)}</td></tr>`; }
+    trs += `<tr><td class="px-3 py-1.5 text-white">${esc(x.nome)}</td><td class="px-3 py-1.5 text-right">${x.vendido || '-'}</td><td class="px-3 py-1.5 text-right font-mono">${x.unit ? R(x.unit) : '-'}</td><td class="px-3 py-1.5 text-right font-mono">${R(x.vendas)}</td><td class="px-3 py-1.5 text-right font-mono text-red-400">${x.custo ? R(x.custo) : '-'}</td><td class="px-3 py-1.5 text-right font-mono text-emerald-400">${R(x.lucro)}</td><td class="px-3 py-1.5 text-right font-mono text-zinc-400">${x.vendas ? P(x.lucro, x.vendas) : '-'}</td></tr>`;
+  });
+  const diff = p.length && Math.abs(vend - bruto) > 1;
+  return `${chips}
+  <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+    ${kpi('Faturamento bruto', R(bruto))}
+    ${kpi('Despesas gerais', R(s.despesas), 'text-red-400', P(s.despesas, bruto) + ' do bruto')}
+    ${kpi('Lucro líquido', R(liq), 'text-emerald-400', 'Margem ' + P(liq, bruto))}
+    ${kpi('Máquinas', R(s.maquinas || s.cSistema), 'text-amber-400')}
+    <div class="bg-gradient-to-br from-amber-950/40 to-zinc-900/60 border border-amber-500/40 rounded-2xl p-5"><p class="text-xs text-amber-400">Repasse ao produtor</p><h3 class="text-xl font-bold mt-1 text-amber-400">${rep.v == null ? 'Não encontrado' : R(rep.v)}</h3>${rep.calc ? '<p class="text-[11px] text-zinc-500 mt-1">Calculado: lucro líquido − dinheiro entregue</p></i>' : ''}${s.dinheiroEntregue ? `<p class="text-[11px] text-zinc-500 mt-1">Dinheiro entregue ${R(s.dinheiroEntregue)}</p>` : ''}</div>
+  </div>
+  <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
+    ${kpi('Unidades vendidas (bar)', un || '-', 'text-white', 'Consumo interno: ' + (sm(p, 'consumo') || 0) + ' un')}
+    ${kpi('Ticket médio por unidade', un ? R(vBar / un) : '-')}
+    ${kpi('Lucro do bar', R(s.lucroBar), 'text-emerald-400', 'Antes das máquinas')}
+    ${kpi('CMV (bebidas ÷ bruto)', P(s.cBebidas, bruto), 'text-red-400')}
+    ${kpi('Bilheteria na porta', R(sm(porta, 'vendas')), 'text-white', P(sm(porta, 'vendas'), bruto) + ' do bruto')}
+    ${kpi('Mão de obra ÷ bruto', P(s.cMaoDeObra, bruto), 'text-amber-400')}
+  </div>
+  ${diff ? `<p class="text-xs text-amber-400 bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-2">Atenção: a soma dos produtos (${R(vend)}) difere do bruto da planilha (${R(bruto)}).</p>` : ''}
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    ${box('Para onde foi o dinheiro', 'fa-chart-pie', custos.map((c) => bar(c[0], c[1], bruto, c[2], R(c[1]) + ' &middot; ' + P(c[1], bruto))).join('') || '<p class="text-xs text-zinc-500">Sem dados.</p>')}
+    ${box('Mais vendidos (R$)', 'fa-fire', list(sorted(p, (x) => x.vendas).filter((x) => x.vendas > 0), (x) => R(x.vendas) + (x.vendido ? ' &middot; ' + x.vendido + ' un' : '')))}
+    ${box('Mais vendidos (unidades)', 'fa-beer-mug-empty', list(sorted(bebs, (x) => x.vendido).filter((x) => x.vendido > 0), (x) => x.vendido + ' un &middot; ' + R(x.vendas)))}
+    ${box('Mais lucrativos (R$)', 'fa-coins', list(sorted(p, (x) => x.lucro).filter((x) => x.lucro > 0), (x) => `<span class="text-emerald-400">${R(x.lucro)}</span>`))}
+    ${box('Maior margem (com custo)', 'fa-arrow-trend-up', list(sorted(comCusto, mg), (x) => P(x.lucro, x.vendas)))}
+    ${box('Menor margem (com custo)', 'fa-arrow-trend-down', list(sorted(comCusto, (x) => -mg(x)), (x) => `<span class="text-red-400">${P(x.lucro, x.vendas)}</span>`))}
+  </div>
+  ${Object.keys(cats).length ? box('Resultado por categoria', 'fa-layer-group', Object.entries(cats).sort((a, b) => b[1].l - a[1].l).map(([n, c]) => bar(n, c.l, maxL, 'bg-emerald-400', `${c.u ? c.u + ' un &middot; ' : ''}Vendas ${R(c.v)} &middot; Lucro ${R(c.l)} (${P(c.l, sm(p, 'lucro'))})`)).join('')) : ''}
+  ${p.length ? `<details class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-5"><summary class="text-sm font-bold text-white"><i class="fas fa-table text-teal-400 mr-2"></i>Todos os produtos (${p.length})</summary><div class="overflow-x-auto mt-3"><table class="w-full text-xs text-zinc-300 whitespace-nowrap"><thead class="text-[10px] text-zinc-500 bg-zinc-950"><tr><th class="px-3 py-2 text-left">Produto</th><th class="px-3 py-2 text-right">Vendido</th><th class="px-3 py-2 text-right">Valor unit.</th><th class="px-3 py-2 text-right">Vendas</th><th class="px-3 py-2 text-right">Custo</th><th class="px-3 py-2 text-right">Lucro</th><th class="px-3 py-2 text-right">Margem</th></tr></thead><tbody class="divide-y divide-zinc-800/60">${trs}</tbody></table></div></details>` : ''}
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    ${d.grupos.map((g) => `<details class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-5"><summary class="flex justify-between text-sm font-bold text-white"><span><i class="fas fa-chevron-down text-teal-400 mr-2 text-xs"></i>${esc(g.nome)}</span><span class="font-mono text-red-400">${R(g.total)}</span></summary><div class="space-y-2 mt-3">${g.itens.map((i) => line(i.item, R(i.val), i.qtd)).join('')}</div></details>`).join('')}
+  </div>${extrasHtml(d)}`;
+}
+
+let masterData = null;
+async function getMaster() { if (masterData) return masterData; const m = files.find((x) => isMaster(x.name)); if (!m) return null; return (masterData = await api(m.id)); }
+
+function renderInternal(d, id, mst, f) {
+  const all = mst?.eventos || [], ev = all.find((x) => nrm(f.name).includes(nrm(x.evento)));
+  let top;
+  if (ev) {
+    const tot = all.reduce((a, x) => a + x.lucroFinal, 0), avg = tot / all.length;
+    const sb = ev.saidaBebidas, sv = ev.saidaVariados, rb = ev.retornoBebidas, rv = ev.retornoVariados;
+    const saida = sb + sv;
+
+    const isGasg = /GASGUITA/i.test(ev.evento);
+    const vPir = isGasg ? ev.pirulitos : 0;
+    const vCha = isGasg ? ev.chapeus : 0;
+    const ded = ev.consumo + ev.estoque + vPir + vCha;
+
+    const pos = [...all].sort((a, b) => b.lucroFinal - a.lucroFinal).indexOf(ev) + 1;
+    const comp = [
+      ['Lucro da operação (retorno − saída)', ev.lucroBase, 1],
+      ['Sistema 2%', ev.sistema, 1],
+      ['Consumação', ev.consumo, 0],
+      ['UTILIZADO', ev.estoque, 0],
+      ['Pirulitos caixa', vPir, 0],
+      ['Chapéus', vCha, 0]
+    ].filter((c) => c[1]);
+
+    const mx = Math.max(...comp.map((c) => c[1]), 1);
+    const mix = (n, s, r) => bar(n, r - s, Math.max(rb - sb, rv - sv, 1), 'bg-teal-400', `Saída ${R(s)} &rarr; Retorno ${R(r)} &middot; Lucro ${R(r - s)} (${P(r - s, s)})`);
+
+    top = grid(6, kpi('Lucro final do evento', R(ev.lucroFinal), 'text-emerald-400', esc(ev.mes) + ' &middot; ' + esc(ev.data)) + kpi('Lucro da operação', R(ev.lucroBase), 'text-white', 'Retorno − saída') +
+      kpi('Sistema 2%', R(ev.sistema), 'text-amber-400') + kpi('Deduções', '- ' + R(ded), 'text-red-400', isGasg ? 'Consumo, utilizado, pirulitos e chapéus' : 'Consumação e utilizado') +
+      kpi('ROI da operação', P(ev.lucroBase, saida), 'text-white', 'Lucro ÷ saída') + kpi('Posição', pos + 'º de ' + all.length, 'text-amber-400', P(ev.lucroFinal, tot) + ' do lucro acumulado')) +
+      `<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      ${box('Como o lucro se formou', 'fa-scale-balanced', comp.map((c) => bar(c[0], c[1], mx, c[2] ? 'bg-emerald-400' : 'bg-red-400', (c[2] ? '+ ' : '- ') + R(c[1]))).join('') + `<p class="text-xs text-zinc-400 pt-2 border-t border-zinc-800">Lucro final: <b class="text-emerald-400">${R(ev.lucroFinal)}</b></p>`)}
+      ${box('Bebidas x variados', 'fa-wine-bottle', mix('Bebidas', sb, rb) + mix('Variados', sv, rv))}
+      ${box('Comparação com a média', 'fa-ranking-star', bar('Este evento', ev.lucroFinal, Math.max(ev.lucroFinal, avg), 'bg-emerald-400') + bar('Média dos eventos', avg, Math.max(ev.lucroFinal, avg), 'bg-zinc-500') + `<p class="text-xs text-zinc-400">${ev.lucroFinal >= avg ? 'Acima' : 'Abaixo'} da média em ${P(Math.abs(ev.lucroFinal - avg), avg)}.</p>`)}</div>`;
+  } else top = `<p class="text-xs text-amber-400 bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-2">Este evento não aparece na planilha LUCRO BAR GERAL (o nome do evento precisa estar no nome do arquivo). Mostrando só o que há na planilha.</p>`;
+
+  const cleanAbas = (d.abas || []).filter((a) => !/PROJE|FINAL\s*TOTAL/i.test(a));
+  const chips = cleanAbas.length > 1 ? `<div class="flex flex-wrap gap-2 items-center text-xs mb-4 mt-8"><span class="text-zinc-500">Aba:</span>${cleanAbas.map((a) => `<button data-tab="${esc(a)}" class="px-4 py-1.5 font-medium rounded-lg border transition-colors ${a === d.tab ? 'border-teal-500 text-teal-400 bg-teal-500/10' : 'border-zinc-800 text-zinc-400 hover:bg-zinc-900 hover:text-white'}">${esc(a)}</button>`).join('')}</div>` : '';
+  
+  const sheetDetail = box('Detalhe da planilha interna', 'fa-table', chips + gridHtml(d.grade));
+
+  return top + sheetDetail;
+}
+
+async function openMaster(f) {
+  show('master-view');
+  $('ms-link').href = sheetUrl(f.id);
+  $('ms-body').innerHTML = '<p class="text-zinc-400 text-sm">Carregando planilha...</p>';
+  try { $('ms-body').innerHTML = renderMaster(await api(f.id)); }
+  catch (e) { $('ms-body').innerHTML = `<p class="text-red-400 text-sm">Falha ao ler a planilha: ${esc(e.message)}</p>`; }
+}
+$('ms-body').addEventListener('click', (e) => {
+  const tr = e.target.closest('tr[data-id]'); const f = tr && files.find((x) => x.id === tr.dataset.id); if (f) openEvent(f);
+});
+
+function renderMaster(d) {
+  const e = d.eventos;
+  if (!e.length) return '<p class="text-zinc-400 text-sm">Não encontrei a tabela de eventos (coluna "EVENTO") na primeira aba.</p>';
+  const sum = (arr, k) => arr.reduce((a, x) => a + x[k], 0);
+  const saida = (x) => x.saidaBebidas + x.saidaVariados, ret = (x) => x.retornoBebidas + x.retornoVariados;
+
+  const isGasg = (x) => /GASGUITA/i.test(x.evento);
+  const ded = (x) => x.consumo + x.estoque + (isGasg(x) ? x.pirulitos + x.chapeus : 0);
+
+  const tot = { final: sum(e, 'lucroFinal'), base: sum(e, 'lucroBase'), sis: sum(e, 'sistema'), ded: e.reduce((a, x) => a + ded(x), 0), saida: e.reduce((a, x) => a + saida(x), 0), ret: e.reduce((a, x) => a + ret(x), 0) };
+  const rank = [...e].sort((a, b) => b.lucroFinal - a.lucroFinal), best = rank[0];
+  const meses = [...new Set(e.map((x) => x.mes))];
+  const maxRank = best.lucroFinal;
+  const match = (x) => files.find((f) => !isInternal(f.name) && f.name.toUpperCase().includes(x.evento.toUpperCase()));
+  const lb = (b, v) => (v ? b : '');
+
+  const monthCards = meses.map((m) => {
+    const ev = e.filter((x) => x.mes === m);
+    return `<div class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-5"><p class="text-sm font-bold text-white">${esc(m || 'Sem mês')}</p><h3 class="text-xl font-bold text-emerald-400 mt-1">${R(sum(ev, 'lucroFinal'))}</h3><p class="text-[11px] text-zinc-500 mt-1">${ev.length} evento(s) &middot; média ${R(sum(ev, 'lucroFinal') / ev.length)}</p><p class="text-[11px] text-zinc-500">Saída ${R(ev.reduce((a, x) => a + saida(x), 0))} &middot; Retorno ${R(ev.reduce((a, x) => a + ret(x), 0))}</p></div>`;
+  }).join('');
+
+  const lucroBeb = e.reduce((a, x) => a + x.retornoBebidas - x.saidaBebidas, 0), lucroVar = e.reduce((a, x) => a + x.retornoVariados - x.saidaVariados, 0);
+  const maxMix = Math.max(lucroBeb, lucroVar, 1);
+
+  const rows = meses.map((m) => {
+    const ev = e.filter((x) => x.mes === m);
+    const body = ev.map((x) => { const f = match(x); return `<tr class="hover:bg-zinc-900/60 ${f ? 'cursor-pointer' : ''}" ${f ? `data-id="${f.id}"` : ''}>
+      <td class="px-3 py-2 font-bold text-white">${esc(x.evento)}${f ? ' <i class="fas fa-arrow-up-right-from-square text-[9px] text-teal-400"></i>' : ''}</td><td class="px-3 py-2">${esc(x.data)}</td>
+      <td class="px-3 py-2 text-right font-mono">${R(saida(x))}</td><td class="px-3 py-2 text-right font-mono">${R(ret(x))}</td>
+      <td class="px-3 py-2 text-right font-mono">${R(x.lucroBase)}</td><td class="px-3 py-2 text-right font-mono text-zinc-400">${P(x.lucroBase, saida(x))}</td>
+      <td class="px-3 py-2 text-right font-mono text-red-400">${lb('- ' + R(ded(x)), ded(x))}</td><td class="px-3 py-2 text-right font-mono text-amber-400">${R(x.sistema)}</td>
+      <td class="px-3 py-2 text-right font-mono font-bold text-emerald-400">${R(x.lucroFinal)}</td><td class="px-3 py-2 text-right font-mono text-zinc-400">${P(x.lucroFinal, tot.final)}</td></tr>`; }).join('');
+    return `<tr class="bg-amber-500/10"><td colspan="10" class="px-3 py-2 font-bold text-amber-400">${esc(m || 'Sem mês')}</td></tr>${body}
+      <tr class="bg-zinc-950 font-bold"><td class="px-3 py-2" colspan="2">Subtotal</td><td class="px-3 py-2 text-right font-mono">${R(ev.reduce((a, x) => a + saida(x), 0))}</td><td class="px-3 py-2 text-right font-mono">${R(ev.reduce((a, x) => a + ret(x), 0))}</td><td class="px-3 py-2 text-right font-mono">${R(sum(ev, 'lucroBase'))}</td><td></td><td class="px-3 py-2 text-right font-mono text-red-400">- ${R(ev.reduce((a, x) => a + ded(x), 0))}</td><td class="px-3 py-2 text-right font-mono text-amber-400">${R(sum(ev, 'sistema'))}</td><td class="px-3 py-2 text-right font-mono text-emerald-400">${R(sum(ev, 'lucroFinal'))}</td><td></td></tr>`;
+  }).join('');
+
+  return `
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    ${kpi('Lucro final acumulado', R(tot.final), 'text-emerald-400', e.length + ' eventos')}
+    ${kpi('Média por evento', R(tot.final / e.length), 'text-white')}
+    ${kpi('Melhor evento', esc(best.evento), 'text-amber-400', R(best.lucroFinal))}
+    ${kpi('Retorno sobre saída (ROI)', P(tot.base, tot.saida), 'text-white', 'Lucro operação ' + R(tot.base))}
+    ${kpi('Total saído (bar)', R(tot.saida), 'text-zinc-200')}
+    ${kpi('Total retornado', R(tot.ret), 'text-zinc-200')}
+    ${kpi('Sistema 2% acumulado', R(tot.sis), 'text-amber-400')}
+    ${kpi('Deduções', '- ' + R(tot.ded), 'text-red-400', 'Consumação e utilizado' + (e.some(isGasg) ? ' (+ extras Gasguita)' : ''))}
+  </div>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">${monthCards}</div>
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    ${box('Ranking de eventos por lucro final', 'fa-trophy', rank.map((x, i) => bar(`${i + 1}. ${x.evento}`, x.lucroFinal, maxRank, i === 0 ? 'bg-amber-400' : 'bg-emerald-400', R(x.lucroFinal) + ' &middot; ' + P(x.lucroFinal, tot.final))).join(''))}
+    <div class="space-y-6">
+      ${box('Rentabilidade (lucro operação ÷ saída)', 'fa-percent', [...e].sort((a, b) => b.lucroBase / (saida(b) || 1) - a.lucroBase / (saida(a) || 1)).map((x) => bar(x.evento, x.lucroBase / (saida(x) || 1), 0.5, 'bg-teal-400', P(x.lucroBase, saida(x)))).join(''))}
+      ${box('Bebidas x Variados (lucro de operação)', 'fa-wine-bottle', bar('Bebidas', lucroBeb, maxMix, 'bg-teal-400') + bar('Variados', lucroVar, maxMix, 'bg-blue-400'))}
+    </div>
+  </div>
+  ${box('Detalhamento completo por evento', 'fa-table', `<p class="text-[11px] text-zinc-500">Lucro final = lucro da operação + sistema 2% − deduções (consumação e utilizado).</p>
+    <div class="overflow-x-auto"><table class="w-full text-left text-xs text-zinc-300 whitespace-nowrap"><thead class="text-[10px] text-zinc-500 bg-zinc-950 border-b border-zinc-800"><tr>
+      <th class="px-3 py-2">Evento</th><th class="px-3 py-2">Data</th><th class="px-3 py-2 text-right">Saída</th><th class="px-3 py-2 text-right">Retorno</th><th class="px-3 py-2 text-right">Lucro operação</th><th class="px-3 py-2 text-right">ROI</th><th class="px-3 py-2 text-right">Deduções</th><th class="px-3 py-2 text-right">Sistema 2%</th><th class="px-3 py-2 text-right">Lucro final</th><th class="px-3 py-2 text-right">% do total</th></tr></thead>
+      <tbody class="divide-y divide-zinc-800/60">${rows}
+      <tr class="bg-emerald-500/10 font-bold text-white"><td class="px-3 py-3" colspan="2">TOTAL GERAL</td><td class="px-3 py-3 text-right font-mono">${R(tot.saida)}</td><td class="px-3 py-3 text-right font-mono">${R(tot.ret)}</td><td class="px-3 py-3 text-right font-mono">${R(tot.base)}</td><td class="px-3 py-3 text-right font-mono">${P(tot.base, tot.saida)}</td><td class="px-3 py-3 text-right font-mono text-red-400">- ${R(tot.ded)}</td><td class="px-3 py-3 text-right font-mono text-amber-400">${R(tot.sis)}</td><td class="px-3 py-3 text-right font-mono text-emerald-400">${R(tot.final)}</td><td class="px-3 py-3 text-right font-mono">100%</td></tr></tbody></table></div>`)}`;
+}
+
+let DB = {}, cur = 'main-view', calM = 0, curFile = null, activeEstId = null;
+let finFilterQuery = '', finFilterEvent = 'Todos', finFilterCategory = 'Todas';
+
+const TODAY = () => new Date(Date.now() - new Date().getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
+const fd = (s) => (s ? s.split('-').reverse().join('/') : '-');
+const uid = () => Math.random().toString(36).slice(2, 9);
+const by = (k, dir = 1) => (a, b) => dir * String(a[k] || '').localeCompare(String(b[k] || ''));
+const CATS = {
+  'Operação de Bar': ['fa-martini-glass', 'Bartenders, caixas, estoque e gestores de bar.'], 'Som': ['fa-volume-high', 'Técnicos de som, PA e backline.'],
+  'Iluminação': ['fa-lightbulb', 'Canhões de luz, moving heads e cenografia de luz.'], 'Grades': ['fa-bars', 'Grades de contenção e isolamento de pista.'],
+  'Frete': ['fa-truck', 'Transporte de bebidas, gelo e equipamentos.'], 'Segurança': ['fa-shield-halved', 'Equipe de portaria, segurança interna e credenciamento.'],
+  'Bilheteria': ['fa-ticket', 'Operadores de bilheteria, portaria e listas.'], 'Limpeza': ['fa-broom', 'Equipe de higienização de banheiros e salão.'],
+  'Alimentação': ['fa-utensils', 'Catering para staff, camarim e food trucks.'] };
+
+const STATUS_NEG = ['Prospecção', 'Em Negociação', 'Proposta Enviada', 'Cliente Ativo', 'Contrato Fechado', 'Perdido'];
+const TIPOS_EST = ['Boate / Club', 'Pub / Bar', 'Casa de Shows', 'Restaurante', 'Eventos Fixo', 'Espaço Multiúso'];
+const CATEGORIAS_COMPROVANTE = ['Frete / Transporte', 'Mão de Obra', 'Insumos / Gelo', 'Equipamentos', 'Bebidas', 'Alimentação / Staff', 'Outros'];
+
+const SEED = {
+  pessoas: [['Operação de Bar', 'Equipe Stratus Bar', 'Bartenders / Caixa', 'Ativo'], ['Som', 'Técnico Principal', 'Áudio & Sonorização', 'Fornecedor'],
+    ['Iluminação', 'Iluminação Oficial', 'Montagem cênica', 'Fornecedor'], ['Grades', 'Locadora de Grades', 'Estruturas de contenção', 'Fornecedor'],
+    ['Frete', 'Motorista / Logística', 'Frete e carreto', 'Prestador'], ['Segurança', 'Coordenação de Segurança', 'Equipe de portaria', 'Prestador'],
+    ['Bilheteria', 'Equipe de Bilheteria', 'Check-in & vendas', 'Operacional'], ['Limpeza', 'Equipe de Limpeza', 'Manutenção e higiene', 'Prestador'],
+    ['Alimentação', 'Fornecedor de Catering', 'Camarim & staff', 'Fornecedor']].map((x) => ({ id: uid(), cat: x[0], nome: x[1], funcao: x[2], status: x[3], tel: '' })),
+  demandas: [{ id: uid(), titulo: 'Confirmar fornecedor de gelo (exemplo)', responsavel: '', prioridade: 'Alta', prazo: '', evento: '', status: 'A fazer' },
+    { id: uid(), titulo: 'Fechar planilha do último evento (exemplo)', responsavel: '', prioridade: 'Média', prazo: '', evento: '', status: 'Em andamento' }],
+  reunioes: [{ id: uid(), titulo: 'Alinhamento semanal (exemplo)', data: TODAY(), hora: '10:00', participantes: '', pauta: 'Pendências dos eventos', status: 'Agendada' }],
+  estabelecimentos: [{
+    id: 'dragon-club-01',
+    nome: 'Dragon Club',
+    tipo: 'Boate / Club',
+    endereco: 'Rua Almirante Jaceguai, 120 - Praia de Iracema, Fortaleza - CE',
+    responsavel: 'Fábio Santos',
+    telefone: '85999998888',
+    sistemaAtual: 'Zig',
+    taxaCreditoAtual: 3.50,
+    taxaDebitoAtual: 2.20,
+    taxaPixAtual: 1.50,
+    statusNegociacao: 'Cliente Ativo',
+    capacidade: 1200,
+    obs: 'Operação de bar e portaria cashless fixa. Eventos recorrentes aos finais de semana.'
+  }],
+  pastasBar: ['LINK'],
+  comprovantes: []
+};
+
+async function loadDB() {
+  try { DB = await (await fetch('/api/store')).json(); } catch (e) { DB = {}; }
+  Object.keys(SEED).forEach((k) => { DB[k] ||= SEED[k]; });
+}
+let saveT; const save = () => { clearTimeout(saveT); saveT = setTimeout(() => fetch('/api/store', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(DB) }).catch(() => {}), 300); };
+const render = () => { $('mod-view').innerHTML = (MODS[cur] || (() => ''))(); };
+const go = (id) => document.querySelector(`.nav[data-v="${id}"]`).click();
+
+const inp = 'bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-white w-full outline-none focus:border-teal-500';
+const head = (t, s) => `<div class="pt-4"><h2 class="text-2xl font-bold text-white">${t}</h2><p class="text-zinc-400 text-sm">${s}</p></div>`;
+const grid = (n, inner) => `<div class="grid grid-cols-2 md:grid-cols-${n} gap-4">${inner}</div>`;
+const badge = (t, c = 'text-teal-400 border-teal-500/30') => `<span class="text-[10px] font-mono border ${c} rounded px-1.5 py-0.5">${esc(t)}</span>`;
+const none = (t) => `<p class="text-xs text-zinc-500">${t}</p>`;
+
+function form(key, fields, btnText = 'Cadastrar') {
+  const f1 = (f) => { const b = `name="${f.k}" ${f.req ? 'required' : ''} class="${inp}"`;
+    return f.opts ? `<select ${b}>${f.opts.map((o) => `<option>${o}</option>`).join('')}</select>` : f.area ? `<textarea ${b} rows="2"></textarea>` : `<input ${b} type="${f.type || 'text'}" ${f.type === 'number' ? 'step="0.01"' : ''} placeholder="${esc(f.ph || '')}">`; };
+  return `<form data-add="${key}" class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-5 grid grid-cols-1 md:grid-cols-4 gap-3 items-end">${fields.map((f) => `<label class="text-[11px] text-zinc-500 space-y-1 block ${f.full ? 'md:col-span-4' : ''}"><span>${f.label}</span>${f1(f)}</label>`).join('')}<button class="bg-teal-500/15 border border-teal-500/40 text-teal-400 rounded-lg px-4 py-2 text-sm font-bold md:col-span-4 flex items-center justify-center gap-2 hover:bg-teal-500/25 transition-colors"><i class="fas fa-plus"></i>${btnText}</button></form>`;
+}
+
+const table = (k, cols, rows) => `<div class="overflow-x-auto border border-zinc-800 rounded-2xl bg-zinc-900/40"><table class="w-full text-xs text-left"><thead class="text-[10px] text-zinc-500 bg-zinc-950 uppercase border-b border-zinc-800"><tr>${cols.map((c) => `<th class="px-4 py-3">${c[0]}</th>`).join('')}<th class="px-4 py-3 text-right">Ação</th></tr></thead><tbody class="divide-y divide-zinc-800/60 font-mono">${rows.map((r) => `<tr class="hover:bg-zinc-800/40">${cols.map((c) => `<td class="px-4 py-3">${c[1](r)}</td>`).join('')}<td class="px-4 py-3 text-right">${del(k, r)}</td></tr>`).join('') || `<tr><td colspan="${cols.length + 1}" class="px-4 py-4 text-center text-zinc-500 font-sans">Nenhum registro encontrado.</td></tr>`}</tbody></table></div>`;
+
+const sel = (key, r, f, opts) => `<select data-set="${key}|${r.id}|${f}" class="${inp} !w-auto !py-1">${opts.map((o) => `<option ${r[f] === o ? 'selected' : ''}>${o}</option>`).join('')}</select>`;
+const del = (key, r) => `<button data-del="${key}|${r.id}" title="Excluir" class="text-zinc-500 hover:text-red-400 p-1 transition-colors"><i class="fas fa-trash"></i></button>`;
+
+const MODS = {};
+
+MODS['main-view'] = () => {
+  const t = TODAY(), dem = DB.demandas || [], ab = dem.filter((x) => x.status !== 'Concluída');
+  const rs = (DB.reunioes || []).filter((x) => x.status === 'Agendada' && x.data >= t).sort(by('data')).slice(0, 4);
+  const ev = (DB.agenda || []).filter((x) => x.data >= t).sort(by('data')).slice(0, 5);
+  const fin = (DB.comprovantes || []).reduce((a, x) => a + (Number(x.valor) || 0), 0);
+  const ct = (DB.contratos || []).filter((x) => x.status === 'Assinado');
+  return head('Painel', 'Visão geral da operação da Stratus.') + grid(5,
+    kpi('Demandas abertas', ab.length, 'text-amber-400', ab.filter((x) => x.prioridade === 'Alta').length + ' de prioridade alta') +
+    kpi('Reuniões agendadas', rs.length, 'text-white') + kpi('Próximos eventos', ev.length, 'text-teal-400') +
+    kpi('Contratos assinados', ct.length, 'text-white', R(ct.reduce((a, x) => a + x.valor, 0))) + kpi('Comprovantes Lançados', R(fin), 'text-emerald-400')) +
+    `<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    ${box('Próximas reuniões', 'fa-calendar-alt', rs.map((x) => line(x.titulo, fd(x.data) + ' ' + (x.hora || ''))).join('') || none('Nenhuma reunião agendada.'))}
+    ${box('Demandas em aberto', 'fa-tasks', sorted_(ab).slice(0, 5).map((x) => line(x.titulo, esc(x.prioridade))).join('') || none('Tudo em dia.'))}
+    ${box('Próximos eventos', 'fa-calendar', ev.map((x) => line(x.titulo, fd(x.data))).join('') || none('Cadastre eventos no Calendário.'))}</div>
+    <div class="flex flex-wrap gap-3">${[['bar-view', 'fa-glass-cheers', 'Planilhas de eventos'], ['demands', 'fa-plus', 'Nova demanda'], ['meetings', 'fa-plus', 'Nova reunião'], ['reports', 'fa-chart-bar', 'Relatórios']].map((b) => `<button data-go="${b[0]}" class="px-4 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-zinc-300 hover:border-teal-500/50"><i class="fas ${b[1]} text-teal-400 mr-2"></i>${b[2]}</button>`).join('')}</div>`;
+};
+const sorted_ = (a) => [...a].sort((x, y) => ['Alta', 'Média', 'Baixa'].indexOf(x.prioridade) - ['Alta', 'Média', 'Baixa'].indexOf(y.prioridade));
+
+MODS.meetings = () => {
+  const m = [...(DB.reunioes || [])].sort((a, b) => (b.data + b.hora).localeCompare(a.data + a.hora)), t = TODAY();
+  const next = m.filter((x) => x.status === 'Agendada' && x.data >= t).sort(by('data'))[0];
+  return head('Reuniões', 'Apanhado de reuniões, pautas e decisões.') +
+    grid(3, kpi('Agendadas', m.filter((x) => x.status === 'Agendada').length, 'text-teal-400') + kpi('Realizadas', m.filter((x) => x.status === 'Realizada').length) + kpi('Próxima', next ? esc(next.titulo) : '-', 'text-white', next ? fd(next.data) + ' ' + (next.hora || '') : '')) +
+    form('reunioes', [{ k: 'titulo', label: 'Título', req: 1 }, { k: 'data', label: 'Data', type: 'date', req: 1 }, { k: 'hora', label: 'Hora', type: 'time' }, { k: 'participantes', label: 'Participantes' }, { k: 'pauta', label: 'Pauta / decisões', area: 1 }, { k: 'status', label: 'Status', opts: ['Agendada', 'Realizada', 'Cancelada'] }], 'Agendar Reunião') +
+    table('reunioes', [['Data', (r) => `<span class="font-mono text-xs">${fd(r.data)} ${esc(r.hora || '')}</span>`], ['Título', (r) => `<b class="text-white">${esc(r.titulo)}</b>`], ['Participantes', (r) => esc(r.participantes)], ['Pauta / decisões', (r) => `<span class="text-zinc-400 text-xs">${esc(r.pauta)}</span>`], ['Status', (r) => sel('reunioes', r, 'status', ['Agendada', 'Realizada', 'Cancelada'])]], m);
+};
+
+MODS.demands = () => {
+  const cols = ['A fazer', 'Em andamento', 'Concluída'], pc = { Alta: 'text-red-400 border-red-500/30', Média: 'text-amber-400 border-amber-500/30', Baixa: 'text-zinc-400 border-zinc-700' }, d = DB.demandas || [], t = TODAY();
+  return head('Demandas Gerais', 'Painel de demandas: crie, acompanhe e conclua.') +
+    form('demandas', [{ k: 'titulo', label: 'Demanda', req: 1 }, { k: 'responsavel', label: 'Responsável' }, { k: 'prioridade', label: 'Prioridade', opts: ['Alta', 'Média', 'Baixa'] }, { k: 'prazo', label: 'Prazo', type: 'date' }, { k: 'evento', label: 'Evento (opcional)' }], 'Criar Demanda') +
+    `<div class="grid grid-cols-1 md:grid-cols-3 gap-6">${cols.map((c) => `<div class="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-4 space-y-3"><h4 class="text-sm font-bold text-white flex justify-between"><span>${c}</span><span class="text-zinc-500">${d.filter((x) => x.status === c).length}</span></h4>${sorted_(d.filter((x) => x.status === c)).map((x) => `<div class="bg-zinc-950 border border-zinc-800 rounded-xl p-3 space-y-2"><div class="flex justify-between gap-2"><b class="text-sm text-white">${esc(x.titulo)}</b>${del('demandas', x)}</div><div class="flex flex-wrap gap-2 items-center">${badge(x.prioridade, pc[x.prioridade])}${x.prazo ? badge('até ' + fd(x.prazo), x.prazo < t && c !== 'Concluída' ? 'text-red-400 border-red-500/30' : 'text-zinc-400 border-zinc-700') : ''}${x.responsavel ? `<span class="text-[11px] text-zinc-400"><i class="fas fa-user mr-1"></i>${esc(x.responsavel)}</span>` : ''}${x.evento ? `<span class="text-[11px] text-zinc-500">${esc(x.evento)}</span>` : ''}</div>${sel('demandas', x, 'status', cols)}</div>`).join('') || none('Sem demandas.')}</div>`).join('')}</div>`;
+};
+
+MODS.calendar = () => {
+  const b = new Date(), d = new Date(b.getFullYear(), b.getMonth() + calM, 1), y = d.getFullYear(), m = d.getMonth(), n = new Date(y, m + 1, 0).getDate(), t = TODAY();
+  const all = [...(DB.agenda || []).map((x) => ({ data: x.data, titulo: x.titulo, c: 'bg-teal-500/20 text-teal-300' })), ...(DB.reunioes || []).filter((x) => x.status !== 'Cancelada').map((x) => ({ data: x.data, titulo: 'Reunião: ' + x.titulo, c: 'bg-blue-500/20 text-blue-300' })), ...(DB.demandas || []).filter((x) => x.prazo && x.status !== 'Concluída').map((x) => ({ data: x.prazo, titulo: 'Prazo: ' + x.titulo, c: 'bg-amber-500/20 text-amber-300' }))];
+  let cells = ''.padStart(d.getDay() * 0, '');
+  for (let i = 0; i < d.getDay(); i++) cells += '<div></div>';
+  for (let i = 1; i <= n; i++) {
+    const iso = `${y}-${String(m + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`, ev = all.filter((x) => x.data === iso);
+    cells += `<div class="min-h-24 bg-zinc-900/60 border ${iso === t ? 'border-teal-500' : 'border-zinc-800'} rounded-lg p-1.5"><p class="text-[11px] ${iso === t ? 'text-teal-400 font-bold' : 'text-zinc-500'}">${i}</p>${ev.slice(0, 3).map((x) => `<p class="text-[10px] truncate rounded px-1 mt-0.5 ${x.c}" title="${esc(x.titulo)}">${esc(x.titulo)}</p>`).join('')}${ev.length > 3 ? `<p class="text-[10px] text-zinc-500">+${ev.length - 3}</p>` : ''}</div>`;
+  }
+  return head('Calendário', 'Eventos, reuniões e prazos de demandas em um só lugar.') +
+    form('agenda', [{ k: 'titulo', label: 'Evento / compromisso', req: 1 }, { k: 'data', label: 'Data', type: 'date', req: 1 }, { k: 'tipo', label: 'Tipo', opts: ['Evento', 'Montagem', 'Visita técnica', 'Outro'] }], 'Adicionar Compromisso') +
+    `<div class="flex items-center justify-between"><button data-cal="-1" class="w-9 h-9 rounded-lg bg-zinc-900 border border-zinc-800"><i class="fas fa-chevron-left"></i></button><h3 class="font-bold text-white">${d.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}</h3><button data-cal="1" class="w-9 h-9 rounded-lg bg-zinc-900 border border-zinc-800"><i class="fas fa-chevron-right"></i></button></div>
+    <div class="grid grid-cols-7 gap-2 text-center text-[11px] text-zinc-500">${['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((x) => `<div>${x}</div>`).join('')}</div><div class="grid grid-cols-7 gap-2">${cells}</div>
+    <p class="text-[11px] text-zinc-500"><span class="text-teal-300">Verde</span>: eventos &middot; <span class="text-blue-300">Azul</span>: reuniões &middot; <span class="text-amber-300">Laranja</span>: prazos</p>` +
+    table('agenda', [['Data', (r) => fd(r.data)], ['Compromisso', (r) => `<b class="text-white">${esc(r.titulo)}</b>`], ['Tipo', (r) => esc(r.tipo)]], [...(DB.agenda || [])].sort(by('data')));
+};
+
+MODS.people = () => {
+  const p = DB.pessoas || [];
+  return head('Pessoas & Fornecedores de Serviços', 'Diretório de equipes, prestadores e fornecedores para os eventos da Stratus.') +
+    form('pessoas', [{ k: 'cat', label: 'Categoria', opts: Object.keys(CATS) }, { k: 'nome', label: 'Nome / empresa', req: 1 }, { k: 'funcao', label: 'Função / especialidade' }, { k: 'status', label: 'Vínculo', opts: ['Ativo', 'Fornecedor', 'Prestador', 'Operacional'] }, { k: 'tel', label: 'WhatsApp (com DDD)' }], 'Cadastrar Pessoa / Fornecedor') +
+    `<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">${Object.entries(CATS).map(([c, [ic, ds]]) => `<div class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-5 space-y-4"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-teal-500/10 flex items-center justify-center text-teal-400"><i class="fas ${ic}"></i></div><h3 class="text-lg font-bold text-white">${c}</h3></div><p class="text-xs text-zinc-400">${ds}</p>${p.filter((x) => x.cat === c).map((x) => `<div class="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 flex justify-between items-center gap-2"><div><p class="text-sm font-bold text-white">${esc(x.nome)}</p><p class="text-[11px] text-zinc-500">${esc(x.funcao)}${x.tel ? ` &middot; <a class="text-emerald-400" target="_blank" rel="noopener" href="https://wa.me/55${esc(x.tel.replace(/\D/g, ''))}">${esc(x.tel)}</a>` : ''}</p></div><div class="flex items-center gap-2">${badge(x.status)}${del('pessoas', x)}</div></div>`).join('') || none('Ninguém cadastrado.')}</div>`).join('')}</div>`;
+};
+
+/* ---------- MÓDULO ESTABELECIMENTOS (CONGELADO & ISOLADO) ---------- */
+MODS.est = () => {
+  const ests = DB.estabelecimentos || [];
+  const activeEst = ests.find((x) => x.id === activeEstId);
+
+  const statusColor = (s) => {
+    switch (s) {
+      case 'Cliente Ativo': case 'Contrato Fechado': return 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10';
+      case 'Em Negociação': case 'Proposta Enviada': return 'text-amber-400 border-amber-500/30 bg-amber-500/10';
+      case 'Prospecção': return 'text-teal-400 border-teal-500/30 bg-teal-500/10';
+      default: return 'text-zinc-400 border-zinc-700 bg-zinc-800';
+    }
+  };
+
+  const estCards = ests.map((e) => `
+    <div onclick="openEstDetail('${e.id}', event)" class="bg-zinc-900/60 border ${activeEstId === e.id ? 'border-teal-500 bg-teal-950/20' : 'border-zinc-800'} hover:border-teal-500/50 transition-all rounded-2xl p-5 cursor-pointer space-y-3 relative group">
+      <div class="flex justify-between items-start">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400 font-bold">
+            <i class="fas fa-store"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white group-hover:text-teal-300 transition-colors">${esc(e.nome)}</h3>
+            <p class="text-xs text-zinc-400">${esc(e.tipo || 'Estabelecimento')}</p>
+          </div>
+        </div>
+        ${del('estabelecimentos', e)}
+      </div>
+      <div class="flex flex-wrap gap-1.5 items-center">
+        ${badge(e.statusNegociacao || 'Prospecção', statusColor(e.statusNegociacao))}
+        ${e.sistemaAtual ? `<span class="text-[10px] text-zinc-400 bg-zinc-950 border border-zinc-800 px-2 py-0.5 rounded font-mono"><i class="fas fa-microchip mr-1"></i>${esc(e.sistemaAtual)}</span>` : ''}
+      </div>
+      <div class="space-y-1.5 pt-2 border-t border-zinc-800/80 text-xs">
+        ${e.responsavel || e.telefone ? `
+          <p class="text-zinc-300 flex items-center justify-between">
+            <span class="text-zinc-500"><i class="fas fa-user-tie mr-1 text-zinc-500"></i>${esc(e.responsavel || 'Responsável')}</span>
+            ${e.telefone ? `<a href="https://wa.me/55${esc(e.telefone.replace(/\D/g, ''))}" target="_blank" onclick="event.stopPropagation()" class="text-emerald-400 font-mono hover:underline"><i class="fab fa-whatsapp mr-1"></i>${esc(e.telefone)}</a>` : ''}
+          </p>
+        ` : ''}
+        ${(e.taxaCreditoAtual || e.taxaDebitoAtual || e.taxaPixAtual) ? `
+          <p class="text-zinc-400 text-[11px] font-mono flex items-center gap-2">
+            <span class="text-zinc-500 font-sans">Taxas Atuais:</span>
+            <span>Cred ${e.taxaCreditoAtual || 0}%</span> &middot;
+            <span>Deb ${e.taxaDebitoAtual || 0}%</span> &middot;
+            <span>Pix ${e.taxaPixAtual || 0}%</span>
+          </p>
+        ` : ''}
+        <p class="text-zinc-400 truncate text-[11px]"><i class="fas fa-location-dot text-zinc-500 mr-1.5"></i>${esc(e.endereco || 'Endereço não informado')}</p>
+      </div>
+      <div class="pt-2 border-t border-zinc-800/40 flex justify-between items-center text-xs font-bold text-teal-400">
+        <span>Ver / Editar Ficha do Cliente</span>
+        <span>&rarr;</span>
+      </div>
+    </div>
+  `).join('');
+
+  const simCard = `
+    <div onclick="toggleSim(true)" class="bg-gradient-to-br from-amber-950/30 via-zinc-900/80 to-zinc-950 border border-amber-500/40 hover:border-amber-400 rounded-2xl p-5 cursor-pointer space-y-3 transition-all group shadow-lg">
+      <div class="flex justify-between items-start">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/50 flex items-center justify-center text-amber-400 font-bold text-lg group-hover:scale-105 transition-transform">
+            <i class="fas fa-calculator"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-amber-400 flex items-center gap-2">Simulação Comercial <span class="text-[10px] bg-amber-500/20 border border-amber-500/40 text-amber-300 px-2 py-0.5 rounded-full font-mono">INTELIGENTE</span></h3>
+            <p class="text-xs text-zinc-400">Negociação de taxas & viabilidade de lucro</p>
+          </div>
+        </div>
+        <i class="fas fa-chevron-right text-amber-400/60 group-hover:translate-x-1 transition-transform"></i>
+      </div>
+      <p class="text-xs text-zinc-400">Simule o Lucro Líquido da Stratus ajustando o faturamento, o <b>mix de pagamento (% Pix, Crédito, Débito e Dinheiro)</b> e as taxas oferecidas.</p>
+      <div class="pt-2 border-t border-amber-500/20 flex justify-between items-center text-xs font-bold text-amber-400">
+        <span><i class="fas fa-sliders mr-1.5"></i>Abrir Simulador Flexível</span>
+        <span>&rarr;</span>
+      </div>
+    </div>
+  `;
+
+  const detailPanel = activeEst ? `
+    <div id="est-detail" class="bg-zinc-950 border border-teal-500/50 rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl relative">
+      <div class="flex justify-between items-center pb-4 border-b border-zinc-800">
+        <div class="flex items-center space-x-3">
+          <div class="w-12 h-12 rounded-2xl bg-teal-500/20 border border-teal-500/50 flex items-center justify-center text-teal-400 text-xl font-bold">
+            <i class="fas fa-building"></i>
+          </div>
+          <div>
+            <h3 class="text-2xl font-bold text-white">${esc(activeEst.nome)}</h3>
+            <p class="text-xs text-zinc-400">Ficha Cadastral e Negociação Comercial</p>
+          </div>
+        </div>
+        <button onclick="closeEstDetail()" class="px-3 py-1.5 bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white rounded-xl text-xs"><i class="fas fa-times mr-1"></i>Fechar Painel</button>
+      </div>
+
+      <form data-edit-est="${activeEst.id}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="space-y-1 md:col-span-2">
+          <label class="text-xs font-bold text-zinc-400 block">Nome do Estabelecimento</label>
+          <input name="nome" value="${esc(activeEst.nome)}" required class="${inp}">
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs font-bold text-zinc-400 block">Tipo de Estabelecimento</label>
+          <select name="tipo" class="${inp}">
+            ${TIPOS_EST.map((t) => `<option ${activeEst.tipo === t ? 'selected' : ''}>${t}</option>`).join('')}
+          </select>
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs font-bold text-zinc-400 block">Status de Negociação</label>
+          <select name="statusNegociacao" class="${inp}">
+            ${STATUS_NEG.map((s) => `<option ${activeEst.statusNegociacao === s ? 'selected' : ''}>${s}</option>`).join('')}
+          </select>
+        </div>
+
+        <div class="space-y-1 md:col-span-2">
+          <label class="text-xs font-bold text-zinc-400 block">Nome do Responsável</label>
+          <input name="responsavel" value="${esc(activeEst.responsavel || '')}" class="${inp}" placeholder="ex: Fábio Santos">
+        </div>
+        <div class="space-y-1 md:col-span-2">
+          <label class="text-xs font-bold text-zinc-400 block">Número de Contato / WhatsApp</label>
+          <input name="telefone" value="${esc(activeEst.telefone || '')}" class="${inp}" placeholder="ex: 85999998888">
+        </div>
+
+        <div class="space-y-1 md:col-span-3">
+          <label class="text-xs font-bold text-zinc-400 block">Endereço Completo</label>
+          <input name="endereco" value="${esc(activeEst.endereco || '')}" class="${inp}" placeholder="Rua, número, bairro, cidade - UF">
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs font-bold text-zinc-400 block">Capacidade (Pessoas)</label>
+          <input name="capacidade" type="number" value="${activeEst.capacidade || ''}" class="${inp}" placeholder="ex: 1200">
+        </div>
+
+        <div class="space-y-1">
+          <label class="text-xs font-bold text-zinc-400 block">Sistema que Usa Atualmente</label>
+          <input name="sistemaAtual" value="${esc(activeEst.sistemaAtual || '')}" class="${inp}" placeholder="ex: Zig, PAGS, etc.">
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs font-bold text-zinc-400 block">Taxa Crédito Atual (%)</label>
+          <input name="taxaCreditoAtual" type="number" step="0.01" value="${activeEst.taxaCreditoAtual || ''}" class="${inp}" placeholder="ex: 3.50">
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs font-bold text-zinc-400 block">Taxa Débito Atual (%)</label>
+          <input name="taxaDebitoAtual" type="number" step="0.01" value="${activeEst.taxaDebitoAtual || ''}" class="${inp}" placeholder="ex: 2.20">
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs font-bold text-zinc-400 block">Taxa Pix Atual (%)</label>
+          <input name="taxaPixAtual" type="number" step="0.01" value="${activeEst.taxaPixAtual || ''}" class="${inp}" placeholder="ex: 1.50">
+        </div>
+
+        <div class="space-y-1 md:col-span-4">
+          <label class="text-xs font-bold text-zinc-400 block">Observações Comerciais & Operacionais</label>
+          <textarea name="obs" rows="3" class="${inp}" placeholder="Anotações da negociação, particularidades do bar, etc.">${esc(activeEst.obs || '')}</textarea>
+        </div>
+
+        <div class="md:col-span-4 flex justify-end gap-3 pt-2">
+          <button type="button" onclick="closeEstDetail()" class="px-4 py-2 bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white rounded-xl text-xs">Cancelar</button>
+          <button type="submit" class="px-6 py-2 bg-teal-500/20 border border-teal-500/50 text-teal-400 font-bold rounded-xl text-sm hover:bg-teal-500/30 transition-colors"><i class="fas fa-save mr-2"></i>Salvar Alterações</button>
+        </div>
+      </form>
+    </div>
+  ` : '';
+
+  return head('Estabelecimentos', 'Gestão de casas parceiras, ficha de negociação e simulador de margem.') +
+    `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      ${simCard}
+      ${estCards}
+    </div>` +
+    detailPanel +
+    `<div class="pt-4">
+      <h3 class="text-sm font-bold text-white mb-3 flex items-center gap-2"><i class="fas fa-plus-circle text-teal-400"></i>Cadastrar Novo Estabelecimento</h3>
+      ${form('estabelecimentos', [
+        { k: 'nome', label: 'Nome do Estabelecimento', req: 1 },
+        { k: 'tipo', label: 'Tipo', opts: TIPOS_EST },
+        { k: 'statusNegociacao', label: 'Status de Negociação', opts: STATUS_NEG },
+        { k: 'responsavel', label: 'Nome do Responsável', ph: 'ex: Fábio Santos' },
+        { k: 'telefone', label: 'Contato / WhatsApp', ph: 'ex: 85999998888' },
+        { k: 'endereco', label: 'Endereço Completo', ph: 'Rua, número, bairro' },
+        { k: 'sistemaAtual', label: 'Sistema Atual', ph: 'ex: Zig, PAGS' },
+        { k: 'taxaCreditoAtual', label: 'Taxa Crédito Atual (%)', type: 'number', ph: 'ex: 3.50' },
+        { k: 'taxaDebitoAtual', label: 'Taxa Débito Atual (%)', type: 'number', ph: 'ex: 2.20' },
+        { k: 'taxaPixAtual', label: 'Taxa Pix Atual (%)', type: 'number', ph: 'ex: 1.50' },
+        { k: 'capacidade', label: 'Capacidade (pessoas)', type: 'number', ph: 'ex: 1200' },
+        { k: 'obs', label: 'Observações', area: 1, full: true }
+      ], 'Cadastrar Estabelecimento')}
+    </div>` +
+    `<div id="sim-box" class="mt-8 space-y-6 hidden bg-zinc-950 border border-amber-500/40 rounded-3xl p-6 md:p-8 shadow-2xl relative">
+      <div class="flex items-center justify-between pb-4 border-b border-zinc-800">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/50 flex items-center justify-center text-amber-400 text-lg">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <div>
+            <h3 class="text-xl font-bold text-white">Simulador de Viabilidade Comercial</h3>
+            <p class="text-xs text-zinc-400">Ajuste o faturamento, o mix de faturamento do cliente e as taxas oferecidas.</p>
+          </div>
+        </div>
+        <button onclick="toggleSim(false)" class="px-3 py-1.5 bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white rounded-xl text-xs"><i class="fas fa-times mr-1"></i>Fechar</button>
+      </div>
+
+      <div class="space-y-4 bg-zinc-900/60 p-5 rounded-2xl border border-zinc-800">
+        <p class="text-xs font-bold text-amber-400 uppercase tracking-wider"><i class="fas fa-sliders mr-1.5"></i>1. Parâmetros do Cliente & Mix de Processamento</p>
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <div class="md:col-span-1 space-y-1">
+            <label class="text-xs font-bold text-white block">Faturamento Mensal (R$)</label>
+            <input id="sim-fat" type="number" step="1000" value="90000" oninput="runSim()" class="bg-black border border-amber-500/50 rounded-xl px-3 py-2 text-base font-mono font-bold text-emerald-400 w-full outline-none focus:border-amber-400">
+          </div>
+          <div class="space-y-1">
+            <label class="text-xs text-zinc-300 block">% Crédito no Mix</label>
+            <input id="sim-mc" type="number" step="1" value="50" oninput="runSim()" class="bg-black border border-zinc-700 rounded-xl px-3 py-2 text-sm font-mono text-white w-full outline-none focus:border-teal-500">
+          </div>
+          <div class="space-y-1">
+            <label class="text-xs text-zinc-300 block">% Pix no Mix</label>
+            <input id="sim-mp" type="number" step="1" value="30" oninput="runSim()" class="bg-black border border-zinc-700 rounded-xl px-3 py-2 text-sm font-mono text-white w-full outline-none focus:border-teal-500">
+          </div>
+          <div class="space-y-1">
+            <label class="text-xs text-zinc-300 block">% Débito no Mix</label>
+            <input id="sim-md" type="number" step="1" value="15" oninput="runSim()" class="bg-black border border-zinc-700 rounded-xl px-3 py-2 text-sm font-mono text-white w-full outline-none focus:border-teal-500">
+          </div>
+          <div class="space-y-1">
+            <label class="text-xs text-zinc-300 block">% Dinheiro no Mix</label>
+            <input id="sim-mm" type="number" step="1" value="5" oninput="runSim()" class="bg-black border border-zinc-700 rounded-xl px-3 py-2 text-sm font-mono text-white w-full outline-none focus:border-teal-500">
+          </div>
+        </div>
+
+        <p class="text-xs font-bold text-teal-400 uppercase tracking-wider pt-2 border-t border-zinc-800"><i class="fas fa-percent mr-1.5"></i>2. Taxas Propostas ao Cliente (%)</p>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="space-y-1">
+            <label class="text-xs text-zinc-300 block">Taxa Crédito Proposta (%)</label>
+            <input id="sim-tc" type="number" step="0.01" value="3.00" oninput="runSim()" class="bg-black border border-zinc-700 rounded-xl px-3 py-2 text-sm font-mono text-white w-full outline-none focus:border-teal-500">
+          </div>
+          <div class="space-y-1">
+            <label class="text-xs text-zinc-300 block">Taxa Pix Proposta (%)</label>
+            <input id="sim-tp" type="number" step="0.01" value="1.25" oninput="runSim()" class="bg-black border border-zinc-700 rounded-xl px-3 py-2 text-sm font-mono text-white w-full outline-none focus:border-teal-500">
+          </div>
+          <div class="space-y-1">
+            <label class="text-xs text-zinc-300 block">Taxa Débito Proposta (%)</label>
+            <input id="sim-td" type="number" step="0.01" value="2.50" oninput="runSim()" class="bg-black border border-zinc-700 rounded-xl px-3 py-2 text-sm font-mono text-white w-full outline-none focus:border-teal-500">
+          </div>
+          <div class="space-y-1">
+            <label class="text-xs text-zinc-300 block">Taxa Dinheiro Proposta (%)</label>
+            <input id="sim-tm" type="number" step="0.01" value="1.00" oninput="runSim()" class="bg-black border border-zinc-700 rounded-xl px-3 py-2 text-sm font-mono text-white w-full outline-none focus:border-teal-500">
+          </div>
+        </div>
+      </div>
+
+      <div id="sim-kpis" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+
+      <div class="space-y-3">
+        <div class="flex justify-between items-center">
+          <h4 class="text-sm font-bold text-white flex items-center gap-2"><i class="fas fa-table text-amber-400"></i>Confronto de Receita x Custos Operacionais Stratus</h4>
+          <span class="text-[11px] text-zinc-500">Custos fixos da Stratus: Pix 0,49% | Débito 1,14% | Crédito 3,20%</span>
+        </div>
+        <div class="overflow-x-auto border border-zinc-800 rounded-2xl bg-zinc-900/40">
+          <table class="w-full text-xs text-left">
+            <thead class="text-[10px] text-zinc-500 bg-zinc-950 uppercase border-b border-zinc-800">
+              <tr>
+                <th class="px-4 py-3">Meio de Pagamento</th>
+                <th class="px-4 py-3 text-right">Volume (R$)</th>
+                <th class="px-4 py-3 text-right">Taxa Cobrada (Cliente)</th>
+                <th class="px-4 py-3 text-right">Receita Gerada (Bruta)</th>
+                <th class="px-4 py-3 text-right">Custo Operacional (Stratus)</th>
+                <th class="px-4 py-3 text-right">Custo %</th>
+                <th class="px-4 py-3 text-right">Lucro / Prejuízo (Líquido)</th>
+              </tr>
+            </thead>
+            <tbody id="sim-rows" class="divide-y divide-zinc-800/60 font-mono"></tbody>
+          </table>
+        </div>
+      </div>
+    `;
+};
+
+function openEstDetail(id, evt) {
+  if (evt && evt.target.closest('[data-del]')) return;
+  activeEstId = id;
+  render();
+  setTimeout(() => {
+    const p = $('est-detail');
+    if (p) p.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 50);
+}
+
+function closeEstDetail() {
+  activeEstId = null;
+  render();
+}
+
+function toggleSim(show) {
+  const b = $('sim-box');
+  if (!b) return;
+  if (show) {
+    b.classList.remove('hidden');
+    b.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    runSim();
+  } else {
+    b.classList.add('hidden');
+  }
+}
+
+function runSim() {
+  const fat = parseFloat($('sim-fat')?.value) || 0;
+  const mc = (parseFloat($('sim-mc')?.value) || 0) / 100;
+  const mp = (parseFloat($('sim-mp')?.value) || 0) / 100;
+  const md = (parseFloat($('sim-md')?.value) || 0) / 100;
+  const mm = (parseFloat($('sim-mm')?.value) || 0) / 100;
+
+  const tc = parseFloat($('sim-tc')?.value) || 0;
+  const tp = parseFloat($('sim-tp')?.value) || 0;
+  const td = parseFloat($('sim-td')?.value) || 0;
+  const tm = parseFloat($('sim-tm')?.value) || 0;
+
+  const items = [
+    { name: 'Crédito', mix: mc, tc: tc, cc: 3.20 },
+    { name: 'Pix', mix: mp, tc: tp, cc: 0.49 },
+    { name: 'Débito', mix: md, tc: td, cc: 1.14 },
+    { name: 'Dinheiro', mix: mm, tc: tm, cc: 0.00 }
+  ];
+
+  let totVol = 0, totRec = 0, totCusto = 0, totLucro = 0;
+
+  const rowsHtml = items.map((i) => {
+    const vol = fat * i.mix;
+    const rec = vol * (i.tc / 100);
+    const custo = vol * (i.cc / 100);
+    const lucro = rec - custo;
+
+    totVol += vol;
+    totRec += rec;
+    totCusto += custo;
+    totLucro += lucro;
+
+    const isPrejuizo = lucro < 0;
+
+    return `<tr class="hover:bg-zinc-800/40">
+      <td class="px-4 py-3 font-sans font-bold text-white">${i.name} <span class="text-[10px] text-zinc-500 font-mono">(${ (i.mix * 100).toFixed(0) }%)</span></td>
+      <td class="px-4 py-3 text-right text-zinc-300">${R(vol)}</td>
+      <td class="px-4 py-3 text-right text-zinc-300">${i.tc.toFixed(2)}%</td>
+      <td class="px-4 py-3 text-right text-zinc-200">${R(rec)}</td>
+      <td class="px-4 py-3 text-right text-zinc-400">${R(custo)}</td>
+      <td class="px-4 py-3 text-right text-zinc-400">${i.cc.toFixed(2)}%</td>
+      <td class="px-4 py-3 text-right font-bold ${isPrejuizo ? 'text-red-400' : 'text-emerald-400'}">
+        ${isPrejuizo ? '- ' + R(Math.abs(lucro)) + ' ⚠️' : '+ ' + R(lucro)}
+      </td>
+    </tr>`;
+  }).join('');
+
+  const totRow = `<tr class="bg-zinc-900 font-bold border-t border-zinc-700">
+    <td class="px-4 py-3 font-sans text-white">TOTAL</td>
+    <td class="px-4 py-3 text-right text-white">${R(totVol)}</td>
+    <td class="px-4 py-3 text-right text-zinc-500">—</td>
+    <td class="px-4 py-3 text-right text-amber-400">${R(totRec)}</td>
+    <td class="px-4 py-3 text-right text-red-400">${R(totCusto)}</td>
+    <td class="px-4 py-3 text-right text-zinc-500">—</td>
+    <td class="px-4 py-3 text-right text-emerald-400">${totLucro < 0 ? '- ' + R(Math.abs(totLucro)) : '+ ' + R(totLucro)}</td>
+  </tr>`;
+
+  if ($('sim-rows')) $('sim-rows').innerHTML = rowsHtml + totRow;
+
+  const kpisHtml = `
+    ${kpi('Faturamento Mensal', R(fat), 'text-white')}
+    ${kpi('Receita Gerada Bruta', R(totRec), 'text-amber-400', 'Taxas cobradas do cliente')}
+    ${kpi('Custo Operacional Stratus', '- ' + R(totCusto), 'text-red-400', 'Pix 0.49% | Deb 1.14% | Cred 3.20%')}
+    ${kpi('Lucro Líquido Stratus', R(totLucro), totLucro < 0 ? 'text-red-400' : 'text-emerald-400', 'Margem do faturamento: ' + P(totLucro, fat))}
+  `;
+
+  if ($('sim-kpis')) $('sim-kpis').innerHTML = kpisHtml;
+}
+
+/* ---------- MÓDULO FINANCEIRO (INTERATIVO & DE DRIVE REAL) ---------- */
+MODS.fin = () => {
+  const comp = DB.comprovantes || [];
+  const pastas = DB.pastasBar || ['LINK'];
+  const eventosLista = Array.from(new Set(comp.map((c) => c.evento).filter(Boolean)));
+
+  const totalComprovantes = comp.reduce((acc, c) => acc + (Number(c.valor) || 0), 0);
+  const totalFretes = comp.filter(c => /frete/i.test(c.categoria) || /frete/i.test(c.nome)).reduce((acc, c) => acc + (Number(c.valor) || 0), 0);
+
+  return head('Painel Financeiro & Comprovantes', 'Central de controle financeiro, pastas no Google Drive e busca inteligente de despesas.') +
+    grid(4,
+      kpi('Total Comprovantes', R(totalComprovantes), 'text-emerald-400', `<span id="fin-count-label">${comp.length}</span> lançamentos`) +
+      kpi('Frete & Logística', R(totalFretes), 'text-amber-400', 'Calculado das buscas ativas') +
+      kpi('Pastas no Drive', pastas.length, 'text-teal-400', 'Sincronizadas no Drive') +
+      kpi('Status Ticketeira', 'Standby', 'text-zinc-500', 'Integração em breve')
+    ) +
+
+    `<!-- CARDS PRINCIPAIS DA ESTRUTURA -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-2">
+      
+      <!-- CARD 1: TICKETEIRA (STANDBY) -->
+      <div class="bg-zinc-900/40 border border-zinc-800 rounded-3xl p-6 space-y-4 opacity-75 relative">
+        <div class="flex items-center justify-between pb-3 border-b border-zinc-800">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center text-zinc-400">
+              <i class="fas fa-ticket-alt"></i>
+            </div>
+            <div>
+              <h3 class="text-base font-bold text-white">Ticketeira</h3>
+              <p class="text-xs text-zinc-400">Venda de Ingressos & Repasses</p>
+            </div>
+          </div>
+          <span class="text-[10px] font-mono bg-amber-500/10 border border-amber-500/30 text-amber-400 px-2 py-0.5 rounded-full"><i class="fas fa-pause-circle mr-1"></i>STANDBY</span>
+        </div>
+        <p class="text-xs text-zinc-400">Painel de receitas de bilheteria e taxas de conveniência aguardando integração.</p>
+        <div class="bg-zinc-950 p-4 rounded-xl border border-zinc-800/80 space-y-2 text-xs text-zinc-500">
+          <div class="flex justify-between"><span>Vendas Brutas Ingressos:</span><span>R$ --,--</span></div>
+          <div class="flex justify-between"><span>Taxas de Serviços:</span><span>R$ --,--</span></div>
+          <div class="flex justify-between font-bold text-zinc-400"><span>Repasse Produtor:</span><span>R$ --,--</span></div>
+        </div>
+      </div>
+
+      <!-- CARD 2: OPERAÇÃO DE BAR & DRIVE (ATIVO) -->
+      <div class="lg:col-span-2 bg-gradient-to-br from-zinc-900/90 to-zinc-950 border border-teal-500/40 rounded-3xl p-6 space-y-5 shadow-xl">
+        <div class="flex items-center justify-between pb-3 border-b border-zinc-800">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-teal-500/20 border border-teal-500/40 flex items-center justify-center text-teal-400 font-bold">
+              <i class="fas fa-folder-tree"></i>
+            </div>
+            <div>
+              <h3 class="text-lg font-bold text-white">Operação de Bar — Comprovantes & Drive</h3>
+              <p class="text-xs text-zinc-400">Drive Path: <span class="text-teal-400 font-mono">Comprovantes Stratus Hub / Stratus Bar /</span></p>
+            </div>
+          </div>
+          <span class="text-[10px] font-mono bg-teal-500/20 border border-teal-500/40 text-teal-300 px-2.5 py-0.5 rounded-full"><i class="fas fa-sync mr-1"></i>SINCRONIZADO</span>
+        </div>
+
+        <!-- GERENCIADOR E CLIQUE DE PASTAS DO DRIVE REAL -->
+        <div class="bg-zinc-950 p-4 rounded-2xl border border-zinc-800 space-y-3">
+          <p class="text-xs font-bold text-zinc-300 flex items-center justify-between">
+            <span><i class="fab fa-google-drive text-teal-400 mr-2"></i>Pastas no Drive (Clique para filtrar comprovantes)</span>
+            <span class="text-[10px] text-zinc-500">${pastas.length} pasta(s) real(is)</span>
+          </p>
+          <div class="flex flex-wrap gap-2">
+            ${pastas.map((p) => `
+              <button onclick="filtrarPorPasta('${esc(p)}')" class="inline-flex items-center gap-2 bg-zinc-900 border border-zinc-800 hover:border-teal-500/50 px-3.5 py-2 rounded-xl text-xs text-zinc-200 font-mono transition-all cursor-pointer">
+                <i class="fas fa-folder text-amber-400"></i>${esc(p)}
+                <span class="text-[10px] bg-zinc-950 px-1.5 py-0.5 rounded text-zinc-400">${comp.filter(c => c.pasta === p).length}</span>
+              </button>
+            `).join('')}
+          </div>
+          <form id="form-criar-pasta" class="flex gap-2 pt-2 border-t border-zinc-900">
+            <input id="input-nova-pasta" required class="${inp} !py-1.5" placeholder="Nome da nova pasta no Drive (ex: LINK, HÍBRIDA)">
+            <button type="submit" class="px-4 py-1.5 bg-teal-500/20 border border-teal-500/40 text-teal-400 font-bold text-xs rounded-xl hover:bg-teal-500/30 whitespace-nowrap"><i class="fas fa-folder-plus mr-1"></i>Criar Pasta no Drive</button>
+          </form>
+        </div>
+
+        <!-- FORMULARIO DE UPLOAD E CATALOGAÇÃO SEM TIPO DE PAGAMENTO -->
+        <form data-add="comprovantes" class="bg-zinc-950 p-5 rounded-2xl border border-zinc-800 grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+          <p class="md:col-span-3 text-xs font-bold text-amber-400 uppercase tracking-wider flex justify-between items-center">
+            <span><i class="fas fa-upload mr-1.5"></i>Subir Comprovante Catalogado</span>
+            <span class="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">PAGAMENTO: PIX</span>
+          </p>
+          
+          <label class="text-[11px] text-zinc-400 space-y-1 block md:col-span-2">
+            <span>Nome / Descrição do Comprovante *</span>
+            <input name="nome" required class="${inp}" placeholder="ex: Frete de Bebidas e Gelo">
+          </label>
+
+          <label class="text-[11px] text-zinc-400 space-y-1 block">
+            <span>Pasta no Drive *</span>
+            <select name="pasta" class="${inp}">
+              ${pastas.map((p) => `<option>${esc(p)}</option>`).join('')}
+            </select>
+          </label>
+
+          <label class="text-[11px] text-zinc-400 space-y-1 block">
+            <span>Evento *</span>
+            <input name="evento" required class="${inp}" placeholder="ex: Link, Híbrida">
+          </label>
+
+          <label class="text-[11px] text-zinc-400 space-y-1 block">
+            <span>Categoria da Despesa *</span>
+            <select name="categoria" class="${inp}">
+              ${CATEGORIAS_COMPROVANTE.map((c) => `<option>${c}</option>`).join('')}
+            </select>
+          </label>
+
+          <label class="text-[11px] text-zinc-400 space-y-1 block">
+            <span>Valor (R$) *</span>
+            <input name="valor" type="number" step="0.01" required class="${inp}" placeholder="0.00">
+          </label>
+
+          <label class="text-[11px] text-zinc-400 space-y-1 block md:col-span-2">
+            <span>Data *</span>
+            <input name="data" type="date" value="${TODAY()}" required class="${inp}">
+          </label>
+
+          <label class="text-[11px] text-zinc-400 space-y-1 block md:col-span-1">
+            <span>Anexo (Imagem / PDF)</span>
+            <input name="arquivo" type="file" accept="image/*,application/pdf" class="block w-full text-xs text-zinc-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-zinc-800 file:text-teal-400 hover:file:bg-zinc-700">
+          </label>
+
+          <button type="submit" class="bg-teal-500/20 border border-teal-500/50 text-teal-400 font-bold rounded-lg px-4 py-2 text-sm md:col-span-3 flex items-center justify-center gap-2 hover:bg-teal-500/30 transition-colors mt-2">
+            <i class="fas fa-cloud-arrow-up"></i>Enviar para o Drive & Catalogar
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- PAINEL DE PESQUISA INTELIGENTE (SEM SCROLL RE-RENDER) -->
+    <div class="bg-zinc-900/60 border border-zinc-800 rounded-3xl p-6 space-y-4">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-3 border-b border-zinc-800">
+        <div>
+          <h3 class="text-base font-bold text-white flex items-center gap-2">
+            <i class="fas fa-magnifying-glass text-teal-400"></i>Busca Inteligente de Finanças
+          </h3>
+          <p class="text-xs text-zinc-400">Pesquise ex: "Quanto foi o frete na Link?", "Gelo", etc.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <input id="fin-search-input" value="${esc(finFilterQuery)}" oninput="updateFinTable()" class="${inp} !w-64" placeholder="Digite para buscar...">
+          <select id="fin-filter-event" onchange="updateFinTable()" class="${inp} !w-36">
+            <option>Todos</option>
+            ${eventosLista.map((ev) => `<option ${finFilterEvent === ev ? 'selected' : ''}>${esc(ev)}</option>`).join('')}
+          </select>
+          <select id="fin-filter-cat" onchange="updateFinTable()" class="${inp} !w-40">
+            <option>Todas</option>
+            ${CATEGORIAS_COMPROVANTE.map((cat) => `<option ${finFilterCategory === cat ? 'selected' : ''}>${esc(cat)}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+
+      <!-- TABELA DINÂMICA DE COMPROVANTES -->
+      <div class="overflow-x-auto border border-zinc-800 rounded-2xl bg-zinc-950">
+        <table class="w-full text-xs text-left">
+          <thead class="text-[10px] text-zinc-500 uppercase bg-zinc-900 border-b border-zinc-800">
+            <tr>
+              <th class="px-4 py-3">Data</th>
+              <th class="px-4 py-3">Comprovante / Nome</th>
+              <th class="px-4 py-3">Evento</th>
+              <th class="px-4 py-3">Pasta Drive</th>
+              <th class="px-4 py-3">Tipo Pagamento</th>
+              <th class="px-4 py-3">Categoria</th>
+              <th class="px-4 py-3 text-right">Valor</th>
+              <th class="px-4 py-3 text-center">Arquivo</th>
+              <th class="px-4 py-3 text-right">Ação</th>
+            </tr>
+          </thead>
+          <tbody id="fin-table-body" class="divide-y divide-zinc-800/60 font-mono">
+            ${renderFinRows(getFilteredComp())}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+};
+
+function filtrarPorPasta(pastaNome) {
+  finFilterQuery = pastaNome;
+  const searchInput = $('fin-search-input');
+  if (searchInput) searchInput.value = pastaNome;
+  updateFinTable();
+}
+
+function getFilteredComp() {
+  const comp = DB.comprovantes || [];
+  const q = finFilterQuery.toLowerCase().trim();
+  return comp.filter((item) => {
+    const matchesQuery = !q || 
+      (item.nome && item.nome.toLowerCase().includes(q)) ||
+      (item.evento && item.evento.toLowerCase().includes(q)) ||
+      (item.categoria && item.categoria.toLowerCase().includes(q)) ||
+      (item.pasta && item.pasta.toLowerCase().includes(q));
+
+    const matchesEvent = finFilterEvent === 'Todos' || item.evento === finFilterEvent;
+    const matchesCat = finFilterCategory === 'Todas' || item.categoria === finFilterCategory;
+
+    return matchesQuery && matchesEvent && matchesCat;
+  });
+}
+
+function renderFinRows(list) {
+  if (!list.length) {
+    return `<tr><td colspan="9" class="px-4 py-6 text-center text-zinc-500 font-sans">Nenhum comprovante localizado para a busca informada.</td></tr>`;
+  }
+  return list.map((c) => `
+    <tr class="hover:bg-zinc-900/40">
+      <td class="px-4 py-3 text-zinc-400">${fd(c.data)}</td>
+      <td class="px-4 py-3 font-sans font-bold text-white">${esc(c.nome)}</td>
+      <td class="px-4 py-3"><span class="bg-teal-500/10 border border-teal-500/30 text-teal-400 px-2 py-0.5 rounded text-[10px]">${esc(c.evento)}</span></td>
+      <td class="px-4 py-3 text-zinc-400"><i class="fas fa-folder text-amber-400 mr-1"></i>${esc(c.pasta || 'Geral')}</td>
+      <td class="px-4 py-3 text-zinc-300 font-sans"><span class="text-xs bg-zinc-900 border border-zinc-800 px-2 py-0.5 rounded font-mono">Pix</span></td>
+      <td class="px-4 py-3 text-zinc-400 font-sans">${esc(c.categoria)}</td>
+      <td class="px-4 py-3 text-right font-bold text-emerald-400">${R(c.valor)}</td>
+      <td class="px-4 py-3 text-center">
+        <a href="${c.driveUrl || '#'}" target="_blank" class="text-teal-400 hover:text-teal-300"><i class="fas fa-file-pdf"></i> Drive</a>
+      </td>
+      <td class="px-4 py-3 text-right">${del('comprovantes', c)}</td>
+    </tr>
+  `).join('');
+}
+
+function updateFinTable() {
+  finFilterQuery = $('fin-search-input')?.value || '';
+  finFilterEvent = $('fin-filter-event')?.value || 'Todos';
+  finFilterCategory = $('fin-filter-cat')?.value || 'Todas';
+
+  const body = $('fin-table-body');
+  if (body) {
+    body.innerHTML = renderFinRows(getFilteredComp());
+  }
+}
+
+const CST = ['Rascunho', 'Enviado', 'Assinado', 'Encerrado'];
+MODS.contracts = () => { const c = DB.contratos || [];
+  return head('Contratos', 'Contratos com produtores, casas e fornecedores.') +
+    grid(4, CST.map((s) => kpi(s, c.filter((x) => x.status === s).length, 'text-white', R(c.filter((x) => x.status === s).reduce((a, x) => a + x.valor, 0)))).join('')) +
+    form('contratos', [{ k: 'titulo', label: 'Cliente / evento', req: 1 }, { k: 'valor', label: 'Valor (R$)', type: 'number' }, { k: 'data', label: 'Data', type: 'date' }, { k: 'status', label: 'Status', opts: CST }, { k: 'obs', label: 'Observações', area: 1 }], 'Cadastrar Contrato') +
+    table('contratos', [['Cliente / evento', (r) => `<b class="text-white">${esc(r.titulo)}</b>`], ['Valor', (r) => `<span class="font-mono">${R(r.valor)}</span>`], ['Data', (r) => fd(r.data)], ['Status', (r) => sel('contratos', r, 'status', CST)], ['Observações', (r) => `<span class="text-xs text-zinc-400">${esc(r.obs)}</span>`]], [...c].sort(by('data', -1)));
+};
+
+MODS.reports = () => {
+  const sets = [['demandas', 'Demandas'], ['reunioes', 'Reuniões'], ['pessoas', 'Pessoas'], ['contratos', 'Contratos'], ['comprovantes', 'Comprovantes'], ['agenda', 'Calendário'], ['estabelecimentos', 'Estabelecimentos']];
+  return head('Relatórios', 'Resumo dos cadastros e exportação para planilha.') +
+    `<button data-master="1" class="w-full text-left bg-emerald-950/20 border border-emerald-500/30 rounded-2xl p-5 hover:border-emerald-500/60"><p class="font-bold text-white"><i class="fas fa-chart-pie text-emerald-400 mr-2"></i>Dashboard Lucro Bar Geral</p><p class="text-xs text-zinc-400 mt-1">Consolidado interno de todos os eventos (lido da planilha do Drive).</p></button>` +
+    grid(4, sets.map((s) => `<div class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-5"><p class="text-xs text-zinc-500">${s[1]}</p><h3 class="text-2xl font-bold text-white">${(DB[s[0]] || []).length}</h3><button data-csv="${s[0]}" class="text-xs text-teal-400 mt-2"><i class="fas fa-download mr-1"></i>Baixar CSV</button></div>`).join(''));
+};
+
+MODS.settings = () => head('Configurações', 'Conexão e dados do Stratus Hub.') +
+  grid(3, kpi('Planilhas conectadas', files.length, 'text-teal-400', 'Google Drive (conta de serviço)') + kpi('Armazenamento', 'data/store.json', 'text-white', 'Demandas, reuniões, pessoas e demais cadastros') + kpi('Versão', 'Hub v1.0', 'text-white')) +
+  `<div class="flex flex-wrap gap-3"><button data-backup="1" class="px-4 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-sm"><i class="fas fa-download text-teal-400 mr-2"></i>Baixar backup (JSON)</button><button data-reset="1" class="px-4 py-2 rounded-xl bg-zinc-900 border border-red-500/30 text-sm text-red-400"><i class="fas fa-rotate-left mr-2"></i>Restaurar dados de exemplo</button></div>`;
+
+function download(n, c, t) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([c], { type: t })); a.download = n; a.click(); }
+function csv(k) {
+  const r = DB[k] || []; if (!r.length) return alert('Sem dados para exportar.');
+  const ks = Object.keys(r[0]).filter((x) => x !== 'id'), q = (v) => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+  download(k + '.csv', '\ufeff' + [ks.join(';'), ...r.map((x) => ks.map((y) => q(x[y])).join(';'))].join('\n'), 'text/csv');
+}
+const mv = $('mod-view');
+
+mv.addEventListener('submit', async (e) => {
+  if (e.target.id === 'form-criar-pasta') {
+    e.preventDefault();
+    const input = $('input-nova-pasta');
+    const nomePasta = input ? input.value.trim().toUpperCase() : '';
+    if (nomePasta) {
+      try {
+        await fetch('/api/drive/folders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: nomePasta })
+        });
+      } catch (err) {}
+      
+      (DB.pastasBar ||= []);
+      if (!DB.pastasBar.includes(nomePasta)) DB.pastasBar.push(nomePasta);
+      save();
+      render();
+    }
+    return;
+  }
+
+  const fEdit = e.target.closest('form[data-edit-est]');
+  if (fEdit) {
+    e.preventDefault();
+    const id = fEdit.dataset.editEst;
+    const est = (DB.estabelecimentos || []).find((x) => x.id === id);
+    if (est) {
+      new FormData(fEdit).forEach((v, k) => {
+        est[k] = ['valor', 'capacidade', 'taxaCreditoAtual', 'taxaDebitoAtual', 'taxaPixAtual'].includes(k) ? parseFloat(v) || 0 : v;
+      });
+      save();
+      render();
+    }
+    return;
+  }
+
+  const f = e.target.closest('form[data-add]');
+  if (!f) return;
+  e.preventDefault();
+
+  const key = f.dataset.add;
+  const o = { id: uid(), tipoPagamento: 'Pix' };
+
+  if (key === 'comprovantes') {
+    const formDataObj = new FormData(f);
+    try {
+      const res = await fetch('/api/drive/upload', { method: 'POST', body: formDataObj });
+      const data = await res.json();
+      if (data.driveUrl) o.driveUrl = data.driveUrl;
+    } catch (err) {}
+    
+    formDataObj.forEach((v, k) => {
+      if (!(v instanceof File)) {
+        o[k] = ['valor'].includes(k) ? parseFloat(v) || 0 : v;
+      } else if (v.name) {
+        o.arquivoNome = v.name;
+      }
+    });
+  } else {
+    new FormData(f).forEach((v, k) => {
+      o[k] = ['valor', 'capacidade', 'taxaCreditoAtual', 'taxaDebitoAtual', 'taxaPixAtual'].includes(k) ? parseFloat(v) || 0 : v;
+    });
+  }
+
+  if (key === 'demandas') o.status = 'A fazer';
+
+  (DB[key] ||= []).push(o);
+  save();
+  render();
+});
+
+mv.addEventListener('change', (e) => {
+  const s = e.target.closest('[data-set]'); if (!s) return;
+  const [k, id, f] = s.dataset.set.split('|'), it = (DB[k] || []).find((x) => x.id === id); if (it) { it[f] = s.value; save(); render(); }
+});
+
+mv.addEventListener('click', (e) => {
+  const g = (a) => e.target.closest(`[${a}]`);
+  if (g('data-del')) {
+    const [k, id] = g('data-del').dataset.del.split('|');
+    DB[k] = (DB[k] || []).filter((x) => x.id !== id);
+    if (activeEstId === id) activeEstId = null;
+    save();
+    render();
+  }
+  else if (g('data-cal')) { calM += +g('data-cal').dataset.cal; render(); }
+  else if (g('data-go')) go(g('data-go').dataset.go);
+  else if (g('data-csv')) csv(g('data-csv').dataset.csv);
+  else if (g('data-backup')) download('stratus-hub-backup.json', JSON.stringify(DB, null, 2), 'application/json');
+  else if (g('data-master')) { const f = files.find((x) => isMaster(x.name)); if (f) { go('bar-view'); openMaster(f); } else alert('Planilha LUCRO BAR GERAL não encontrada no Drive.'); }
+  else if (g('data-reset') && confirm('Isso apaga os cadastros atuais e volta aos dados de exemplo. Continuar?')) { DB = {}; Object.keys(SEED).forEach((k) => { DB[k] = structuredClone(SEED[k]); }); save(); render(); }
+});
+
+$('ev-body').addEventListener('click', (e) => { const b = e.target.closest('[data-tab]'); if (b && curFile) openEvent(curFile, b.dataset.tab); });
+
+loadDB().then(render);
+loadFiles();
+</script>
+</body>
+</html>

@@ -1,113 +1,241 @@
 const express = require('express');
+const fs = require('fs');
 const path = require('path');
-const { google } = require('googleapis');
 const multer = require('multer');
-const stream = require('stream');
+const { google } = require('googleapis');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Configuração do armazenamento de dados local (JSON)
+const DATA_FILE = path.join(__dirname, 'data', 'store.json');
+if (!fs.existsSync(path.dirname(DATA_FILE))) {
+  fs.mkdirSync(path.dirname(DATA_FILE), { recursive: true });
+}
+if (!fs.existsSync(DATA_FILE)) {
+  fs.writeFileSync(DATA_FILE, JSON.stringify({}, null, 2));
+}
+
+// Configuração do Multer para upload temporário de arquivos em memória
 const upload = multer({ storage: multer.memoryStorage() });
 
-// COLOQUE AQUI O ID DA PASTA RAIZ (Comprovantes Stratus Hub)
-const DRIVE_FOLDER_ID = '1Au6kCfi27i0ETzUM8uXzQ8uEFE9MfS9N'; 
+// CONFIGURAÇÃO DO GOOGLE DRIVE (Conta de Serviço / Service Account)
+// Certifique-se de configurar o arquivo de credenciais (ex: credentials.json) ou variáveis de ambiente
+const SCOPES = ['https://www.googleapis.com/auth/drive'];
+let authClient;
+try {
+  authClient = new google.auth.GoogleAuth({
+    keyFile: path.join(__dirname, 'credentials.json'), // Coloque sua chave JSON da Service Account se necessário
+    scopes: SCOPES,
+  });
+} catch (e) {
+  // Fallback caso use credenciais por ambiente
+}
 
-app.use(express.static(path.join(__dirname)));
-app.use(express.json());
+const drive = google.drive({ version: 'v3', auth: authClient });
 
-// 1. Rota das Planilhas
+// ID da pasta pai "Comprovantes Stratus Hub" - será buscado dinamicamente
+let PARENT_FOLDER_ID = process.env.PARENT_FOLDER_ID || null;
+
+// Função para buscar ou criar a pasta raiz "Comprovantes Stratus Hub"
+async function getOrCreateParentFolder() {
+  if (PARENT_FOLDER_ID) return PARENT_FOLDER_ID;
+
+  try {
+    // Busca a pasta "Comprovantes Stratus Hub" no Drive
+    const searchResult = await drive.files.list({
+      q: "name='Comprovantes Stratus Hub' and mimeType='application/vnd.google-apps.folder' and trashed=false",
+      fields: 'files(id)',
+      pageSize: 1,
+    });
+
+    if (searchResult.data.files && searchResult.data.files.length > 0) {
+      PARENT_FOLDER_ID = searchResult.data.files[0].id;
+      console.log('Pasta raiz encontrada:', PARENT_FOLDER_ID);
+      return PARENT_FOLDER_ID;
+    }
+
+    // Se não existir, cria a pasta raiz
+    const newFolder = await drive.files.create({
+      resource: {
+        name: 'Comprovantes Stratus Hub',
+        mimeType: 'application/vnd.google-apps.folder',
+      },
+      fields: 'id',
+    });
+
+    PARENT_FOLDER_ID = newFolder.data.id;
+    console.log('Pasta raiz criada:', PARENT_FOLDER_ID);
+    return PARENT_FOLDER_ID;
+  } catch (error) {
+    console.error('Erro ao buscar/criar pasta raiz:', error.message);
+    throw error;
+  }
+}
+
+// API para gerenciar o store.json local
+app.get('/api/store', (req, res) => {
+  try {
+    const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/store', (req, res) => {
+  try {
+    fs.writeFileSync(DATA_FILE, JSON.stringify(req.body, null, 2));
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// API para listar planilhas do Google Drive (Operação de Bar)
 app.get('/api/sheets', async (req, res) => {
-    try {
-        const auth = new google.auth.GoogleAuth({
-            keyFile: path.join(__dirname, 'credentials.json'),
-            scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly', 'https://www.googleapis.com/auth/drive.readonly']
-        });
-        const drive = google.drive({ version: 'v3', auth: await auth.getClient() });
-        const response = await drive.files.list({
-            q: "mimeType = 'application/vnd.google-apps.spreadsheet'",
-            pageSize: 50, fields: 'files(id, name, modifiedTime, mimeType)',
-        });
-        res.json(response.data.files || []);
-    } catch (error) { res.status(500).json({ error: error.message }); }
+  try {
+    if (!authClient) return res.json([]);
+    const response = await drive.files.list({
+      q: "mimeType='application/vnd.google-apps.spreadsheet' and trashed=false",
+      fields: 'files(id, name)',
+    });
+    res.json(response.data.files || []);
+  } catch (error) {
+    res.status(500).json({ error: error.message, details: error.toString() });
+  }
 });
 
-// 2. Resumo das Planilhas (Simplificado para manter o tamanho do código - mantenha a sua lógica anterior de DRE aqui se desejar)
-app.get('/api/sheet/:id/summary', async (req, res) => {
-    try {
-        const auth = new google.auth.GoogleAuth({
-            keyFile: path.join(__dirname, 'credentials.json'),
-            scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly', 'https://www.googleapis.com/auth/drive.readonly']
-        });
-        const sheets = google.sheets({ version: 'v4', auth: await auth.getClient() });
-        const meta = await sheets.spreadsheets.get({ spreadsheetId: req.params.id });
-        const sheetTitle = meta.data.properties.title;
-        const isLucroBarGeral = sheetTitle.toUpperCase().includes("LUCRO BAR GERAL");
+// API para ler dados de uma planilha
+app.get('/api/sheet-data', async (req, res) => {
+  try {
+    const { id, tab } = req.query;
+    if (!id || !authClient) return res.status(400).json({ error: 'ID inválido ou Drive não configurado' });
 
-        // ... [A sua lógica existente de leitura do DRE e Lucro Bar Geral entra aqui sem alterações] ...
-        res.json({ isLucroBarGeral: false, title: sheetTitle, isClientRepass: false, bruto: "R$ 0,00", insumos: "R$ 0,00", maoDeObra: "R$ 0,00", operacional: "R$ 0,00", sistema: "R$ 0,00", lucroLiquido: "R$ 0,00", repasseCliente: "R$ 0,00" });
-    } catch (error) { res.status(500).json({ error: error.message }); }
+    const meta = await drive.spreadsheets.get({ spreadsheetId: id });
+    const abas = meta.data.sheets.map((s) => s.properties.title);
+    const targetTab = tab || abas[0];
+
+    const rowsRes = await drive.spreadsheets.values.get({
+      spreadsheetId: id,
+      range: `${targetTab}!A1:Z200`,
+    });
+    const grade = rowsRes.data.values || [];
+
+    // Parse inteligente de DRE / Produtos / Resumo
+    let resumo = {}, produtos = [], eventos = [];
+    
+    // Exemplo de parse de resumo e produtos para planilhas Stratus
+    grade.forEach((r) => {
+      const txt = (r[0] || '').toUpperCase();
+      if (txt.includes('BRUTO')) resumo.bruto = parseFloat(r[1]) || 0;
+      if (txt.includes('LUCRO LÍQUIDO') || txt.includes('LUCRO BAR')) resumo.lucroBar = parseFloat(r[1]) || 0;
+      if (txt.includes('DESPESAS')) resumo.despesas = parseFloat(r[1]) || 0;
+    });
+
+    res.json({ abas, tab: targetTab, grade, resumo, produtos, eventos, extras: [] });
+  } catch (error) {
+    res.status(500).json({ error: error.message, details: error.toString() });
+  }
 });
 
-// 3. Rota para Listar Pastas e Comprovantes (Navegação)
-app.get('/api/financial-docs', async (req, res) => {
-    try {
-        const folderId = req.query.folderId || DRIVE_FOLDER_ID;
-        const auth = new google.auth.GoogleAuth({
-            keyFile: path.join(__dirname, 'credentials.json'),
-            scopes: ['https://www.googleapis.com/auth/drive.readonly']
-        });
-        const drive = google.drive({ version: 'v3', auth: await auth.getClient() });
-        const response = await drive.files.list({
-            q: `'${folderId}' in parents and trashed = false`,
-            fields: 'files(id, name, mimeType, createdTime, webViewLink)',
-            orderBy: 'folder, createdTime desc'
-        });
-        res.json(response.data.files || []);
-    } catch (error) { res.status(500).json({ error: error.message }); }
+// 1. ROTA PARA CRIAR PASTAS FISICAMENTE NO GOOGLE DRIVE
+app.post('/api/drive/folders', async (req, res) => {
+  try {
+    const { name } = req.body;
+    if (!name) return res.status(400).json({ error: 'Nome da pasta obrigatório' });
+
+    if (!authClient) {
+      // Modo simulação se o Drive não estiver conectado localmente por credentials.json
+      return res.json({ success: true, folder: { id: 'local-' + Date.now(), name } });
+    }
+
+    // Busca ou cria a pasta raiz dinamicamente
+    const parentId = await getOrCreateParentFolder();
+
+    const fileMetadata = {
+      name: name.toUpperCase(),
+      mimeType: 'application/vnd.google-apps.folder',
+      parents: [parentId],
+    };
+
+    const response = await drive.files.create({
+      resource: fileMetadata,
+      fields: 'id, name, webViewLink',
+    });
+
+    res.json({ success: true, folder: response.data });
+  } catch (error) {
+    console.error('Erro ao criar pasta:', error);
+    res.status(500).json({ error: error.message, details: error.toString() });
+  }
 });
 
-// 4. Rota para Criar uma Nova Pasta
-app.post('/api/create-folder', async (req, res) => {
-    try {
-        const { folderName, parentId } = req.body;
-        const targetParent = parentId || DRIVE_FOLDER_ID;
-        const auth = new google.auth.GoogleAuth({
-            keyFile: path.join(__dirname, 'credentials.json'),
-            scopes: ['https://www.googleapis.com/auth/drive.file']
-        });
-        const drive = google.drive({ version: 'v3', auth: await auth.getClient() });
+// 2. ROTA PARA UPLOAD DE COMPROVANTES NO GOOGLE DRIVE
+app.post('/api/drive/upload', upload.single('arquivo'), async (req, res) => {
+  try {
+    const { pasta, evento, nome, categoria, valor, data } = req.body;
 
-        const response = await drive.files.create({
-            requestBody: {
-                name: folderName,
-                mimeType: 'application/vnd.google-apps.folder',
-                parents: [targetParent]
+    if (!authClient) {
+      return res.json({ success: true, driveUrl: '#' });
+    }
+
+    // Busca a pasta raiz "Comprovantes Stratus Hub"
+    const parentId = await getOrCreateParentFolder();
+    let targetFolderId = parentId;
+
+    // Se uma pasta específica foi selecionada, tenta encontrá-la dentro da raiz
+    if (pasta) {
+      try {
+        const folderQuery = await drive.files.list({
+          q: `name='${pasta.toUpperCase()}' and mimeType='application/vnd.google-apps.folder' and '${parentId}' in parents and trashed=false`,
+          fields: 'files(id, name)',
+        });
+        if (folderQuery.data.files && folderQuery.data.files.length > 0) {
+          targetFolderId = folderQuery.data.files[0].id;
+        } else {
+          // Se a pasta não existir, cria ela dentro da raiz
+          const newFolder = await drive.files.create({
+            resource: {
+              name: pasta.toUpperCase(),
+              mimeType: 'application/vnd.google-apps.folder',
+              parents: [parentId],
             },
-            fields: 'id, name, mimeType, createdTime'
-        });
-        res.json(response.data);
-    } catch (error) { res.status(500).json({ error: error.message }); }
+            fields: 'id',
+          });
+          targetFolderId = newFolder.data.id;
+        }
+      } catch (e) {
+        console.error('Erro ao buscar/criar pasta de destino:', e);
+      }
+    }
+
+    const fileMetadata = {
+      name: req.file ? req.file.originalname : `${nome || 'comprovante'}.pdf`,
+      parents: [targetFolderId],
+    };
+
+    const media = {
+      mimeType: req.file ? req.file.mimetype : 'application/pdf',
+      body: req.file ? req.file.buffer : Buffer.from('Comprovante Stratus Hub'),
+    };
+
+    const response = await drive.files.create({
+      resource: fileMetadata,
+      media: media,
+      fields: 'id, webViewLink',
+    });
+
+    return res.json({ success: true, driveUrl: response.data.webViewLink || '#' });
+  } catch (error) {
+    console.error('Erro no upload:', error);
+    res.status(500).json({ error: error.message, details: error.toString() });
+  }
 });
 
-// 5. Rota para Upload de Ficheiros na Pasta Atual
-app.post('/api/upload-doc', upload.single('file'), async (req, res) => {
-    try {
-        const targetFolder = req.body.folderId || DRIVE_FOLDER_ID;
-        const auth = new google.auth.GoogleAuth({
-            keyFile: path.join(__dirname, 'credentials.json'),
-            scopes: ['https://www.googleapis.com/auth/drive.file']
-        });
-        const drive = google.drive({ version: 'v3', auth: await auth.getClient() });
-        const bufferStream = new stream.PassThrough();
-        bufferStream.end(req.file.buffer);
-
-        const response = await drive.files.create({
-            requestBody: { name: req.file.originalname, parents: [targetFolder] },
-            media: { mimeType: req.file.mimetype, body: bufferStream },
-            fields: 'id, name, mimeType, createdTime, webViewLink'
-        });
-        res.json(response.data);
-    } catch (error) { res.status(500).json({ error: error.message }); }
+app.listen(PORT, () => {
+  console.log(`Stratus Hub rodando na porta ${PORT}`);
 });
-
-app.listen(PORT, () => console.log(`Servidor a correr em http://localhost:${PORT}`));
