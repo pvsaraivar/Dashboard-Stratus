@@ -10,39 +10,49 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-// URL do Firebase Realtime Database
+// ATENÇÃO: A linha app.use(express.static(...)) foi REMOVIDA propositadamente.
+// O Vercel vai tratar de entregar o index.html de forma nativa através do vercel.json.
+
+// URL da Base de Dados Firebase (Realtime Database)
 const FIREBASE_URL = process.env.FIREBASE_URL || 'https://painelstratus-default-rtdb.firebaseio.com/store.json';
 
 // Configuração do Multer (mantido para compatibilidade)
 const upload = multer({ storage: multer.memoryStorage() });
 
-// CONFIGURAÇÃO DO GOOGLE DRIVE / SHEETS (Mantido intacto)
+// CONFIGURAÇÃO DO GOOGLE DRIVE / SHEETS
 const SCOPES = ['https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/spreadsheets.readonly'];
 let authClient;
+
 try {
-  // No Vercel, você precisará carregar as credenciais via variável de ambiente,
-  // pois não é seguro subir o credentials.json no GitHub.
-  authClient = new google.auth.GoogleAuth({
-    keyFile: path.join(__dirname, 'credentials.json'),
-    scopes: SCOPES,
-  });
+  if (process.env.GOOGLE_CREDENTIALS) {
+    // Corre no Vercel puxando as chaves da Variável de Ambiente
+    const keys = JSON.parse(process.env.GOOGLE_CREDENTIALS);
+    authClient = google.auth.fromJSON(keys);
+    authClient.scopes = SCOPES;
+  } else {
+    // Corre no seu computador localmente puxando do ficheiro
+    authClient = new google.auth.GoogleAuth({
+      keyFile: path.join(__dirname, 'credentials.json'),
+      scopes: SCOPES,
+    });
+  }
 } catch (e) {
-  console.log("Credenciais locais não encontradas. Verifique as variáveis de ambiente no Vercel.");
+  console.log("Erro de autenticação Google:", e);
 }
 
 const drive = google.drive({ version: 'v3', auth: authClient });
 const sheets = google.sheets({ version: 'v4', auth: authClient });
 
-// --- NOVOS ENDPOINTS DO BANCO DE DADOS (CONECTADOS AO FIREBASE) ---
+// --- ENDPOINTS DA BASE DE DADOS (LIGADOS AO FIREBASE) ---
 
 app.get('/api/store', async (req, res) => {
   try {
     const response = await fetch(FIREBASE_URL);
     const data = await response.json();
-    // Se o banco estiver vazio, retorna um objeto vazio para não quebrar o frontend
+    // Se a base estiver vazia, devolve um objeto vazio para não quebrar o frontend
     res.json(data || {});
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao ler banco de dados: ' + err.message });
+    res.status(500).json({ error: 'Erro ao ler a base de dados: ' + err.message });
   }
 });
 
@@ -54,14 +64,14 @@ app.put('/api/store', async (req, res) => {
       body: JSON.stringify(req.body)
     });
     
-    if (!response.ok) throw new Error('Falha ao salvar no Firebase');
+    if (!response.ok) throw new Error('Falha ao guardar no Firebase');
     res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao salvar no banco de dados: ' + err.message });
+    res.status(500).json({ error: 'Erro ao guardar na base de dados: ' + err.message });
   }
 });
 
-// --- ENDPOINTS DE PLANILHAS (MANTIDOS INTACTOS) ---
+// --- ENDPOINTS DE PLANILHAS (GOOGLE SHEETS) ---
 
 app.get('/api/sheets', async (req, res) => {
   try {
@@ -97,10 +107,10 @@ app.get('/api/sheet-data', async (req, res) => {
   }
 });
 
-// Exportar a app para o Vercel (obrigatório para Serverless Functions)
+// Exportar a aplicação para o Vercel (Obrigatório para Serverless Functions)
 module.exports = app;
 
-// Inicia o servidor localmente apenas se não estiver no Vercel
+// Inicia o servidor localmente apenas se não estiver a correr no Vercel
 if (process.env.NODE_ENV !== 'production') {
   app.listen(PORT, () => {
     console.log(`Stratus Hub a correr na porta ${PORT}`);
