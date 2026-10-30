@@ -10,6 +10,14 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
+// Diz ao Express onde estão os ficheiros visuais (HTML)
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Rota principal: entrega o index.html que está dentro da pasta public
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 // ATENÇÃO: A linha app.use(express.static(...)) foi REMOVIDA propositadamente.
 // O Vercel vai tratar de entregar o index.html de forma nativa através do vercel.json.
 
