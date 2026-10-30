@@ -98,6 +98,12 @@ app.get('/api/sheet-data', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Stratus Hub rodando na porta ${PORT}`);
-});
+// Exportar a app para o Vercel (obrigatório para Serverless Functions)
+module.exports = app;
+
+// Inicia o servidor localmente apenas se não estiver no Vercel
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Stratus Hub a correr na porta ${PORT}`);
+  });
+}
