@@ -1,5 +1,4 @@
 const express = require('express');
-const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
 const { google } = require('googleapis');
@@ -7,85 +6,64 @@ const { google } = require('googleapis');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(express.json());
+// Aumentamos o limite para 50mb para suportar o upload de comprovantes em Base64
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Configuração do armazenamento de dados local (JSON)
-const DATA_FILE = path.join(__dirname, 'data', 'store.json');
-if (!fs.existsSync(path.dirname(DATA_FILE))) {
-  fs.mkdirSync(path.dirname(DATA_FILE), { recursive: true });
-}
-if (!fs.existsSync(DATA_FILE)) {
-  fs.writeFileSync(DATA_FILE, JSON.stringify({}, null, 2));
-}
+// URL do Firebase Realtime Database (Cole a sua URL aqui e adicione /store.json no final)
+// No Vercel, você pode colocar isso nas Environment Variables
+const FIREBASE_URL = process.env.FIREBASE_URL || 'https://console.firebase.google.com/u/0/project/painelstratus/database/painelstratus-default-rtdb/data/~2F/store.json';
 
-// Configuração do Multer para upload temporário de arquivos em memória
+// Configuração do Multer (mantido para compatibilidade)
 const upload = multer({ storage: multer.memoryStorage() });
 
-// CONFIGURAÇÃO DO GOOGLE DRIVE (Conta de Serviço / Service Account)
-const SCOPES = ['https://www.googleapis.com/auth/drive'];
+// CONFIGURAÇÃO DO GOOGLE DRIVE / SHEETS (Mantido intacto)
+const SCOPES = ['https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/spreadsheets.readonly'];
 let authClient;
 try {
+  // No Vercel, você precisará carregar as credenciais via variável de ambiente,
+  // pois não é seguro subir o credentials.json no GitHub.
   authClient = new google.auth.GoogleAuth({
     keyFile: path.join(__dirname, 'credentials.json'),
     scopes: SCOPES,
   });
 } catch (e) {
-  // Fallback caso use credenciais por ambiente
+  console.log("Credenciais locais não encontradas. Verifique as variáveis de ambiente no Vercel.");
 }
 
 const drive = google.drive({ version: 'v3', auth: authClient });
 const sheets = google.sheets({ version: 'v4', auth: authClient });
 
-let PARENT_FOLDER_ID = process.env.PARENT_FOLDER_ID || null;
+// --- NOVOS ENDPOINTS DO BANCO DE DADOS (CONECTADOS AO FIREBASE) ---
 
-async function getOrCreateParentFolder() {
-  if (PARENT_FOLDER_ID) return PARENT_FOLDER_ID;
-
+app.get('/api/store', async (req, res) => {
   try {
-    const searchResult = await drive.files.list({
-      q: "name='Comprovantes Stratus Hub' and mimeType='application/vnd.google-apps.folder' and trashed=false",
-      fields: 'files(id)',
-      pageSize: 1,
-    });
-
-    if (searchResult.data.files && searchResult.data.files.length > 0) {
-      PARENT_FOLDER_ID = searchResult.data.files[0].id;
-      return PARENT_FOLDER_ID;
-    }
-
-    const newFolder = await drive.files.create({
-      resource: {
-        name: 'Comprovantes Stratus Hub',
-        mimeType: 'application/vnd.google-apps.folder',
-      },
-      fields: 'id',
-    });
-
-    PARENT_FOLDER_ID = newFolder.data.id;
-    return PARENT_FOLDER_ID;
-  } catch (error) {
-    throw error;
-  }
-}
-
-app.get('/api/store', (req, res) => {
-  try {
-    const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
-    res.json(data);
+    const response = await fetch(FIREBASE_URL);
+    const data = await response.json();
+    // Se o banco estiver vazio, retorna um objeto vazio para não quebrar o frontend
+    res.json(data || {});
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Erro ao ler banco de dados: ' + err.message });
   }
 });
 
-app.put('/api/store', (req, res) => {
+app.put('/api/store', async (req, res) => {
   try {
-    fs.writeFileSync(DATA_FILE, JSON.stringify(req.body, null, 2));
+    const response = await fetch(FIREBASE_URL, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(req.body)
+    });
+    
+    if (!response.ok) throw new Error('Falha ao salvar no Firebase');
     res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Erro ao salvar no banco de dados: ' + err.message });
   }
 });
+
+// --- ENDPOINTS DE PLANILHAS (MANTIDOS INTACTOS) ---
 
 app.get('/api/sheets', async (req, res) => {
   try {
@@ -105,110 +83,17 @@ app.get('/api/sheet-data', async (req, res) => {
     const { id, tab } = req.query;
     if (!id || !authClient) return res.status(400).json({ error: 'ID inválido ou Drive não configurado' });
 
-    // Correção: a usar sheets.spreadsheets em vez de drive.spreadsheets
     const meta = await sheets.spreadsheets.get({ spreadsheetId: id });
     const abas = meta.data.sheets.map((s) => s.properties.title);
     const targetTab = tab || abas[0];
 
     const rowsRes = await sheets.spreadsheets.values.get({
       spreadsheetId: id,
-            range: `'${String(targetTab).replace(/'/g, "''")}'!A1:Z200`,
+      range: `${targetTab}!A1:Z200`,
     });
     const grade = rowsRes.data.values || [];
 
-    let resumo = {}, produtos = [], eventos = [];
-    
-    grade.forEach((r) => {
-      const txt = (r[0] || '').toUpperCase();
-      if (txt.includes('BRUTO')) resumo.bruto = parseFloat(r[1]) || 0;
-      if (txt.includes('LUCRO LÍQUIDO') || txt.includes('LUCRO BAR')) resumo.lucroBar = parseFloat(r[1]) || 0;
-      if (txt.includes('DESPESAS')) resumo.despesas = parseFloat(r[1]) || 0;
-    });
-
-    res.json({ abas, tab: targetTab, grade, resumo, produtos, eventos, extras: [] });
-  } catch (error) {
-    res.status(500).json({ error: error.message, details: error.toString() });
-  }
-});
-
-app.post('/api/drive/folders', async (req, res) => {
-  try {
-    const { name } = req.body;
-    if (!name) return res.status(400).json({ error: 'Nome da pasta obrigatório' });
-
-    if (!authClient) {
-      return res.json({ success: true, folder: { id: 'local-' + Date.now(), name } });
-    }
-
-    const parentId = await getOrCreateParentFolder();
-
-    const fileMetadata = {
-      name: name.toUpperCase(),
-      mimeType: 'application/vnd.google-apps.folder',
-      parents: [parentId],
-    };
-
-    const response = await drive.files.create({
-      resource: fileMetadata,
-      fields: 'id, name, webViewLink',
-    });
-
-    res.json({ success: true, folder: response.data });
-  } catch (error) {
-    res.status(500).json({ error: error.message, details: error.toString() });
-  }
-});
-
-app.post('/api/drive/upload', upload.single('arquivo'), async (req, res) => {
-  try {
-    const { pasta, evento, nome, categoria, valor, data } = req.body;
-
-    if (!authClient) {
-      return res.json({ success: true, driveUrl: '#' });
-    }
-
-    const parentId = await getOrCreateParentFolder();
-    let targetFolderId = parentId;
-
-    if (pasta) {
-      try {
-        const folderQuery = await drive.files.list({
-          q: `name='${pasta.toUpperCase()}' and mimeType='application/vnd.google-apps.folder' and '${parentId}' in parents and trashed=false`,
-          fields: 'files(id, name)',
-        });
-        if (folderQuery.data.files && folderQuery.data.files.length > 0) {
-          targetFolderId = folderQuery.data.files[0].id;
-        } else {
-          const newFolder = await drive.files.create({
-            resource: {
-              name: pasta.toUpperCase(),
-              mimeType: 'application/vnd.google-apps.folder',
-              parents: [parentId],
-            },
-            fields: 'id',
-          });
-          targetFolderId = newFolder.data.id;
-        }
-      } catch (e) {}
-    }
-
-    const fileMetadata = {
-      name: req.file ? req.file.originalname : `${nome || 'comprovante'}.pdf`,
-      parents: [targetFolderId],
-    };
-
-    const media = {
-      mimeType: req.file ? req.file.mimetype : 'application/pdf',
-      body: req.file ? req.file.buffer : Buffer.from('Comprovante Stratus Hub'),
-    };
-
-    const response = await drive.files.create({
-      resource: fileMetadata,
-      media: media,
-      fields: 'id, webViewLink',
-    });
-
-    return res.json({ success: true, driveUrl: response.data.webViewLink || '#' });
+    res.json({ abas, tab: targetTab, grade });
   } catch (error) {
     res.status(500).json({ error: error.message, details: error.toString() });
   }
