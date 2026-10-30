@@ -12,8 +12,7 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // URL do Firebase Realtime Database (Cole a sua URL aqui e adicione /store.json no final)
-// No Vercel, você pode colocar isso nas Environment Variables
-const FIREBASE_URL = process.env.FIREBASE_URL || 'https://console.firebase.google.com/u/0/project/painelstratus/database/painelstratus-default-rtdb/data/~2F/store.json';
+const FIREBASE_URL = process.env.FIREBASE_URL || 'https://painelstratus-default-rtdb.firebaseio.com/store.json';
 
 // Configuração do Multer (mantido para compatibilidade)
 const upload = multer({ storage: multer.memoryStorage() });
