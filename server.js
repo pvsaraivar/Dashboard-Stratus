@@ -9,12 +9,8 @@ const PORT = process.env.PORT || 3000;
 // Aumentamos o limite para 50mb para suportar o upload de comprovantes em Base64
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
-// Rota principal que entrega o painel visual de forma segura
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
-});
 
-// URL do Firebase Realtime Database (Cole a sua URL aqui e adicione /store.json no final)
+// URL do Firebase Realtime Database
 const FIREBASE_URL = process.env.FIREBASE_URL || 'https://painelstratus-default-rtdb.firebaseio.com/store.json';
 
 // Configuração do Multer (mantido para compatibilidade)
