@@ -33,21 +33,22 @@ let authClient;
 
 try {
   if (process.env.GOOGLE_CREDENTIALS) {
-    // Corre no Vercel puxando as chaves da Variável de Ambiente
+    // Roda no Vercel puxando as chaves da Variável de Ambiente
     const keys = JSON.parse(process.env.GOOGLE_CREDENTIALS);
-    authClient = google.auth.fromJSON(keys);
-    authClient.scopes = SCOPES;
+    authClient = new google.auth.GoogleAuth({
+      credentials: keys,
+      scopes: SCOPES
+    });
   } else {
-    // Corre no seu computador localmente puxando do ficheiro
+    // Roda localmente puxando do arquivo
     authClient = new google.auth.GoogleAuth({
       keyFile: path.join(__dirname, 'credentials.json'),
       scopes: SCOPES,
     });
   }
 } catch (e) {
-  console.log("Erro de autenticação Google:", e);
+  console.error("Erro crítico na autenticação do Google:", e.message);
 }
-
 const drive = google.drive({ version: 'v3', auth: authClient });
 const sheets = google.sheets({ version: 'v4', auth: authClient });
 
