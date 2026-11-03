@@ -385,13 +385,53 @@ async function api(id, tab) {
 async function apiBest(id) {
   const first = await api(id);
   const ok = (x) => { const p = parseGridToDRE(x.grade || []); return p.r.bruto > 0 || p.prods.length > 0 || p.evs.length > 0; };
-  const rank = (t) => (/DRE|GERAL/i.test(t) ? 0 : /PROJE/i.test(t) ? 9 : 5);
+  // Forçamos a aba ESTOQUE a ser a prioridade número 0 (a primeira a ser lida nas planilhas internas)
+  const rank = (t) => (/ESTOQUE/i.test(t) ? 0 : /DRE|GERAL/i.test(t) ? 1 : /PROJE/i.test(t) ? 9 : 5);
   for (const t of [...(first.abas || [])].sort((a, b) => rank(a) - rank(b))) {
     const x = t === first.tab ? first : await api(id, t);
     if (ok(x)) return x;
   }
   return first;
 }
+
+// Novo renderizador inteligente para planilhas de 2 lados (Inicial vs Final)
+const cleanGridHtml = (rows) => {
+  if (!rows || !rows.length) return '';
+  const numCols = Math.max(...rows.map(r => r.length));
+  const colHasData = Array(numCols).fill(false);
+  
+  // Deteta colunas que são completamente vazias para as eliminar
+  rows.forEach(r => r.forEach((c, i) => { if (String(c).trim()) colHasData[i] = true; }));
+  
+  // Filtra linhas vazias
+  const validRows = rows.filter(r => r.some(c => String(c).trim() !== ''));
+  
+  return `<div class="overflow-auto max-h-[38rem] border border-zinc-800 rounded-2xl bg-zinc-950/80 custom-scrollbar relative mt-4">
+      <table class="text-[10px] md:text-[11px] text-zinc-300 w-full text-left border-collapse">
+          <tbody class="divide-y divide-zinc-800/50">
+              ${validRows.map((r) => {
+                  const strRow = r.join(' ').toUpperCase();
+                  const isHeader = strRow.includes('INICIAL') || strRow.includes('FINAL') || strRow.includes('ESTOQUE') || strRow.includes('CBV BEBIDAS') || strRow.includes('ADB BEBIDAS') || (strRow.includes('ITEM') && strRow.includes('VALOR'));
+                  return `<tr class="hover:bg-zinc-800/40 ${isHeader ? 'bg-zinc-900/80' : ''}">${
+                  colHasData.map((has, j) => {
+                      if (!has) return ''; // Ignora colunas vazias (junta os dois lados)
+                      const val = r[j] ?? '';
+                      const txt = String(val).toUpperCase().trim();
+                      let color = '';
+                      
+                      // Destaques visuais inteligentes
+                      if (txt === 'INICIAL') color = 'text-amber-400 text-sm md:text-base font-black uppercase tracking-widest';
+                      else if (txt === 'FINAL') color = 'text-emerald-400 text-sm md:text-base font-black uppercase tracking-widest';
+                      else if (isHeader) color = 'text-teal-400 font-bold';
+                      else if (txt.includes('R$') || !isNaN(parseFloat(txt))) color = 'font-mono text-zinc-400';
+                      
+                      return `<td class="px-3 py-2.5 ${color} whitespace-nowrap">${esc(val)}</td>`;
+                  }).join('')
+              }</tr>`}).join('')}
+          </tbody>
+      </table>
+  </div>`;
+};
 
 async function getMasterData() {
   const m = files.find(x => x.name.toUpperCase().includes('LUCRO BAR GERAL'));
@@ -494,19 +534,18 @@ function renderClient(d, f) {
 }
 
 function renderInternal(d, f, mst) {
-  const tabs = `<div class="flex flex-wrap gap-2 items-center text-[11px] mb-6 mt-8 font-bold"><span class="text-zinc-500 mr-2">Detalhe da planilha interna:</span>` +
-    (d.abas || []).map((a) => `<button onclick="openEvent(curFile, '${esc(a)}', 'internal')" class="px-4 py-1.5 rounded-lg border transition-colors ${a === d.tab ? 'border-teal-500 text-teal-400 bg-teal-500/10' : 'border-zinc-800 text-zinc-400 hover:bg-zinc-900 hover:text-white'}">${esc(a)}</button>`).join('') + `</div>`;
-
   const nm = (s) => String(s).toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   const ordenado = mst ? [...mst.evs].sort((a, b) => b.lucroFinal - a.lucroFinal) : [];
   const ev = ordenado.find((x) => nm(f.name).includes(nm(x.evento)));
-  if (!ev) return `<p class="text-xs text-amber-400 bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-3 mb-4">Atenção: não achei este evento na planilha LUCRO BAR GERAL (o nome do evento precisa aparecer no nome do arquivo). Mostrando só a planilha.</p>` + tabs + gridHtml(d.grade);
+  
+  if (!ev) return `<p class="text-xs text-amber-400 bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-3 mb-4">Atenção: não achei este evento na planilha LUCRO BAR GERAL.</p>` + cleanGridHtml(d.grade);
 
   const pos = ordenado.indexOf(ev) + 1, tot = ordenado.reduce((a, x) => a + x.lucroFinal, 0), media = tot / ordenado.length;
   const comp = [['Lucro da operação (retorno − saída)', ev.lucroBase, 1], ['Sistema 2%', ev.sistema, 1], ['Consumação', ev.consumo, 0], ['Pirulitos caixa', ev.pirulitos, 0], ['Chapéus', ev.chapeus, 0], ['Estoque', ev.estoque, 0]].filter((c) => c[1]);
   const mx = Math.max(...comp.map((c) => c[1]), 1);
   const mix = (n, s, r) => bar(n, r - s, Math.max(ev.rb - ev.sb, ev.rv - ev.sv, 1), 'bg-teal-400', `Saída ${R(s)} → Retorno ${R(r)} · Lucro ${R(r - s)} (${P(r - s, s)})`);
 
+  // Removemos a variável "tabs" e adicionámos o cleanGridHtml no final
   return `
   <div class="grid grid-cols-2 md:grid-cols-6 gap-4 mb-8">
     ${kpi('Lucro final do evento', R(ev.lucroFinal), 'text-emerald-400', esc(ev.mes) + ' · ' + esc(ev.data))}
@@ -521,8 +560,11 @@ function renderInternal(d, f, mst) {
     ${box('Bebidas x variados', 'fa-wine-bottle text-teal-400', mix('Bebidas', ev.sb, ev.rb) + mix('Variados', ev.sv, ev.rv))}
     ${box('Comparação com a média', 'fa-ranking-star text-teal-400', bar('Este evento', ev.lucroFinal, Math.max(ev.lucroFinal, media), 'bg-emerald-400') + bar('Média dos eventos', media, Math.max(ev.lucroFinal, media), 'bg-zinc-500') + `<p class="text-[11px] text-zinc-400">${ev.lucroFinal >= media ? 'Acima' : 'Abaixo'} da média em ${P(Math.abs(ev.lucroFinal - media), media)}.</p>`)}
   </div>
-  ${tabs}
-  ${gridHtml(d.grade)}`;
+  <div class="mt-10">
+    <h4 class="text-sm font-bold text-white"><i class="fas fa-table text-teal-400 mr-2"></i>Detalhamento da Operação</h4>
+    <p class="text-[11px] text-zinc-500 mt-1">Comparativo de entrada (compras) e saída (consumo real).</p>
+  </div>
+  ${cleanGridHtml(d.grade)}`;
 }
 
 async function openMaster(f) {
