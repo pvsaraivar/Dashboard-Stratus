@@ -580,7 +580,7 @@ function renderMaster(parsed, rawGrade) {
   </div>`;
 }
 
-/* ---------- BANCO DE DADOS E MÓDULOS ---------- */
+/* ---------- BANCO DE DADOS E MÓDULOS BASE ---------- */
 let DB = {}, cur = 'bar-view', calM = 0, curFile = null, activeEstId = null;
 const uid = () => Math.random().toString(36).slice(2, 9);
 const TIPOS_EST = ['Boate / Club', 'Pub / Bar', 'Casa de Shows', 'Restaurante', 'Eventos Fixo', 'Espaço Multiúso'];
@@ -600,57 +600,51 @@ function form(key, fields, btnText = 'Cadastrar') {
 const del = (key, r) => `<button data-del="${key}|${r.id}" title="Excluir" class="text-zinc-500 hover:text-red-400 p-1 transition-colors"><i class="fas fa-trash"></i></button>`;
 
 const MODS = {};
+MODS.contracts = () => head('Contratos', 'Módulo temporariamente minimizado.');
+MODS.reports = () => head('Relatórios', 'Módulo temporariamente minimizado.');
 
-MODS.people = () => {
-  const p = DB.pessoas || [];
-  const f = [{k:'nome', label:'Nome', req:1}, {k:'papel', label:'Função/Papel'}, {k:'telefone', label:'WhatsApp'}, {k:'chavePix', label:'Chave PIX'}];
-  const c = p.map(x => `<div class="bg-zinc-900/60 border border-zinc-800 rounded-xl p-5 relative group hover:border-teal-500/30 transition-all"><div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">${del('pessoas', x)}</div><div class="flex items-center space-x-3 mb-2"><div class="w-8 h-8 rounded-lg bg-teal-500/10 flex items-center justify-center text-teal-400"><i class="fas fa-user"></i></div><div><h3 class="font-bold text-white text-sm">${esc(x.nome)}</h3><p class="text-[10px] text-zinc-400 uppercase tracking-wider">${esc(x.papel)}</p></div></div><p class="text-xs text-teal-400 mt-3 bg-teal-500/10 py-1.5 px-3 rounded-lg inline-block border border-teal-500/20"><i class="fab fa-whatsapp mr-1"></i>${esc(x.telefone)}</p></div>`).join('');
-  return head('Pessoas & Fornecedores', 'Gestão de equipe e contatos.') + `<div class="mb-8 mt-6 bg-zinc-900/40 border border-zinc-800 rounded-2xl p-5"><h3 class="text-sm font-bold text-white mb-3"><i class="fas fa-user-plus text-teal-400 mr-2"></i>Novo Contato</h3>${form('pessoas', f)}</div><div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">${c}</div>`;
-};
-
-MODS.meetings = () => {
-  const m = DB.reunioes || [];
-  const f = [{k:'data', label:'Data', type:'date', req:1}, {k:'pauta', label:'Pauta Principal', req:1}, {k:'participantes', label:'Participantes', full:true}, {k:'resumo', label:'Resumo/Ata', full:true, area:true}];
-  const c = m.sort((a,b) => new Date(b.data) - new Date(a.data)).map(x => `<div class="bg-zinc-900/60 border border-zinc-800 rounded-xl p-5 relative group"><div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">${del('reunioes', x)}</div><span class="text-[9px] bg-zinc-800 text-zinc-300 px-2 py-1 rounded font-bold uppercase tracking-wider"><i class="far fa-calendar-alt mr-1"></i>${x.data.split('-').reverse().join('/')}</span><h3 class="font-bold text-white mt-3 text-lg">${esc(x.pauta)}</h3><p class="text-[11px] text-zinc-400 mt-2 mb-3 line-clamp-3">${esc(x.resumo)}</p><div class="pt-3 border-t border-zinc-800 text-[10px] text-teal-400"><i class="fas fa-users mr-1"></i>${esc(x.participantes)}</div></div>`).join('');
-  return head('Reuniões & Atas', 'Registros e alinhamentos.') + `<div class="mb-8 mt-6 bg-zinc-900/40 border border-zinc-800 rounded-2xl p-5"><h3 class="text-sm font-bold text-white mb-3"><i class="fas fa-file-signature text-teal-400 mr-2"></i>Nova Ata</h3>${form('reunioes', f)}</div><div class="grid grid-cols-1 md:grid-cols-2 gap-4">${c}</div>`;
-};
-
-MODS.demands = () => {
-  const d = DB.demandas || [];
-  const f = [{k:'titulo', label:'Tarefa', req:1, full:true}, {k:'responsavel', label:'Responsável'}, {k:'prazo', label:'Prazo', type:'date'}, {k:'status', label:'Status', opts:['Pendente', 'Em Andamento', 'Concluído']}];
-  const c = d.map(x => {
-    const colors = {'Pendente':'bg-red-500/10 text-red-400 border-red-500/30', 'Em Andamento':'bg-amber-500/10 text-amber-400 border-amber-500/30', 'Concluído':'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'};
-    const st = colors[x.status] || 'bg-zinc-800 text-zinc-400 border-zinc-700';
-    return `<div class="bg-zinc-900/60 border border-zinc-800 rounded-xl p-5 relative group"><div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">${del('demandas', x)}</div><div class="inline-block px-2 py-1 rounded text-[9px] font-bold border uppercase tracking-wider mb-3 ${st}">${x.status}</div><h3 class="font-bold text-white text-sm leading-tight">${esc(x.titulo)}</h3><div class="flex justify-between items-center mt-4 pt-3 border-t border-zinc-800/50"><span class="text-[11px] text-zinc-400 bg-zinc-950 px-2 py-1 rounded-md border border-zinc-800"><i class="fas fa-user mr-1 text-teal-400"></i>${esc(x.responsavel)}</span><span class="text-[11px] text-zinc-500"><i class="far fa-clock mr-1"></i>${x.prazo ? x.prazo.split('-').reverse().join('/') : '-'}</span></div></div>`;
-  }).join('');
-  return head('Demandas Gerais', 'Gestão de tarefas operacionais.') + `<div class="mb-8 mt-6 bg-zinc-900/40 border border-zinc-800 rounded-2xl p-5"><h3 class="text-sm font-bold text-white mb-3"><i class="fas fa-tasks text-teal-400 mr-2"></i>Nova Demanda</h3>${form('demandas', f)}</div><div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">${c}</div>`;
-};
-
-MODS.fin = () => {
-  const f = DB.financeiro || [];
-  const fields = [{k:'tipo', label:'Tipo', opts:['Receita', 'Despesa']}, {k:'descricao', label:'Descrição', req:1}, {k:'valor', label:'Valor (R$)', type:'number', req:1}, {k:'data', label:'Data', type:'date', req:1}];
-  const totR = f.filter(x=>x.tipo==='Receita').reduce((a,b)=>a+Number(b.valor),0);
-  const totD = f.filter(x=>x.tipo==='Despesa').reduce((a,b)=>a+Number(b.valor),0);
-  const saldo = totR - totD;
-  const tr = f.sort((a,b)=>new Date(b.data)-new Date(a.data)).map(x => `<tr class="border-t border-zinc-800/50 hover:bg-zinc-800/20"><td class="py-3 px-4 text-zinc-400">${x.data.split('-').reverse().join('/')}</td><td class="py-3 px-4 text-white font-medium">${esc(x.descricao)}</td><td class="py-3 px-4"><span class="px-2 py-1 rounded-md text-[9px] font-bold uppercase border ${x.tipo==='Receita'?'bg-emerald-500/10 text-emerald-400 border-emerald-500/20':'bg-red-500/10 text-red-400 border-red-500/20'}">${x.tipo}</span></td><td class="py-3 px-4 font-mono text-right ${x.tipo==='Receita'?'text-emerald-400':'text-red-400'}">${x.tipo==='Receita'?'+':'-'} ${R(x.valor)}</td><td class="py-3 px-4 text-right">${del('financeiro', x)}</td></tr>`).join('');
+/* ---------- NOVO MÓDULO DE ACESSOS ---------- */
+MODS.users = () => {
+  if (currentUser?.role !== 'admin') return head('Acesso Negado', 'Apenas administradores podem gerenciar acessos.') + `<p class="mt-4 text-xs text-zinc-500">O seu perfil de utilizador não tem permissões para ver esta página.</p>`;
   
-  return head('Painel Financeiro', 'Controle de caixa e despesas gerais.') + `
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-6">
-    ${kpi('Total Entradas', R(totR), 'text-emerald-400')}
-    ${kpi('Total Saídas', R(totD), 'text-red-400')}
-    ${kpi('Saldo em Caixa', R(saldo), saldo >= 0 ? 'text-teal-400' : 'text-red-400')}
-  </div>
-  <div class="mb-8 bg-zinc-900/40 border border-zinc-800 rounded-2xl p-5"><h3 class="text-sm font-bold text-white mb-3"><i class="fas fa-wallet text-teal-400 mr-2"></i>Novo Lançamento</h3>${form('financeiro', fields)}</div>
-  <div class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-5 overflow-x-auto custom-scrollbar"><table class="w-full text-xs text-left whitespace-nowrap"><thead class="text-zinc-500 uppercase bg-zinc-950/50"><tr><th class="py-3 px-4 rounded-tl-lg">Data</th><th class="py-3 px-4">Descrição</th><th class="py-3 px-4">Tipo</th><th class="py-3 px-4 text-right">Valor</th><th class="py-3 px-4 rounded-tr-lg"></th></tr></thead><tbody class="divide-y divide-zinc-800/30">${tr||'<tr><td colspan="5" class="py-8 text-center text-zinc-500 border-t border-zinc-800 border-dashed">Nenhum lançamento efetuado.</td></tr>'}</tbody></table></div>`;
+  const users = DB.usuarios || [];
+  const cards = users.map(u => `<div class="bg-zinc-900/60 border border-zinc-800 rounded-xl p-5 flex justify-between items-center relative group hover:border-teal-500/30 transition-colors shadow-sm"><div><h4 class="text-sm font-bold text-white mb-1">${esc(u.nome)}</h4><p class="text-[11px] text-zinc-400"><i class="fas fa-envelope text-zinc-600 mr-1"></i>${esc(u.email)}</p><p class="text-[10px] text-zinc-500 mt-1 font-mono">Senha: ${esc(u.senha)}</p></div><div class="flex flex-col items-end gap-3"><span class="px-2.5 py-1 text-[9px] font-bold border rounded-md uppercase tracking-wider ${u.role === 'admin' ? 'bg-amber-500/10 border-amber-500/30 text-amber-400' : 'bg-zinc-800 border-zinc-700 text-zinc-300'}">${esc(u.role)}</span>${u.email !== 'admin@stratus.com' ? `<div class="opacity-0 group-hover:opacity-100 transition-opacity">${del('usuarios', u)}</div>` : ''}</div></div>`).join('');
+  
+  const formFields = [{k:'nome', label:'Nome do Colaborador', req:1}, {k:'email', label:'E-mail de Acesso', type:'email', req:1}, {k:'senha', label:'Senha de Acesso', req:1}, {k:'role', label:'Nível de Acesso', opts:['operador', 'admin']}];
+  
+  return head('Gestão de Acessos', 'Controle os utilizadores que podem entrar no sistema.') + `<div class="mb-8 mt-4 bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6"><h3 class="text-sm font-bold text-white mb-3"><i class="fas fa-user-plus text-teal-400 mr-2"></i>Criar Novo Acesso</h3>${form('usuarios', formFields, 'Criar Conta de Utilizador')}</div><div class="flex items-center justify-between mb-4"><h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fas fa-users-cog text-teal-400"></i>Contas Ativas no Sistema</h3><span class="text-[10px] font-bold bg-zinc-900 border border-zinc-700 text-zinc-400 px-2 py-1 rounded-lg">${users.length}</span></div><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">${cards}</div>`;
 };
 
-window.addCalEvento = (e) => {
-  e.preventDefault();
-  const f = new FormData(e.target);
-  const o = { id: uid(), titulo: f.get('titulo'), data: f.get('data'), operacao: f.get('operacao') };
-  (DB.calendario ||= []).push(o); save(); render();
+/* ---------- MÓDULO DE PESSOAS E FORNECEDORES ---------- */
+MODS.people = () => {
+  const pessoas = DB.pessoas || [];
+  const CATEGORIAS_FORN = ['Alimentação', 'Artístico', 'Bilheteria', 'Brigada / Bombeiros', 'Designers', 'Estrutura', 'Fotografia e Vídeo', 'Limpeza', 'Logística', 'Marketing / Assessoria', 'Operação de Bar', 'Produção', 'Segurança', 'Som e Iluminação'];
+  const catIcons = {
+    'Alimentação': 'fa-hamburger text-red-400 bg-red-500/10 border-red-500/30', 'Artístico': 'fa-music text-yellow-400 bg-yellow-500/10 border-yellow-500/30', 'Bilheteria': 'fa-ticket-alt text-teal-400 bg-teal-500/10 border-teal-500/30', 'Brigada / Bombeiros': 'fa-fire-extinguisher text-red-500 bg-red-500/10 border-red-500/30', 'Designers': 'fa-paint-brush text-indigo-400 bg-indigo-500/10 border-indigo-500/30', 'Estrutura': 'fa-hard-hat text-orange-400 bg-orange-500/10 border-orange-500/30', 'Fotografia e Vídeo': 'fa-camera text-pink-400 bg-pink-500/10 border-pink-500/30', 'Limpeza': 'fa-broom text-blue-400 bg-blue-500/10 border-blue-500/30', 'Logística': 'fa-truck text-cyan-400 bg-cyan-500/10 border-cyan-500/30', 'Marketing / Assessoria': 'fa-bullhorn text-blue-500 bg-blue-500/10 border-blue-500/30', 'Operação de Bar': 'fa-glass-cheers text-emerald-400 bg-emerald-500/10 border-emerald-500/30', 'Produção': 'fa-headset text-zinc-300 bg-zinc-500/10 border-zinc-500/30', 'Segurança': 'fa-shield-alt text-amber-400 bg-amber-500/10 border-amber-500/30', 'Som e Iluminação': 'fa-volume-up text-purple-400 bg-purple-500/10 border-purple-500/30'
+  };
+
+  const formFields = [{ k: 'nome', label: 'Nome / Empresa', req: 1, full: true }, { k: 'categoria', label: 'Categoria Principal', opts: CATEGORIAS_FORN }, { k: 'telefone', label: 'WhatsApp' }, { k: 'pix', label: 'Chave PIX' }, { k: 'observacao', label: 'Observação (Cachê, Restrições)', full: true }];
+
+  const cards = pessoas.map(p => {
+    const icClass = catIcons[p.categoria] || 'fa-user text-zinc-400 bg-zinc-800 border-zinc-700';
+    const ic = icClass.split(' ')[0], bg = icClass.split(' ').slice(1).join(' ');
+    return `<div class="bg-zinc-900/60 border border-zinc-800 hover:border-teal-500/30 transition-all rounded-2xl p-5 relative group flex flex-col justify-between shadow-sm"><div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2"><button onclick="editPessoa('${p.id}')" class="text-zinc-500 hover:text-amber-400 transition-colors" title="Editar Contato"><i class="fas fa-edit"></i></button>${del('pessoas', p)}</div><div><div class="flex items-center gap-2 mb-3"><span class="text-[9px] font-bold uppercase border px-2 py-0.5 rounded-md ${bg}"><i class="fas ${ic} mr-1"></i>${esc(p.categoria)}</span></div><h4 class="text-base font-bold text-white pr-8">${esc(p.nome)}</h4><div class="mt-3 space-y-1.5">${p.telefone ? `<p class="text-[11px] text-zinc-300"><i class="fab fa-whatsapp text-emerald-400 w-4"></i>${esc(p.telefone)}</p>` : ''}${p.pix ? `<p class="text-[11px] text-zinc-300"><i class="fas fa-key text-amber-400 w-4"></i>${esc(p.pix)}</p>` : ''}</div></div>${p.observacao ? `<div class="mt-4 pt-3 border-t border-zinc-800/50 text-[10px] text-zinc-500 leading-relaxed italic">"${esc(p.observacao)}"</div>` : ''}</div>`;
+  }).join('');
+
+  return head('Pessoas & Fornecedores', 'Diretório de contatos e parceiros.') + `<div class="mb-8 mt-4 bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6"><h3 class="text-sm font-bold text-white mb-3"><i class="fas fa-user-plus text-teal-400 mr-2"></i>Cadastrar Novo Contato</h3>${form('pessoas', formFields, 'Salvar Contato')}</div><div class="flex items-center justify-between mb-4"><h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fas fa-address-book text-teal-400"></i>Contatos Cadastrados</h3><span class="text-[10px] font-bold bg-zinc-900 border border-zinc-700 text-zinc-400 px-2 py-1 rounded-lg">${pessoas.length}</span></div><div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">${cards || '<div class="col-span-full py-10 text-center text-zinc-500 bg-zinc-900/30 border border-zinc-800 border-dashed rounded-2xl">Nenhum contato cadastrado.</div>'}</div>`;
 };
 
+window.editPessoa = (id) => {
+   const p = (DB.pessoas || []).find(x => x.id === id);
+   if (!p) return;
+   const n = prompt("Editar Nome:", p.nome); if (n === null) return;
+   const t = prompt("Editar WhatsApp:", p.telefone || ''); if (t === null) return;
+   const px = prompt("Editar Chave PIX:", p.pix || ''); if (px === null) return;
+   p.nome = n; p.telefone = t; p.pix = px;
+   save(); render();
+};
+
+/* ---------- MÓDULO DE CALENDÁRIO ---------- */
 MODS.calendar = () => {
   const eventosCal = DB.calendario || [];
   const d = new Date(); d.setMonth(d.getMonth() + calM); 
@@ -681,9 +675,61 @@ MODS.calendar = () => {
 
   return head('Calendário de Eventos', 'Visão geral da agenda de operações.') + 
   `<div class="mb-6 mt-4 bg-zinc-900/40 border border-zinc-800 rounded-2xl p-4 md:p-6 shadow-sm"><h3 class="text-sm font-bold text-white mb-4"><i class="fas fa-calendar-plus text-teal-400 mr-2"></i>Adicionar Evento</h3><form onsubmit="addCalEvento(event)" class="grid grid-cols-1 md:grid-cols-4 gap-3 md:gap-4 items-end"><label class="text-[11px] text-zinc-500 space-y-1 block md:col-span-2"><span>Nome do Evento</span><input required name="titulo" class="${inp}" placeholder="Ex: Baile da Bateu..."></label><label class="text-[11px] text-zinc-500 space-y-1 block"><span>Data do Evento</span><input required type="date" name="data" class="${inp}"></label><label class="text-[11px] text-zinc-500 space-y-1 block"><span>Escopo</span><select name="operacao" class="${inp}"><option>Bilheteria e Bar</option><option>Apenas Bilheteria</option><option>Apenas Bar</option></select></label><div class="md:col-span-4 flex justify-end mt-1 md:mt-2 pt-3 md:pt-4 border-t border-zinc-800"><button type="submit" class="w-full md:w-auto bg-teal-500/15 border border-teal-500/40 text-teal-400 rounded-lg px-6 py-2.5 text-sm font-bold hover:bg-teal-500/25 transition-colors"><i class="fas fa-plus mr-2"></i>Salvar no Calendário</button></div></form></div>` + 
-  `<div class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-3 md:p-6"><div class="flex justify-between items-center mb-4 md:mb-6"><button onclick="calM--; render()" class="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-white hover:border-teal-500/50 transition-all"><i class="fas fa-chevron-left"></i></button><h3 class="text-sm md:text-xl font-bold text-white tracking-widest flex items-center gap-2 md:gap-3"><i class="far fa-calendar-alt text-teal-400"></i>${monthName}</h3><button onclick="calM++; render()" class="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-white hover:border-teal-500/50 transition-all"><i class="fas fa-chevron-right"></i></button></div><div class="grid grid-cols-7 gap-1 md:gap-2 mb-1 md:gap-2 mb-1 md:mb-2">${headerCells}</div><div class="grid grid-cols-7 gap-1 md:gap-2">${cells}</div></div>`;
+  `<div class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-3 md:p-6"><div class="flex justify-between items-center mb-4 md:mb-6"><button onclick="calM--; render()" class="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-white hover:border-teal-500/50 transition-all"><i class="fas fa-chevron-left"></i></button><h3 class="text-sm md:text-xl font-bold text-white tracking-widest flex items-center gap-2 md:gap-3"><i class="far fa-calendar-alt text-teal-400"></i>${monthName}</h3><button onclick="calM++; render()" class="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-white hover:border-teal-500/50 transition-all"><i class="fas fa-chevron-right"></i></button></div><div class="grid grid-cols-7 gap-1 md:gap-2 mb-1 md:mb-2">${headerCells}</div><div class="grid grid-cols-7 gap-1 md:gap-2">${cells}</div></div>`;
 };
 
+window.addCalEvento = (e) => {
+   e.preventDefault(); const fd = new FormData(e.target);
+   DB.calendario = DB.calendario || [];
+   DB.calendario.push({ id: uid(), titulo: fd.get('titulo'), data: fd.get('data'), operacao: fd.get('operacao') });
+   save(); render();
+};
+
+/* ---------- MÓDULO DE REUNIÕES & ATAS ---------- */
+MODS.meetings = () => {
+  const reunioes = DB.reunioes || [];
+  const sorted = [...reunioes].sort((a, b) => new Date(a.data) - new Date(b.data));
+  const agendadas = sorted.filter(r => r.status === 'Agendada');
+  const historico = sorted.filter(r => r.status !== 'Agendada').sort((a, b) => new Date(b.data) - new Date(a.data)); 
+
+  const typeColors = { 'Online': 'text-blue-400 bg-blue-500/10 border-blue-500/30', 'Presencial': 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30', 'Call / Telefone': 'text-amber-400 bg-amber-500/10 border-amber-500/30' };
+
+  const formatData = (iso) => { if(!iso) return ''; return new Date(iso).toLocaleDateString('pt-BR', {weekday: 'short', day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'}).replace('.', ','); };
+
+  const cardHtml = (r, isH) => `<div class="bg-zinc-900/60 border border-zinc-800 rounded-xl p-5 flex flex-col gap-3 relative group hover:border-teal-500/30 transition-colors shadow-sm"><div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">${isH && r.status === 'Concluída' ? `<button onclick="editAta('${r.id}')" class="text-zinc-500 hover:text-amber-400 transition-colors" title="Editar Ata"><i class="fas fa-edit"></i></button>` : ''}${del('reunioes', r)}</div><div class="flex items-center gap-2 mb-1"><span class="text-[9px] font-bold uppercase border px-2 py-0.5 rounded-md ${typeColors[r.tipo] || 'text-zinc-400 bg-zinc-800 border-zinc-700'}"><i class="fas ${r.tipo === 'Online' ? 'fa-video' : r.tipo === 'Presencial' ? 'fa-handshake' : 'fa-phone'} mr-1"></i>${esc(r.tipo)}</span>${isH ? `<span class="text-[9px] font-bold uppercase border px-2 py-0.5 rounded-md ${r.status === 'Concluída' ? 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10' : 'text-red-400 border-red-500/30 bg-red-500/10'}">${esc(r.status)}</span>` : ''}</div><div><h4 class="text-base font-bold text-white leading-tight pr-12">${esc(r.titulo)}</h4><p class="text-[11px] text-teal-400 font-mono mt-1 capitalize"><i class="far fa-calendar-alt mr-1"></i>${formatData(r.data)}</p></div>${r.participantes ? `<div class="text-[11px] text-zinc-400 mt-1"><i class="fas fa-users mr-1"></i>${esc(r.participantes)}</div>` : ''}${r.pauta ? `<div class="mt-2 text-[11px] text-zinc-300 bg-zinc-950 p-3 rounded-lg border border-zinc-800/50"><strong class="text-zinc-500 block mb-1 uppercase tracking-wider text-[9px]">Pauta / Detalhes:</strong>${esc(r.pauta).replace(/\n/g, '<br>')}</div>` : ''}${isH && r.ata ? `<div class="mt-2 text-[11px] text-emerald-200 bg-emerald-950/20 p-3 rounded-lg border border-emerald-900/30"><strong class="text-emerald-500 block mb-1 uppercase tracking-wider text-[9px]">Ata e Decisões:</strong>${esc(r.ata).replace(/\n/g, '<br>')}</div>` : ''}${!isH ? `<div class="mt-auto pt-4 border-t border-zinc-800/50 flex gap-2"><button onclick="concluirReuniao('${r.id}')" class="flex-1 bg-teal-500/15 border border-teal-500/40 text-teal-400 rounded-lg py-2 text-[11px] uppercase tracking-wider font-bold hover:bg-teal-500/25 transition-colors"><i class="fas fa-check mr-2"></i>Realizar & Gerar Ata</button><button onclick="cancelarReuniao('${r.id}')" class="px-4 bg-red-500/10 border border-red-500/30 text-red-400 rounded-lg text-[11px] hover:bg-red-500/20 transition-colors" title="Cancelar Reunião"><i class="fas fa-times"></i></button></div>` : ''}</div>`;
+
+  return head('Reuniões & Atas', 'Agendamento e registro de decisões.') + `<div class="mb-8 mt-4 bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6"><h3 class="text-sm font-bold text-white mb-4"><i class="fas fa-plus text-teal-400 mr-2"></i>Agendar Nova Reunião</h3><form onsubmit="addReuniao(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-start"><label class="text-[11px] text-zinc-500 space-y-1 block md:col-span-2"><span>Assunto / Título</span><input required name="titulo" class="${inp}"></label><label class="text-[11px] text-zinc-500 space-y-1 block"><span>Data e Hora</span><input required type="datetime-local" name="data" class="${inp}"></label><label class="text-[11px] text-zinc-500 space-y-1 block"><span>Formato</span><select name="tipo" class="${inp}"><option>Online</option><option>Presencial</option><option>Call / Telefone</option></select></label><label class="text-[11px] text-zinc-500 space-y-1 block md:col-span-2"><span>Pauta</span><textarea name="pauta" rows="2" class="${inp}"></textarea></label><label class="text-[11px] text-zinc-500 space-y-1 block md:col-span-2"><span>Participantes</span><textarea name="participantes" rows="2" class="${inp}"></textarea></label><div class="md:col-span-4 flex justify-end pt-3 border-t border-zinc-800 mt-2"><button type="submit" class="bg-teal-500/15 border border-teal-500/40 text-teal-400 rounded-lg px-6 py-2.5 text-sm font-bold hover:bg-teal-500/25 transition-colors"><i class="fas fa-calendar-check mr-2"></i>Agendar Reunião</button></div></form></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-8"><div><div class="flex items-center justify-between pb-3 border-b border-zinc-800 mb-4"><h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fas fa-clock text-amber-400"></i>Próximas Reuniões</h3><span class="text-[10px] font-bold bg-zinc-900 border border-zinc-700 text-zinc-400 px-2 py-1 rounded-lg">${agendadas.length}</span></div><div class="flex flex-col gap-4">${agendadas.map(r => cardHtml(r, false)).join('') || '<div class="text-center text-[11px] text-zinc-600 py-8 border border-zinc-800 border-dashed rounded-xl">Nenhuma reunião agendada.</div>'}</div></div><div><div class="flex items-center justify-between pb-3 border-b border-zinc-800 mb-4"><h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fas fa-archive text-zinc-400"></i>Histórico & Atas</h3><span class="text-[10px] font-bold bg-zinc-900 border border-zinc-700 text-zinc-400 px-2 py-1 rounded-lg">${historico.length}</span></div><div class="flex flex-col gap-4">${historico.map(r => cardHtml(r, true)).join('') || '<div class="text-center text-[11px] text-zinc-600 py-8 border border-zinc-800 border-dashed rounded-xl">Nenhum histórico disponível.</div>'}</div></div></div>`;
+};
+
+window.addReuniao = (e) => { e.preventDefault(); const fd = new FormData(e.target); DB.reunioes = DB.reunioes || []; DB.reunioes.push({ id: uid(), titulo: fd.get('titulo'), data: fd.get('data'), tipo: fd.get('tipo'), pauta: fd.get('pauta'), participantes: fd.get('participantes'), status: 'Agendada', ata: '' }); save(); render(); };
+window.concluirReuniao = (id) => { const r = (DB.reunioes || []).find(x => x.id === id); if (!r) return; const ata = prompt(`Reunião: ${r.titulo}\nEscreva a Ata:`); if (ata !== null) { r.status = 'Concluída'; r.ata = ata; save(); render(); } };
+window.cancelarReuniao = (id) => { if(confirm('Cancelar reunião?')) { const r = (DB.reunioes || []).find(x => x.id === id); if (r) { r.status = 'Cancelada'; save(); render(); } } };
+window.editAta = (id) => { const r = (DB.reunioes || []).find(x => x.id === id); if (!r) return; const ata = prompt(`Editar Ata:`, r.ata || ''); if (ata !== null) { r.ata = ata; save(); render(); } };
+
+/* ---------- MÓDULO DE DEMANDAS (KANBAN) ---------- */
+MODS.demands = () => {
+  const demandas = DB.demandas || [];
+  const STATUS = ['Pendente', 'Em Andamento', 'Concluída'];
+  const URG_COLORS = { 'Baixa': 'bg-blue-500/10 border-blue-500/30 text-blue-400', 'Média': 'bg-amber-500/10 border-amber-500/30 text-amber-400', 'Alta': 'bg-orange-500/10 border-orange-500/30 text-orange-400', 'Urgente': 'bg-red-500/10 border-red-500/30 text-red-400' };
+
+  const colHtml = (status, icon, colorClass) => {
+    const items = demandas.filter(d => d.status === status);
+    const cards = items.map(d => {
+      const currIdx = STATUS.indexOf(d.status);
+      const btnPrev = currIdx > 0 ? `<button onclick="moveDemanda('${d.id}', '${STATUS[currIdx - 1]}')" class="p-1.5 text-zinc-500 hover:text-white transition-colors" title="Mover para trás"><i class="fas fa-arrow-left"></i></button>` : '<div class="w-7"></div>';
+      const btnNext = currIdx < 2 ? `<button onclick="moveDemanda('${d.id}', '${STATUS[currIdx + 1]}')" class="p-1.5 text-zinc-500 hover:text-white transition-colors" title="Mover para frente"><i class="fas fa-arrow-right"></i></button>` : '<div class="w-7"></div>';
+      return `<div class="bg-zinc-900/60 border border-zinc-800 rounded-xl p-4 flex flex-col gap-3 relative group hover:border-teal-500/30 transition-colors shadow-sm"><div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">${del('demandas', d)}</div><div><div class="flex items-center gap-2 mb-3"><span class="text-[9px] font-bold uppercase border px-2 py-0.5 rounded-md ${URG_COLORS[d.urgencia] || 'bg-zinc-800 text-zinc-400'}">${esc(d.urgencia)}</span><span class="text-[9px] font-bold uppercase text-zinc-400 bg-zinc-800 border border-zinc-700 rounded-md px-2 py-0.5">${esc(d.tipo)}</span></div><h4 class="text-sm font-bold text-white leading-tight pr-6">${esc(d.titulo)}</h4></div><p class="text-[11px] text-zinc-400 leading-relaxed line-clamp-3">${esc(d.descricao).replace(/\n/g, '<br>')}</p><div class="flex justify-between items-center mt-2 pt-3 border-t border-zinc-800/50"><div class="flex items-center gap-2 text-[10px] text-zinc-400 font-bold bg-zinc-950 px-2 py-1 rounded-lg border border-zinc-800"><i class="fas fa-user-circle text-teal-400 text-sm"></i>${esc(d.responsavel)}</div><div class="flex items-center gap-1 bg-zinc-950 rounded-lg border border-zinc-800">${btnPrev}${btnNext}</div></div></div>`;
+    }).join('');
+    return `<div class="flex flex-col gap-4"><div class="flex items-center justify-between pb-3 border-b-2 border-zinc-800/80"><h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fas ${icon} ${colorClass}"></i>${status}</h3><span class="text-[10px] font-bold bg-zinc-900 border border-zinc-700 text-zinc-400 px-2 py-1 rounded-lg">${items.length}</span></div><div class="flex flex-col gap-3 min-h-[10rem]">${cards || `<div class="text-center text-[11px] text-zinc-600 py-6 border border-zinc-800 border-dashed rounded-xl">Nenhuma demanda aqui.</div>`}</div></div>`;
+  };
+
+  return head('Demandas Gerais', 'Gestão de tarefas e backlog.') + `<div class="mb-8 mt-4 bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6"><h3 class="text-sm font-bold text-white mb-4"><i class="fas fa-plus text-teal-400 mr-2"></i>Nova Demanda</h3><form onsubmit="addDemanda(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-start"><label class="text-[11px] text-zinc-500 space-y-1 block md:col-span-2"><span>Título da Demanda</span><input required name="titulo" class="${inp}"></label><label class="text-[11px] text-zinc-500 space-y-1 block"><span>Responsável</span><input required name="responsavel" class="${inp}"></label><label class="text-[11px] text-zinc-500 space-y-1 block"><span>Urgência</span><select name="urgencia" class="${inp}"><option>Baixa</option><option>Média</option><option>Alta</option><option>Urgente</option></select></label><label class="text-[11px] text-zinc-500 space-y-1 block md:col-span-3"><span>Descrição</span><textarea required name="descricao" rows="2" class="${inp}"></textarea></label><label class="text-[11px] text-zinc-500 space-y-1 block"><span>Tipo</span><select name="tipo" class="${inp}"><option>Operacional</option><option>Financeiro</option><option>Comercial</option><option>Tecnologia</option><option>Marketing / Design</option><option>Outros</option></select></label><div class="md:col-span-4 flex justify-end pt-3 border-t border-zinc-800 mt-2"><button type="submit" class="bg-teal-500/15 border border-teal-500/40 text-teal-400 rounded-lg px-6 py-2.5 text-sm font-bold hover:bg-teal-500/25 transition-colors"><i class="fas fa-save mr-2"></i>Criar Demanda</button></div></form></div><div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 mt-4">${colHtml('Pendente', 'fa-clipboard-list', 'text-zinc-400')}${colHtml('Em Andamento', 'fa-spinner fa-spin-pulse', 'text-amber-400')}${colHtml('Concluída', 'fa-check-circle', 'text-emerald-400')}</div>`;
+};
+
+window.addDemanda = (e) => { e.preventDefault(); const fd = new FormData(e.target); DB.demandas = DB.demandas || []; DB.demandas.push({ id: uid(), titulo: fd.get('titulo'), descricao: fd.get('descricao'), responsavel: fd.get('responsavel'), urgencia: fd.get('urgencia'), tipo: fd.get('tipo'), status: 'Pendente', dataCriacao: new Date().toISOString() }); save(); render(); };
+window.moveDemanda = (id, newStatus) => { const d = (DB.demandas || []).find(x => x.id === id); if (d) { d.status = newStatus; save(); render(); } };
+
+/* ---------- MÓDULOS DE FINANCEIRO E SIMULADOR ---------- */
 let activeFinClient = null, activeFinEvent = null;
 
 MODS.est = () => {
@@ -758,20 +804,62 @@ window.calcSim = () => {
   </div>`;
 };
 
-MODS.contracts = () => head('Contratos', 'Módulo temporariamente minimizado.');
-MODS.reports = () => head('Relatórios', 'Módulo temporariamente minimizado.');
+MODS.fin = () => {
+  const clientes = DB.finClientes || [], eventos = DB.finEventos || [], comprovantes = DB.finComprovantes || [];
+  const modalHtml = `<div id="comp-modal" class="fixed inset-0 z-[100] bg-black/95 hidden flex-col items-center p-4 md:p-8 backdrop-blur-sm"><div class="w-full max-w-5xl flex justify-between items-center mb-4"><h3 id="comp-modal-title" class="text-white font-bold text-lg">Comprovante</h3><button onclick="$('comp-modal').classList.add('hidden'); $('comp-modal').classList.remove('flex');" class="w-10 h-10 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-400 hover:text-white hover:bg-red-500/20 hover:border-red-500/50 transition-all flex items-center justify-center"><i class="fas fa-times"></i></button></div><div id="comp-modal-content" class="w-full flex-1 bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden flex items-center justify-center"></div></div>`;
 
-/* ---------- MÓDULO DE ACESSOS ---------- */
-MODS.users = () => {
-  if (currentUser?.role !== 'admin') return head('Acesso Negado', 'Apenas administradores podem gerenciar acessos.') + `<p class="mt-4 text-xs text-zinc-500">O seu perfil de utilizador não tem permissões para ver esta página.</p>`;
-  
-  const users = DB.usuarios || [];
-  const cards = users.map(u => `<div class="bg-zinc-900/60 border border-zinc-800 rounded-xl p-5 flex justify-between items-center relative group hover:border-teal-500/30 transition-colors shadow-sm"><div><h4 class="text-sm font-bold text-white mb-1">${esc(u.nome)}</h4><p class="text-[11px] text-zinc-400"><i class="fas fa-envelope text-zinc-600 mr-1"></i>${esc(u.email)}</p><p class="text-[10px] text-zinc-500 mt-1 font-mono">Senha: ${esc(u.senha)}</p></div><div class="flex flex-col items-end gap-3"><span class="px-2.5 py-1 text-[9px] font-bold border rounded-md uppercase tracking-wider ${u.role === 'admin' ? 'bg-amber-500/10 border-amber-500/30 text-amber-400' : 'bg-zinc-800 border-zinc-700 text-zinc-300'}">${esc(u.role)}</span>${u.email !== 'admin@stratus.com' ? `<div class="opacity-0 group-hover:opacity-100 transition-opacity">${del('usuarios', u)}</div>` : ''}</div></div>`).join('');
-  
-  const formFields = [{k:'nome', label:'Nome do Colaborador', req:1}, {k:'email', label:'E-mail de Acesso', type:'email', req:1}, {k:'senha', label:'Senha de Acesso', req:1}, {k:'role', label:'Nível de Acesso', opts:['operador', 'admin']}];
-  
-  return head('Gestão de Acessos', 'Controle os utilizadores que podem entrar no sistema.') + `<div class="mb-8 mt-4 bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6"><h3 class="text-sm font-bold text-white mb-3"><i class="fas fa-user-plus text-teal-400 mr-2"></i>Criar Novo Acesso</h3>${form('usuarios', formFields, 'Criar Conta de Utilizador')}</div><div class="flex items-center justify-between mb-4"><h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fas fa-users-cog text-teal-400"></i>Contas Ativas no Sistema</h3><span class="text-[10px] font-bold bg-zinc-900 border border-zinc-700 text-zinc-400 px-2 py-1 rounded-lg">${users.length}</span></div><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">${cards}</div>`;
+  if (activeFinClient && activeFinEvent) {
+    const cliente = clientes.find(c => c.id === activeFinClient), evento = eventos.find(e => e.id === activeFinEvent);
+    if (!cliente || !evento) { activeFinEvent = null; return render(); }
+    const compDoEvento = comprovantes.filter(c => c.eventoId === activeFinEvent);
+    const trs = compDoEvento.map(c => `<tr class="hover:bg-zinc-800/40 border-b border-zinc-800/50"><td class="py-3 px-4 text-white font-bold">${esc(c.nome)}</td><td class="py-3 px-4 text-zinc-400">${esc(c.categoria)}</td><td class="py-3 px-4 text-zinc-400">${fd(c.data)}</td><td class="py-3 px-4 font-mono text-emerald-400">${R(c.valor)}</td><td class="py-3 px-4 text-right space-x-3">${c.arquivo ? `<button type="button" onclick="viewComp('${c.id}')" class="text-teal-400 hover:text-teal-300 transition-colors" title="Ver Arquivo"><i class="fas fa-eye"></i></button>` : ''}<button type="button" onclick="editComp('${c.id}')" class="text-amber-400 hover:text-amber-300 transition-colors" title="Editar"><i class="fas fa-edit"></i></button>${del('finComprovantes', c)}</td></tr>`).join('');
+
+    return modalHtml + `<div class="flex items-center space-x-3 mb-6 mt-4 text-sm font-bold"><button onclick="activeFinClient = null; activeFinEvent = null; render();" class="text-zinc-500 hover:text-white transition-colors"><i class="fas fa-building mr-2"></i>Clientes</button><i class="fas fa-chevron-right text-zinc-700 text-xs"></i><button onclick="activeFinEvent = null; render();" class="text-zinc-400 hover:text-white transition-colors">${esc(cliente.nome)}</button><i class="fas fa-chevron-right text-zinc-700 text-xs"></i><span class="text-amber-400">${esc(evento.nome)}</span></div><div class="mb-8 bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6"><h3 class="text-sm font-bold text-white mb-4"><i class="fas fa-plus text-teal-400 mr-2"></i>Lançar Comprovante</h3><form id="form-comp" onsubmit="saveComp(event)" class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end"><input type="hidden" id="comp-id"><label class="text-[11px] text-zinc-500 space-y-1 block"><span>Descrição</span><input required id="comp-nome" class="${inp}"></label><label class="text-[11px] text-zinc-500 space-y-1 block"><span>Categoria</span><select id="comp-cat" class="${inp}"><option>Fornecedor</option><option>Staff / Equipe</option><option>Insumos / Bar</option><option>Logística</option><option>Impostos</option><option>Outros</option></select></label><label class="text-[11px] text-zinc-500 space-y-1 block"><span>Valor (R$)</span><input required type="number" step="0.01" id="comp-val" class="${inp}"></label><label class="text-[11px] text-zinc-500 space-y-1 block"><span>Data</span><input required type="date" id="comp-data" class="${inp}"></label><label class="text-[11px] text-zinc-500 space-y-1 block"><span>Anexo (Imagem/PDF)</span><input type="file" id="comp-file" class="${inp} p-1 text-xs" accept="image/*,.pdf"></label><div class="md:col-span-5 flex justify-end space-x-3 mt-2 pt-4 border-t border-zinc-800"><button type="button" onclick="resetCompForm()" class="px-4 py-2 rounded-lg text-sm text-zinc-400 hover:text-white border border-transparent hover:border-zinc-700 transition-colors">Limpar</button><button type="submit" class="bg-teal-500/15 border border-teal-500/40 text-teal-400 rounded-lg px-4 py-2 text-sm font-bold hover:bg-teal-500/25 transition-colors"><i class="fas fa-save mr-2"></i>Salvar Comprovante</button></div></form></div><div class="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-5"><h4 class="text-sm font-bold text-white mb-4"><i class="fas fa-file-invoice-dollar text-emerald-400 mr-2"></i>Extrato do Evento</h4><div class="overflow-x-auto"><table class="w-full text-[11px] text-left whitespace-nowrap"><thead class="text-zinc-500 uppercase bg-zinc-950 border-b border-zinc-800"><tr><th class="py-3 px-4">Descrição</th><th class="py-3 px-4">Categoria</th><th class="py-3 px-4">Data</th><th class="py-3 px-4">Valor</th><th class="py-3 px-4 text-right">Ações</th></tr></thead><tbody class="divide-y divide-zinc-800/50">${trs || '<tr><td colspan="5" class="py-6 text-center text-zinc-500">Nenhum comprovante lançado neste evento.</td></tr>'}</tbody></table></div></div>`;
+  }
+
+  if (activeFinClient) {
+    const cliente = clientes.find(c => c.id === activeFinClient);
+    if (!cliente) { activeFinClient = null; return render(); }
+    const eventosDoCliente = eventos.filter(e => e.clienteId === activeFinClient);
+    const evCards = eventosDoCliente.map(e => {
+      const cTotal = comprovantes.filter(c => c.eventoId === e.id).reduce((a, b) => a + Number(b.valor), 0);
+      return `<div class="bg-zinc-900/60 border border-zinc-800 hover:border-amber-500/50 transition-all rounded-2xl p-5 relative group flex flex-col justify-between h-full"><div class="absolute top-4 right-4 space-x-2"><button onclick="editEvento('${e.id}', '${esc(e.nome)}')" class="text-zinc-500 hover:text-amber-400 transition-colors" title="Editar Evento"><i class="fas fa-edit"></i></button>${del('finEventos', e)}</div><div class="cursor-pointer" onclick="activeFinEvent = '${e.id}'; render();"><i class="fas fa-folder text-4xl text-amber-400/80 mb-4 group-hover:text-amber-400 transition-colors"></i><h3 class="text-base font-bold text-white">${esc(e.nome)}</h3><p class="text-[11px] text-zinc-400 mb-4">Subpasta de evento</p><div class="pt-3 border-t border-zinc-800/50 flex justify-between items-center text-[11px]"><span class="text-zinc-500">Total do Evento:</span><span class="font-bold text-emerald-400">${R(cTotal)}</span></div></div></div>`;
+    }).join('');
+
+    return `<div class="flex items-center space-x-3 mb-6 mt-4 text-sm font-bold"><button onclick="activeFinClient = null; render();" class="text-zinc-500 hover:text-white transition-colors"><i class="fas fa-building mr-2"></i>Clientes</button><i class="fas fa-chevron-right text-zinc-700 text-xs"></i><span class="text-amber-400">${esc(cliente.nome)}</span></div><div class="mb-8 bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6"><h3 class="text-sm font-bold text-white mb-3">Criar Subpasta de Evento</h3><form onsubmit="addFinEvento(event)" class="flex flex-col md:flex-row gap-3 items-end"><label class="text-[11px] text-zinc-500 space-y-1 block flex-1 w-full"><span>Nome do Evento</span><input required name="nome" class="${inp}"></label><button type="submit" class="bg-amber-500/15 border border-amber-500/40 text-amber-400 rounded-lg px-4 py-2 text-sm font-bold hover:bg-amber-500/25 transition-colors w-full md:w-auto"><i class="fas fa-plus mr-2"></i>Criar Evento</button></form></div><div class="flex items-center space-x-2 mb-4"><i class="fas fa-folders text-amber-400"></i><h3 class="text-sm font-bold text-white">Eventos de ${esc(cliente.nome)}</h3></div><div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">${evCards || '<div class="col-span-full py-10 text-center text-zinc-500 bg-zinc-900/30 border border-zinc-800 border-dashed rounded-2xl">Nenhum evento criado.</div>'}</div>`;
+  }
+
+  const cliCards = clientes.map(c => {
+    const evIds = eventos.filter(e => e.clienteId === c.id).map(e => e.id);
+    const cTotal = comprovantes.filter(comp => evIds.includes(comp.eventoId)).reduce((a, b) => a + Number(b.valor), 0);
+    return `<div class="bg-zinc-900/60 border border-zinc-800 hover:border-teal-500/50 transition-all rounded-2xl p-5 relative group flex flex-col justify-between h-full"><div class="absolute top-4 right-4 space-x-2"><button onclick="editCliente('${c.id}', '${esc(c.nome)}')" class="text-zinc-500 hover:text-teal-400 transition-colors" title="Editar Cliente"><i class="fas fa-edit"></i></button>${del('finClientes', c)}</div><div class="cursor-pointer" onclick="activeFinClient = '${c.id}'; render();"><i class="fas fa-building text-4xl text-teal-500/80 mb-4 group-hover:text-teal-400 transition-colors"></i><h3 class="text-base font-bold text-white">${esc(c.nome)}</h3><p class="text-[11px] text-zinc-400 mb-4">${evIds.length} subpasta(s) de evento</p><div class="pt-3 border-t border-zinc-800/50 flex justify-between items-center text-[11px]"><span class="text-zinc-500">Gasto Acumulado:</span><span class="font-bold text-emerald-400">${R(cTotal)}</span></div></div></div>`;
+  }).join('');
+
+  return head('Painel Financeiro', 'Organização em subpastas.') + `<div class="mb-8 mt-4 bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6"><h3 class="text-sm font-bold text-white mb-3">Nova Pasta de Cliente (Produtor/Marca)</h3><form onsubmit="addFinCliente(event)" class="flex flex-col md:flex-row gap-3 items-end"><label class="text-[11px] text-zinc-500 space-y-1 block flex-1 w-full"><span>Nome do Cliente</span><input required name="nome" class="${inp}"></label><button type="submit" class="bg-teal-500/15 border border-teal-500/40 text-teal-400 rounded-lg px-4 py-2 text-sm font-bold hover:bg-teal-500/25 transition-colors w-full md:w-auto"><i class="fas fa-plus mr-2"></i>Criar Cliente</button></form></div><div class="flex items-center space-x-2 mb-4"><i class="fas fa-folder-open text-teal-400"></i><h3 class="text-sm font-bold text-white">Clientes Cadastrados</h3></div><div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">${cliCards || '<div class="col-span-full py-10 text-center text-zinc-500 bg-zinc-900/30 border border-zinc-800 border-dashed rounded-2xl">Nenhum cliente cadastrado ainda.</div>'}</div>`;
 };
+
+window.addFinCliente = (e) => { e.preventDefault(); const fd = new FormData(e.target); DB.finClientes = DB.finClientes || []; DB.finClientes.push({ id: uid(), nome: fd.get('nome') }); save(); render(); };
+window.addFinEvento = (e) => { e.preventDefault(); const fd = new FormData(e.target); DB.finEventos = DB.finEventos || []; DB.finEventos.push({ id: uid(), clienteId: activeFinClient, nome: fd.get('nome') }); save(); render(); };
+window.editCliente = (id, nome) => { const n = prompt("Editar Nome:", nome); if (n) { const c = DB.finClientes.find(x => x.id === id); if (c) { c.nome = n; save(); render(); } } };
+window.editEvento = (id, nome) => { const n = prompt("Editar Nome:", nome); if (n) { const e = DB.finEventos.find(x => x.id === id); if (e) { e.nome = n; save(); render(); } } };
+
+window.saveComp = async (e) => {
+   e.preventDefault();
+   const btn = e.target.querySelector('button[type="submit"]'); btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Salvando...'; btn.disabled = true;
+   const id = $('comp-id').value, nome = $('comp-nome').value, cat = $('comp-cat').value, val = parseFloat($('comp-val').value) || 0, data = $('comp-data').value, fileInput = $('comp-file');
+   let b64 = null;
+   if (fileInput.files.length > 0) {
+      b64 = await new Promise((res) => { const reader = new FileReader(); reader.onload = (ev) => res(ev.target.result); reader.readAsDataURL(fileInput.files[0]); });
+   }
+   DB.finComprovantes = DB.finComprovantes || [];
+   if (id) { const c = DB.finComprovantes.find(x => x.id === id); if (c) { c.nome = nome; c.categoria = cat; c.valor = val; c.data = data; if (b64) c.arquivo = b64; } } 
+   else { DB.finComprovantes.push({ id: uid(), eventoId: activeFinEvent, nome, categoria: cat, valor: val, data, arquivo: b64 }); }
+   save(); render();
+};
+
+window.editComp = (id) => { const c = DB.finComprovantes.find(x => x.id === id); if (!c) return; $('comp-id').value = c.id; $('comp-nome').value = c.nome; $('comp-cat').value = c.categoria; $('comp-val').value = c.valor; $('comp-data').value = c.data; $('comp-nome').focus(); };
+window.resetCompForm = () => { $('form-comp').reset(); $('comp-id').value = ''; };
+window.viewComp = (id) => { const c = DB.finComprovantes.find(x => x.id === id); if (!c || !c.arquivo) return; const ct = $('comp-modal-content'); if (c.arquivo.startsWith('data:application/pdf')) { ct.innerHTML = `<iframe src="${c.arquivo}" class="w-full h-full border-none"></iframe>`; } else { ct.innerHTML = `<img src="${c.arquivo}" class="max-w-full max-h-full object-contain p-2">`; } $('comp-modal-title').textContent = c.nome; $('comp-modal').classList.remove('hidden'); $('comp-modal').classList.add('flex'); };
 
 const mv = $('mod-view');
 mv.addEventListener('submit', async (e) => {
@@ -779,21 +867,22 @@ mv.addEventListener('submit', async (e) => {
   if (!f) return; e.preventDefault();
   const o = { id: uid() }; new FormData(f).forEach((v, k) => { o[k] = ['valor', 'capacidade'].includes(k) ? parseFloat(v) || 0 : v; });
   (DB[f.dataset.add] ||= []).push(o); save(); render();
-  
-  if (f.dataset.add === 'usuarios') {
-      alert("Acesso criado com sucesso! Partilhe o email e a senha com a pessoa.");
-  }
 });
+
 mv.addEventListener('click', (e) => {
   const g = (a) => e.target.closest(`[${a}]`);
   if (g('data-del')) { const [k, id] = g('data-del').dataset.del.split('|'); DB[k] = (DB[k] || []).filter((x) => x.id !== id); save(); render(); } 
   else if (g('data-go')) { go(g('data-go').dataset.go); }
 });
 
-/* ---------- LOGICA DE AUTENTICAÇÃO ---------- */
+loadDB().then(() => { nav('bar-view', document.querySelector('[data-v="bar-view"]')); });
+loadFiles();
+
+/* ---------- LOGIC DE AUTENTICAÇÃO ---------- */
 async function initApp() {
    await loadDB(); 
    
+   // Cria o super admin automaticamente se a lista de utilizadores não existir ou estiver vazia
    if (!DB.usuarios || DB.usuarios.length === 0) {
        DB.usuarios = [{ id: uid(), nome: 'Paulo Victor', email: 'admin@stratus.com', senha: '123', role: 'admin' }];
        save();
@@ -811,6 +900,7 @@ async function initApp() {
        } catch(e) {}
    }
    
+   // Se não houver login salvo ou for inválido, mostra a tela de login e esconde a App
    $('login-screen').classList.remove('hidden');
    $('app-container').classList.add('hidden');
 }
@@ -832,13 +922,14 @@ window.doLogin = (e) => {
 
 window.doLogout = () => {
    localStorage.removeItem('stratus_user');
-   location.reload();
+   location.reload(); // Recarrega a página para trancar tudo novamente
 };
 
 function showApp() {
    $('login-screen').classList.add('hidden');
    $('app-container').classList.remove('hidden');
    
+   // Coloca as iniciais do utilizador logado no topo
    const initials = currentUser.nome.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
    $('user-avatar').textContent = initials;
    
@@ -846,6 +937,7 @@ function showApp() {
    loadFiles();
 }
 
+// Inicia o ciclo do aplicativo
 initApp();
 </script>
 </body>
