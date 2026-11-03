@@ -172,6 +172,13 @@ const groups = [
   ['Operacional', [['est', 'fa-store', 'Estabelecimentos'], ['contracts', 'fa-file-contract', 'Contratos'], ['fin', 'fa-wallet', 'Financeiro'], ['reports', 'fa-chart-bar', 'Relatórios']]],
 ];
 $('sidebar').innerHTML = groups.map(([t, l]) => `<div><p class="px-3 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-2">${t}</p><nav class="space-y-1">${l.map((x) => item(x[0], x[1], x[2], x[0] === 'bar-view')).join('')}</nav></div>`).join('');
+// Clique nos itens do menu lateral (delegação de evento)
+$('sidebar').addEventListener('click', (e) => {
+  const a = e.target.closest('.nav');
+  if (!a) return;
+  e.preventDefault();
+  nav(a.dataset.v, a);
+});
 $('today').textContent = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
 
 /* ---------- CÉREBRO DE LEITURA DAS PLANILHAS ---------- */
@@ -875,8 +882,6 @@ mv.addEventListener('click', (e) => {
   else if (g('data-go')) { go(g('data-go').dataset.go); }
 });
 
-loadDB().then(() => { nav('bar-view', document.querySelector('[data-v="bar-view"]')); });
-loadFiles();
 
 /* ---------- LOGIC DE AUTENTICAÇÃO ---------- */
 async function initApp() {
