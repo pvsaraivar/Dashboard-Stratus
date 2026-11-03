@@ -27,30 +27,39 @@ const FIREBASE_URL = process.env.FIREBASE_URL || 'https://painelstratus-default-
 // Configuração do Multer (mantido para compatibilidade)
 const upload = multer({ storage: multer.memoryStorage() });
 
-// CONFIGURAÇÃO DO GOOGLE DRIVE / SHEETS
-const SCOPES = ['https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/spreadsheets.readonly'];
-let authClient;
+// CONFIGURAÇÃO DO GOOGLE DRIVE / SHEETS (somente leitura)
+const SCOPES = ['https://www.googleapis.com/auth/drive.readonly', 'https://www.googleapis.com/auth/spreadsheets.readonly'];
+let authClient = null, authError = null;
 
 try {
-  if (process.env.GOOGLE_CREDENTIALS) {
-    // Roda no Vercel puxando as chaves da Variável de Ambiente
-    const keys = JSON.parse(process.env.GOOGLE_CREDENTIALS);
-    authClient = new google.auth.GoogleAuth({
-      credentials: keys,
-      scopes: SCOPES
-    });
+  let creds = null;
+  if (process.env.GOOGLE_CREDENTIALS_B64) {
+    creds = JSON.parse(Buffer.from(process.env.GOOGLE_CREDENTIALS_B64, 'base64').toString('utf8'));
+  } else if (process.env.GOOGLE_CREDENTIALS) {
+    creds = JSON.parse(process.env.GOOGLE_CREDENTIALS);
+  }
+  if (creds) {
+    creds.private_key = String(creds.private_key || '').replace(/\\n/g, '\n');
+    authClient = new google.auth.GoogleAuth({ credentials: creds, scopes: SCOPES });
   } else {
-    // Roda localmente puxando do arquivo
-    authClient = new google.auth.GoogleAuth({
-      keyFile: path.join(__dirname, 'credentials.json'),
-      scopes: SCOPES,
-    });
+    authClient = new google.auth.GoogleAuth({ keyFile: path.join(__dirname, 'credentials.json'), scopes: SCOPES });
   }
 } catch (e) {
-  console.error("Erro crítico na autenticação do Google:", e.message);
+  authError = e.message;
+  console.error('Erro crítico na autenticação do Google:', e.message);
 }
 const drive = google.drive({ version: 'v3', auth: authClient });
 const sheets = google.sheets({ version: 'v4', auth: authClient });
+
+// Responde com erro claro (em vez de lista vazia) quando as credenciais não estão configuradas
+function needAuth(res) {
+  if (authClient) return false;
+  res.status(500).json({
+    error: 'Credenciais do Google ausentes ou inválidas',
+    details: (authError ? authError + ' · ' : '') + 'Defina GOOGLE_CREDENTIALS_B64 nas variáveis de ambiente da Vercel e faça um novo deploy.',
+  });
+  return true;
+}
 
 // --- ENDPOINTS DA BASE DE DADOS (LIGADOS AO FIREBASE) ---
 
@@ -82,12 +91,27 @@ app.put('/api/store', async (req, res) => {
 
 // --- ENDPOINTS DE PLANILHAS (GOOGLE SHEETS) ---
 
+// Diagnóstico: abra /api/health no navegador para ver se o Google está conectado
+app.get('/api/health', async (req, res) => {
+  const out = { googleConfigurado: !!authClient, erroAuth: authError, firebaseConfigurado: !!FIREBASE_URL };
+  try {
+    if (authClient) {
+      const c = await authClient.getCredentials();
+      out.contaDeServico = c.client_email;
+      const r = await drive.files.list({ q: "mimeType='application/vnd.google-apps.spreadsheet' and trashed=false", fields: 'files(id)', pageSize: 5 });
+      out.planilhasVisiveis = (r.data.files || []).length;
+    }
+  } catch (e) { out.erro = e.message; }
+  res.json(out);
+});
+
 app.get('/api/sheets', async (req, res) => {
   try {
-    if (!authClient) return res.json([]);
+    if (needAuth(res)) return;
     const response = await drive.files.list({
       q: "mimeType='application/vnd.google-apps.spreadsheet' and trashed=false",
       fields: 'files(id, name)',
+      pageSize: 1000,
     });
     res.json(response.data.files || []);
   } catch (error) {
@@ -98,7 +122,8 @@ app.get('/api/sheets', async (req, res) => {
 app.get('/api/sheet-data', async (req, res) => {
   try {
     const { id, tab } = req.query;
-    if (!id || !authClient) return res.status(400).json({ error: 'ID inválido ou Drive não configurado' });
+    if (!id) return res.status(400).json({ error: 'ID da planilha não informado' });
+    if (needAuth(res)) return;
 
     const meta = await sheets.spreadsheets.get({ spreadsheetId: id });
     const abas = meta.data.sheets.map((s) => s.properties.title);
@@ -106,7 +131,7 @@ app.get('/api/sheet-data', async (req, res) => {
 
     const rowsRes = await sheets.spreadsheets.values.get({
       spreadsheetId: id,
-      range: `${targetTab}!A1:Z200`,
+      range: `'${String(targetTab).replace(/'/g, "''")}'!A1:Z200`,
     });
     const grade = rowsRes.data.values || [];
 

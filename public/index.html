@@ -16,7 +16,8 @@
 </head>
 <body class="bg-black text-gray-100 font-sans antialiased flex h-screen overflow-hidden">
 
-<aside class="w-64 bg-zinc-950 border-r border-zinc-800 flex flex-col justify-start select-none shrink-0">
+<div id="overlay" class="fixed inset-0 bg-black/60 z-30 hidden md:hidden"></div>
+<aside id="aside" class="fixed md:static inset-y-0 left-0 z-40 w-64 -translate-x-full md:translate-x-0 transition-transform duration-200 overflow-y-auto bg-zinc-950 border-r border-zinc-800 flex flex-col justify-start select-none shrink-0">
     <div class="px-5 py-4 border-b border-zinc-900 flex justify-center items-center">
       <div class="flex justify-center items-center w-full">
     <span class="text-lg font-black tracking-[0.25em] text-white">STRATUS</span>
@@ -26,15 +27,15 @@
 </aside>
 
 <main class="flex-1 h-screen overflow-y-auto bg-zinc-950">
-  <header class="h-16 border-b border-zinc-900 px-8 flex justify-between items-center bg-zinc-950/80 backdrop-blur sticky top-0 z-20">
-    <div class="flex items-center space-x-2 text-sm text-zinc-400"><i class="far fa-clock text-teal-400"></i><span id="today"></span></div>
+    <header class="h-16 border-b border-zinc-900 px-4 md:px-8 flex justify-between items-center bg-zinc-950/80 backdrop-blur sticky top-0 z-20">
+    <div class="flex items-center space-x-3 text-sm text-zinc-400"><button id="menu-btn" class="md:hidden w-9 h-9 rounded-lg bg-zinc-900 border border-zinc-800 text-teal-400"><i class="fas fa-bars"></i></button><i class="far fa-clock text-teal-400"></i><span id="today"></span></div>
     <div class="w-9 h-9 rounded-lg bg-teal-500/20 border border-teal-500/40 flex items-center justify-center text-teal-400 font-bold text-xs">PV</div>
   </header>
 
-  <div id="mod-view" class="view p-8 max-w-7xl mx-auto space-y-6 hidden"></div>
+    <div id="mod-view" class="view p-4 md:p-8 max-w-7xl mx-auto space-y-6 hidden"></div>
 
   <!-- LISTA DE CARDS - OPERAÇÃO DE BAR -->
-  <div id="bar-view" class="view p-8 max-w-7xl mx-auto space-y-8">
+    <div id="bar-view" class="view p-4 md:p-8 max-w-7xl mx-auto space-y-8">
     <div class="pt-4">
       <h2 class="text-2xl font-bold text-white">Operação de Bar - Eventos</h2>
       <p class="text-zinc-400 text-sm">Prestação de Contas (Produtor) vs Gestão Interna (Stratus).</p>
@@ -58,7 +59,7 @@
   </div>
 
   <!-- RESUMO DO EVENTO / CLIENTE / INTERNO -->
-  <div id="event-view" class="view p-8 max-w-7xl mx-auto space-y-6 hidden">
+      <div class="flex flex-wrap gap-3 items-center justify-between pb-4 border-b border-zinc-800">
     <div class="flex items-center justify-between pb-4 border-b border-zinc-800">
       <div class="flex items-center space-x-4">
         <button onclick="show('bar-view')" class="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-700 text-teal-400"><i class="fas fa-arrow-left"></i></button>
@@ -70,8 +71,8 @@
   </div>
 
   <!-- DASHBOARD MESTRE -->
-  <div id="master-view" class="view p-8 max-w-7xl mx-auto space-y-6 hidden">
-    <div class="flex items-center justify-between pb-4 border-b border-zinc-800">
+    <div id="master-view" class="view p-4 md:p-8 max-w-7xl mx-auto space-y-6 hidden">
+        <div class="flex flex-wrap gap-3 items-center justify-between pb-4 border-b border-zinc-800"></div>
       <div class="flex items-center space-x-4">
         <button onclick="show('bar-view')" class="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-700 text-amber-400"><i class="fas fa-arrow-left"></i></button>
         <div><h2 class="text-2xl font-bold text-amber-400">Lucro Bar Geral</h2><p class="text-xs text-zinc-400">Consolidado interno Stratus</p></div>
@@ -93,11 +94,17 @@ let files = [];
 
 /* ---------- NAVEGAÇÃO ---------- */
 function show(id) { document.querySelectorAll('.view').forEach((v) => v.classList.add('hidden')); $(id).classList.remove('hidden'); $('bar-view') && window.scrollTo(0, 0); }
+
+const toggleMenu = (open) => { $('aside').classList.toggle('-translate-x-full', !open); $('overlay').classList.toggle('hidden', !open); };
+$('menu-btn').addEventListener('click', () => toggleMenu($('aside').classList.contains('-translate-x-full')));
+$('overlay').addEventListener('click', () => toggleMenu(false));
 function nav(id, el) {
+  toggleMenu(false);
   document.querySelectorAll('.nav').forEach((n) => n.classList.remove('on')); el && el.classList.add('on');
   if (id === 'bar-view') return show('bar-view');
   cur = id; show('mod-view'); render();
 }
+
 const item = (id, icon, label, on) => `<a href="#" data-v="${id}" class="nav flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm text-zinc-400 hover:text-white hover:bg-zinc-900 ${on ? 'on' : ''}"><i class="fas ${icon} w-5"></i><span>${label}</span></a>`;
 const groups = [
   ['Painel Principal', [['main-view', 'fa-home', 'Painel'], ['meetings', 'fa-calendar-alt', 'Reuniões'], ['demands', 'fa-tasks', 'Demandas Gerais'], ['calendar', 'fa-calendar', 'Calendário'], ['people', 'fa-users', 'Pessoas']]],
@@ -277,10 +284,15 @@ function card(f, type) {
 async function loadFiles() {
   try {
     const r = await fetch('/api/sheets');
-    files = await r.json();
-    if (!r.ok) throw new Error(files.details || files.error);
-    
+    const data = await r.json();
+    if (!r.ok) throw new Error([data.error, data.details].filter(Boolean).join(' — '));
+    files = Array.isArray(data) ? data : [];
+
     $('producer-cards').innerHTML = ''; $('stratus-cards').innerHTML = '';
+    if (!files.length) {
+      $('producer-cards').innerHTML = '<p class="text-xs text-amber-400 col-span-full">Nenhuma planilha encontrada. Compartilhe as planilhas com o e-mail da conta de serviço do Google (abra /api/health para ver qual é).</p>';
+      return;
+    }
     const masterFile = files.find(f => isMaster(f.name));
     if (masterFile) {
         const mCard = card(masterFile, 'master');
@@ -292,7 +304,10 @@ async function loadFiles() {
       if (isInternal(f.name)) $('stratus-cards').appendChild(card(f, 'internal'));
       else $('producer-cards').appendChild(card(f, 'client'));
     });
-  } catch (e) {}
+  } catch (e) {
+    files = [];
+    $('producer-cards').innerHTML = `<p class="text-xs text-red-400 col-span-full">Não foi possível carregar as planilhas: ${esc(e.message)}</p>`;
+  }
 }
 
 async function api(id, tab) {
