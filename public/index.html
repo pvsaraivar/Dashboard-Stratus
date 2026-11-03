@@ -714,9 +714,6 @@ window.moveDemanda = (id, newStatus) => { const d = (DB.demandas || []).find(x =
 /* ---------- MÓDULOS DE FINANCEIRO E SIMULADOR ---------- */
 let activeFinClient = null, activeFinEvent = null;
 
-/* ---------- MÓDULOS DE FINANCEIRO E SIMULADOR ---------- */
-let activeFinClient = null, activeFinEvent = null;
-
 MODS.est = () => {
   const ests = DB.estabelecimentos || [];
   setTimeout(() => { if($('sim-fat')) calcSim(); }, 50);
