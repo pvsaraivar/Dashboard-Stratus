@@ -394,7 +394,7 @@ async function apiBest(id) {
 }
 
 async function getMasterData() {
-  const m = files.find(x => isMaster(x.name));
+  const m = files.find(x => x.name.toUpperCase().includes('LUCRO BAR GERAL'));
   if (!m) return null;
   const d = await api(m.id);
   return parseGridToDRE(d.grade);
