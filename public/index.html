@@ -143,6 +143,7 @@ const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const R = (v) => 'R$ ' + (Number(v) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const P = (a, b) => (b && a != null && !isNaN(a) ? ((a / b) * 100).toFixed(1).replace('.', ',') + '%' : '0,0%');
+const fd = (d) => (d ? String(d).split('-').reverse().join('/') : '');
 const sheetUrl = (id) => 'https://docs.google.com/spreadsheets/d/' + id;
 
 // Variáveis Globais de Estado
@@ -172,7 +173,7 @@ const groups = [
   ['Operacional', [['est', 'fa-store', 'Estabelecimentos'], ['contracts', 'fa-file-contract', 'Contratos'], ['fin', 'fa-wallet', 'Financeiro'], ['reports', 'fa-chart-bar', 'Relatórios']]],
 ];
 $('sidebar').innerHTML = groups.map(([t, l]) => `<div><p class="px-3 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-2">${t}</p><nav class="space-y-1">${l.map((x) => item(x[0], x[1], x[2], x[0] === 'bar-view')).join('')}</nav></div>`).join('');
-// Clique nos itens do menu lateral (delegação de evento)
+
 $('sidebar').addEventListener('click', (e) => {
   const a = e.target.closest('.nav');
   if (!a) return;
@@ -195,7 +196,6 @@ function parseGridToDRE(grade) {
   let r = { bruto: 0, desp: 0, liq: 0, maq: 0, rep: 0, un: 0, tkt: 0, lBar: 0, cmv: 0, bilh: 0, mo: 0, insumos: 0, oper: 0, sis: 0, consumo: 0 };
   let prods = [], evs = [];
 
-  // SCANNER DE DRE
   grade.forEach((row, rowIndex) => {
     row.forEach((cell, colIndex) => {
       let t = String(cell).toUpperCase().trim();
@@ -221,7 +221,6 @@ function parseGridToDRE(grade) {
     });
   });
 
-  // BUSCA INTELIGENTE DE PRODUTOS
   let prodH = { nome: -1, qtd: -1, unit: -1, vendas: -1, custo: -1, lucro: -1 };
   let inProd = false, currentCategory = 'GERAL';
 
@@ -262,7 +261,6 @@ function parseGridToDRE(grade) {
     }
   });
 
-  // MASTER EVENTOS
   const MESES = ['JANEIRO', 'FEVEREIRO', 'MARÇO', 'ABRIL', 'MAIO', 'JUNHO', 'JULHO', 'AGOSTO', 'SETEMBRO', 'OUTUBRO', 'NOVEMBRO', 'DEZEMBRO'];
   let inEv = false, H = {};
   grade.forEach((row) => {
@@ -610,7 +608,7 @@ const MODS = {};
 MODS.contracts = () => head('Contratos', 'Módulo temporariamente minimizado.');
 MODS.reports = () => head('Relatórios', 'Módulo temporariamente minimizado.');
 
-/* ---------- NOVO MÓDULO DE ACESSOS ---------- */
+/* ---------- MÓDULO DE ACESSOS ---------- */
 MODS.users = () => {
   if (currentUser?.role !== 'admin') return head('Acesso Negado', 'Apenas administradores podem gerenciar acessos.') + `<p class="mt-4 text-xs text-zinc-500">O seu perfil de utilizador não tem permissões para ver esta página.</p>`;
   
@@ -686,9 +684,9 @@ MODS.calendar = () => {
 };
 
 window.addCalEvento = (e) => {
-   e.preventDefault(); const fd = new FormData(e.target);
+   e.preventDefault(); const fdForm = new FormData(e.target);
    DB.calendario = DB.calendario || [];
-   DB.calendario.push({ id: uid(), titulo: fd.get('titulo'), data: fd.get('data'), operacao: fd.get('operacao') });
+   DB.calendario.push({ id: uid(), titulo: fdForm.get('titulo'), data: fdForm.get('data'), operacao: fdForm.get('operacao') });
    save(); render();
 };
 
@@ -708,7 +706,7 @@ MODS.meetings = () => {
   return head('Reuniões & Atas', 'Agendamento e registro de decisões.') + `<div class="mb-8 mt-4 bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6"><h3 class="text-sm font-bold text-white mb-4"><i class="fas fa-plus text-teal-400 mr-2"></i>Agendar Nova Reunião</h3><form onsubmit="addReuniao(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-start"><label class="text-[11px] text-zinc-500 space-y-1 block md:col-span-2"><span>Assunto / Título</span><input required name="titulo" class="${inp}"></label><label class="text-[11px] text-zinc-500 space-y-1 block"><span>Data e Hora</span><input required type="datetime-local" name="data" class="${inp}"></label><label class="text-[11px] text-zinc-500 space-y-1 block"><span>Formato</span><select name="tipo" class="${inp}"><option>Online</option><option>Presencial</option><option>Call / Telefone</option></select></label><label class="text-[11px] text-zinc-500 space-y-1 block md:col-span-2"><span>Pauta</span><textarea name="pauta" rows="2" class="${inp}"></textarea></label><label class="text-[11px] text-zinc-500 space-y-1 block md:col-span-2"><span>Participantes</span><textarea name="participantes" rows="2" class="${inp}"></textarea></label><div class="md:col-span-4 flex justify-end pt-3 border-t border-zinc-800 mt-2"><button type="submit" class="bg-teal-500/15 border border-teal-500/40 text-teal-400 rounded-lg px-6 py-2.5 text-sm font-bold hover:bg-teal-500/25 transition-colors"><i class="fas fa-calendar-check mr-2"></i>Agendar Reunião</button></div></form></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-8"><div><div class="flex items-center justify-between pb-3 border-b border-zinc-800 mb-4"><h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fas fa-clock text-amber-400"></i>Próximas Reuniões</h3><span class="text-[10px] font-bold bg-zinc-900 border border-zinc-700 text-zinc-400 px-2 py-1 rounded-lg">${agendadas.length}</span></div><div class="flex flex-col gap-4">${agendadas.map(r => cardHtml(r, false)).join('') || '<div class="text-center text-[11px] text-zinc-600 py-8 border border-zinc-800 border-dashed rounded-xl">Nenhuma reunião agendada.</div>'}</div></div><div><div class="flex items-center justify-between pb-3 border-b border-zinc-800 mb-4"><h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fas fa-archive text-zinc-400"></i>Histórico & Atas</h3><span class="text-[10px] font-bold bg-zinc-900 border border-zinc-700 text-zinc-400 px-2 py-1 rounded-lg">${historico.length}</span></div><div class="flex flex-col gap-4">${historico.map(r => cardHtml(r, true)).join('') || '<div class="text-center text-[11px] text-zinc-600 py-8 border border-zinc-800 border-dashed rounded-xl">Nenhum histórico disponível.</div>'}</div></div></div>`;
 };
 
-window.addReuniao = (e) => { e.preventDefault(); const fd = new FormData(e.target); DB.reunioes = DB.reunioes || []; DB.reunioes.push({ id: uid(), titulo: fd.get('titulo'), data: fd.get('data'), tipo: fd.get('tipo'), pauta: fd.get('pauta'), participantes: fd.get('participantes'), status: 'Agendada', ata: '' }); save(); render(); };
+window.addReuniao = (e) => { e.preventDefault(); const fdForm = new FormData(e.target); DB.reunioes = DB.reunioes || []; DB.reunioes.push({ id: uid(), titulo: fdForm.get('titulo'), data: fdForm.get('data'), tipo: fdForm.get('tipo'), pauta: fdForm.get('pauta'), participantes: fdForm.get('participantes'), status: 'Agendada', ata: '' }); save(); render(); };
 window.concluirReuniao = (id) => { const r = (DB.reunioes || []).find(x => x.id === id); if (!r) return; const ata = prompt(`Reunião: ${r.titulo}\nEscreva a Ata:`); if (ata !== null) { r.status = 'Concluída'; r.ata = ata; save(); render(); } };
 window.cancelarReuniao = (id) => { if(confirm('Cancelar reunião?')) { const r = (DB.reunioes || []).find(x => x.id === id); if (r) { r.status = 'Cancelada'; save(); render(); } } };
 window.editAta = (id) => { const r = (DB.reunioes || []).find(x => x.id === id); if (!r) return; const ata = prompt(`Editar Ata:`, r.ata || ''); if (ata !== null) { r.ata = ata; save(); render(); } };
@@ -733,7 +731,7 @@ MODS.demands = () => {
   return head('Demandas Gerais', 'Gestão de tarefas e backlog.') + `<div class="mb-8 mt-4 bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6"><h3 class="text-sm font-bold text-white mb-4"><i class="fas fa-plus text-teal-400 mr-2"></i>Nova Demanda</h3><form onsubmit="addDemanda(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-start"><label class="text-[11px] text-zinc-500 space-y-1 block md:col-span-2"><span>Título da Demanda</span><input required name="titulo" class="${inp}"></label><label class="text-[11px] text-zinc-500 space-y-1 block"><span>Responsável</span><input required name="responsavel" class="${inp}"></label><label class="text-[11px] text-zinc-500 space-y-1 block"><span>Urgência</span><select name="urgencia" class="${inp}"><option>Baixa</option><option>Média</option><option>Alta</option><option>Urgente</option></select></label><label class="text-[11px] text-zinc-500 space-y-1 block md:col-span-3"><span>Descrição</span><textarea required name="descricao" rows="2" class="${inp}"></textarea></label><label class="text-[11px] text-zinc-500 space-y-1 block"><span>Tipo</span><select name="tipo" class="${inp}"><option>Operacional</option><option>Financeiro</option><option>Comercial</option><option>Tecnologia</option><option>Marketing / Design</option><option>Outros</option></select></label><div class="md:col-span-4 flex justify-end pt-3 border-t border-zinc-800 mt-2"><button type="submit" class="bg-teal-500/15 border border-teal-500/40 text-teal-400 rounded-lg px-6 py-2.5 text-sm font-bold hover:bg-teal-500/25 transition-colors"><i class="fas fa-save mr-2"></i>Criar Demanda</button></div></form></div><div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 mt-4">${colHtml('Pendente', 'fa-clipboard-list', 'text-zinc-400')}${colHtml('Em Andamento', 'fa-spinner fa-spin-pulse', 'text-amber-400')}${colHtml('Concluída', 'fa-check-circle', 'text-emerald-400')}</div>`;
 };
 
-window.addDemanda = (e) => { e.preventDefault(); const fd = new FormData(e.target); DB.demandas = DB.demandas || []; DB.demandas.push({ id: uid(), titulo: fd.get('titulo'), descricao: fd.get('descricao'), responsavel: fd.get('responsavel'), urgencia: fd.get('urgencia'), tipo: fd.get('tipo'), status: 'Pendente', dataCriacao: new Date().toISOString() }); save(); render(); };
+window.addDemanda = (e) => { e.preventDefault(); const fdForm = new FormData(e.target); DB.demandas = DB.demandas || []; DB.demandas.push({ id: uid(), titulo: fdForm.get('titulo'), descricao: fdForm.get('descricao'), responsavel: fdForm.get('responsavel'), urgencia: fdForm.get('urgencia'), tipo: fdForm.get('tipo'), status: 'Pendente', dataCriacao: new Date().toISOString() }); save(); render(); };
 window.moveDemanda = (id, newStatus) => { const d = (DB.demandas || []).find(x => x.id === id); if (d) { d.status = newStatus; save(); render(); } };
 
 /* ---------- MÓDULOS DE FINANCEIRO E SIMULADOR ---------- */
@@ -845,8 +843,8 @@ MODS.fin = () => {
   return head('Painel Financeiro', 'Organização em subpastas.') + `<div class="mb-8 mt-4 bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6"><h3 class="text-sm font-bold text-white mb-3">Nova Pasta de Cliente (Produtor/Marca)</h3><form onsubmit="addFinCliente(event)" class="flex flex-col md:flex-row gap-3 items-end"><label class="text-[11px] text-zinc-500 space-y-1 block flex-1 w-full"><span>Nome do Cliente</span><input required name="nome" class="${inp}"></label><button type="submit" class="bg-teal-500/15 border border-teal-500/40 text-teal-400 rounded-lg px-4 py-2 text-sm font-bold hover:bg-teal-500/25 transition-colors w-full md:w-auto"><i class="fas fa-plus mr-2"></i>Criar Cliente</button></form></div><div class="flex items-center space-x-2 mb-4"><i class="fas fa-folder-open text-teal-400"></i><h3 class="text-sm font-bold text-white">Clientes Cadastrados</h3></div><div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">${cliCards || '<div class="col-span-full py-10 text-center text-zinc-500 bg-zinc-900/30 border border-zinc-800 border-dashed rounded-2xl">Nenhum cliente cadastrado ainda.</div>'}</div>`;
 };
 
-window.addFinCliente = (e) => { e.preventDefault(); const fd = new FormData(e.target); DB.finClientes = DB.finClientes || []; DB.finClientes.push({ id: uid(), nome: fd.get('nome') }); save(); render(); };
-window.addFinEvento = (e) => { e.preventDefault(); const fd = new FormData(e.target); DB.finEventos = DB.finEventos || []; DB.finEventos.push({ id: uid(), clienteId: activeFinClient, nome: fd.get('nome') }); save(); render(); };
+window.addFinCliente = (e) => { e.preventDefault(); const fdForm = new FormData(e.target); DB.finClientes = DB.finClientes || []; DB.finClientes.push({ id: uid(), nome: fdForm.get('nome') }); save(); render(); };
+window.addFinEvento = (e) => { e.preventDefault(); const fdForm = new FormData(e.target); DB.finEventos = DB.finEventos || []; DB.finEventos.push({ id: uid(), clienteId: activeFinClient, nome: fdForm.get('nome') }); save(); render(); };
 window.editCliente = (id, nome) => { const n = prompt("Editar Nome:", nome); if (n) { const c = DB.finClientes.find(x => x.id === id); if (c) { c.nome = n; save(); render(); } } };
 window.editEvento = (id, nome) => { const n = prompt("Editar Nome:", nome); if (n) { const e = DB.finEventos.find(x => x.id === id); if (e) { e.nome = n; save(); render(); } } };
 
@@ -882,12 +880,10 @@ mv.addEventListener('click', (e) => {
   else if (g('data-go')) { go(g('data-go').dataset.go); }
 });
 
-
 /* ---------- LOGIC DE AUTENTICAÇÃO ---------- */
 async function initApp() {
    await loadDB(); 
    
-   // Cria o super admin automaticamente se a lista de utilizadores não existir ou estiver vazia
    if (!DB.usuarios || DB.usuarios.length === 0) {
        DB.usuarios = [{ id: uid(), nome: 'Paulo Victor', email: 'admin@stratus.com', senha: '123', role: 'admin' }];
        save();
@@ -905,7 +901,6 @@ async function initApp() {
        } catch(e) {}
    }
    
-   // Se não houver login salvo ou for inválido, mostra a tela de login e esconde a App
    $('login-screen').classList.remove('hidden');
    $('app-container').classList.add('hidden');
 }
@@ -927,14 +922,13 @@ window.doLogin = (e) => {
 
 window.doLogout = () => {
    localStorage.removeItem('stratus_user');
-   location.reload(); // Recarrega a página para trancar tudo novamente
+   location.reload();
 };
 
 function showApp() {
    $('login-screen').classList.add('hidden');
    $('app-container').classList.remove('hidden');
    
-   // Coloca as iniciais do utilizador logado no topo
    const initials = currentUser.nome.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
    $('user-avatar').textContent = initials;
    
@@ -942,7 +936,6 @@ function showApp() {
    loadFiles();
 }
 
-// Inicia o ciclo do aplicativo
 initApp();
 </script>
 </body>
