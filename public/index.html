@@ -35,37 +35,65 @@
     <div id="mod-view" class="view p-4 md:p-8 max-w-7xl mx-auto space-y-6 hidden"></div>
 
   <!-- LISTA DE CARDS - OPERAÇÃO DE BAR -->
-    <div id="bar-view" class="view p-4 md:p-8 max-w-7xl mx-auto space-y-8">
-    <div class="pt-4">
-      <h2 class="text-2xl font-bold text-white">Operação de Bar - Eventos</h2>
-      <p class="text-zinc-400 text-sm">Prestação de Contas (Produtor) vs Gestão Interna (Stratus).</p>
+  <div id="bar-view" class="view p-4 md:p-8 max-w-7xl mx-auto space-y-8">
+    
+    <!-- Cabeçalho e Barra de Pesquisa -->
+    <div class="pt-4 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-800 pb-6">
+      <div>
+        <h2 class="text-2xl font-bold text-white">Operação de Bar - Eventos</h2>
+        <p class="text-zinc-400 text-sm">Controle financeiro, dashboard mestre e estoques.</p>
+      </div>
+      <div class="relative w-full md:w-80">
+        <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-zinc-500"></i>
+        <input type="text" id="search-sheets" oninput="searchQuery = this.value; renderCards()" placeholder="Buscar planilha por nome..." class="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-11 pr-4 py-3 text-sm text-white outline-none focus:border-teal-500 transition-colors shadow-sm">
+      </div>
     </div>
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+    <!-- Módulo Mestre (Lucro Bar) Sempre no Topo -->
+    <div class="space-y-4">
+      <h3 class="text-sm font-bold text-amber-400 uppercase tracking-widest flex items-center"><i class="fas fa-crown mr-2"></i>Lucro Bar Geral</h3>
+      <div id="master-cards" class="grid grid-cols-1 gap-4"></div>
+    </div>
+
+    <!-- Grade de 3 Colunas: Clientes, Interno e Estoque -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Clientes -->
       <div class="space-y-4">
         <div class="flex items-center space-x-3 pb-2 border-b border-zinc-800">
           <div class="w-8 h-8 rounded-lg bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400"><i class="fas fa-file-invoice-dollar"></i></div>
-          <div><h3 class="text-lg font-bold text-white">Planilhas dos Clientes</h3><p class="text-xs text-zinc-400">DRE oficial do evento.</p></div>
+          <div><h3 class="text-sm font-bold text-white">Planilhas de Clientes</h3><p class="text-[10px] text-zinc-400">DRE Oficial do Evento</p></div>
         </div>
-        <div id="producer-cards" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        <div id="producer-cards" class="grid grid-cols-1 gap-3"></div>
       </div>
+      
+      <!-- Interno Stratus -->
       <div class="space-y-4">
         <div class="flex items-center space-x-3 pb-2 border-b border-zinc-800">
-          <div class="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400"><i class="fas fa-lock"></i></div>
-          <div><h3 class="text-lg font-bold text-white">Controle Interno & Consolidado</h3><p class="text-xs text-zinc-400">Dashboard executivo Lucro Bar Geral.</p></div>
+          <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400"><i class="fas fa-lock"></i></div>
+          <div><h3 class="text-sm font-bold text-white">Interno Stratus</h3><p class="text-[10px] text-zinc-400">Resumos da Operação</p></div>
         </div>
-        <div id="stratus-cards" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        <div id="stratus-cards" class="grid grid-cols-1 gap-3"></div>
+      </div>
+
+      <!-- Estoque -->
+      <div class="space-y-4">
+        <div class="flex items-center space-x-3 pb-2 border-b border-zinc-800">
+          <div class="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400"><i class="fas fa-boxes"></i></div>
+          <div><h3 class="text-sm font-bold text-white">Planilhas de Estoque</h3><p class="text-[10px] text-zinc-400">Contagem de Insumos</p></div>
+        </div>
+        <div id="estoque-cards" class="grid grid-cols-1 gap-3"></div>
       </div>
     </div>
   </div>
 
- <!-- RESUMO DO EVENTO / CLIENTE / INTERNO -->
+  <!-- RESUMO DO EVENTO / CLIENTE / INTERNO -->
   <div id="event-view" class="view p-4 md:p-8 max-w-7xl mx-auto space-y-6 hidden">
     <div class="flex items-center justify-between pb-4 border-b border-zinc-800">
       <div class="flex items-center space-x-4">
-        <button onclick="show('bar-view')" class="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-700 text-teal-400"><i class="fas fa-arrow-left"></i></button>
+        <button onclick="show('bar-view')" class="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-700 text-teal-400 hover:text-white transition-colors"><i class="fas fa-arrow-left"></i></button>
         <div><h2 id="ev-title" class="text-2xl font-bold text-white"></h2><p id="ev-sub" class="text-xs text-zinc-400">Resumo da apuração</p></div>
       </div>
-      <a id="ev-link" target="_blank" rel="noopener" class="px-4 py-2 bg-teal-500/15 border border-teal-500/40 text-teal-400 rounded-xl text-sm font-bold"><i class="fas fa-external-link-alt mr-2"></i>Abrir no Google Planilhas</a>
+      <a id="ev-link" target="_blank" rel="noopener" class="px-4 py-2 bg-teal-500/15 border border-teal-500/40 text-teal-400 rounded-xl text-sm font-bold hover:bg-teal-500/25 transition-colors"><i class="fas fa-external-link-alt mr-2"></i>Abrir Planilha</a>
     </div>
     <div id="ev-body" class="space-y-6"></div>
   </div>
@@ -74,10 +102,10 @@
   <div id="master-view" class="view p-4 md:p-8 max-w-7xl mx-auto space-y-6 hidden">
     <div class="flex items-center justify-between pb-4 border-b border-zinc-800">
       <div class="flex items-center space-x-4">
-        <button onclick="show('bar-view')" class="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-700 text-amber-400"><i class="fas fa-arrow-left"></i></button>
+        <button onclick="show('bar-view')" class="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-700 text-amber-400 hover:text-white transition-colors"><i class="fas fa-arrow-left"></i></button>
         <div><h2 class="text-2xl font-bold text-amber-400">Lucro Bar Geral</h2><p class="text-xs text-zinc-400">Consolidado interno Stratus</p></div>
       </div>
-      <a id="ms-link" target="_blank" rel="noopener" class="px-4 py-2 bg-amber-500/15 border border-amber-500/40 text-amber-400 rounded-xl text-sm font-bold"><i class="fas fa-external-link-alt mr-2"></i>Abrir no Google Planilhas</a>
+      <a id="ms-link" target="_blank" rel="noopener" class="px-4 py-2 bg-amber-500/15 border border-amber-500/40 text-amber-400 rounded-xl text-sm font-bold hover:bg-amber-500/25 transition-colors"><i class="fas fa-external-link-alt mr-2"></i>Abrir Planilha</a>
     </div>
     <div id="ms-body" class="space-y-6"></div>
   </div>
@@ -90,7 +118,13 @@ const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '
 const R = (v) => 'R$ ' + (Number(v) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const P = (a, b) => (b && a != null && !isNaN(a) ? ((a / b) * 100).toFixed(1).replace('.', ',') + '%' : '0,0%');
 const sheetUrl = (id) => 'https://docs.google.com/spreadsheets/d/' + id;
+
+// Variáveis Globais de Estado das Planilhas
 let files = [];
+let fileMap = {};
+let sheetFiles = { master: [], internal: [], client: [], estoque: [] };
+let searchQuery = '';
+let expSheets = { client: false, internal: false, estoque: false };
 
 /* ---------- NAVEGAÇÃO ---------- */
 function show(id) { document.querySelectorAll('.view').forEach((v) => v.classList.add('hidden')); $(id).classList.remove('hidden'); $('bar-view') && window.scrollTo(0, 0); }
@@ -107,8 +141,8 @@ function nav(id, el) {
 
 const item = (id, icon, label, on) => `<a href="#" data-v="${id}" class="nav flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm text-zinc-400 hover:text-white hover:bg-zinc-900 ${on ? 'on' : ''}"><i class="fas ${icon} w-5"></i><span>${label}</span></a>`;
 const groups = [
-  ['Painel Principal', [['main-view', 'fa-home', 'Painel'], ['meetings', 'fa-calendar-alt', 'Reuniões'], ['demands', 'fa-tasks', 'Demandas Gerais'], ['calendar', 'fa-calendar', 'Calendário'], ['people', 'fa-users', 'Pessoas']]],
-  ['Operacional', [['bar-view', 'fa-glass-cheers', 'Op. de Bar - Eventos'], ['est', 'fa-store', 'Estabelecimentos'], ['contracts', 'fa-file-contract', 'Contratos'], ['fin', 'fa-wallet', 'Financeiro'], ['reports', 'fa-chart-bar', 'Relatórios']]],
+  ['Painel Principal', [['bar-view', 'fa-glass-cheers', 'Op. de Bar - Eventos'], ['meetings', 'fa-calendar-alt', 'Reuniões'], ['demands', 'fa-tasks', 'Demandas Gerais'], ['calendar', 'fa-calendar', 'Calendário'], ['people', 'fa-users', 'Pessoas']]],
+  ['Operacional', [['est', 'fa-store', 'Estabelecimentos'], ['contracts', 'fa-file-contract', 'Contratos'], ['fin', 'fa-wallet', 'Financeiro'], ['reports', 'fa-chart-bar', 'Relatórios']]],
 ];
 $('sidebar').innerHTML = groups.map(([t, l]) => `<div><p class="px-3 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-2">${t}</p><nav class="space-y-1">${l.map((x) => item(x[0], x[1], x[2], x[0] === 'bar-view')).join('')}</nav></div>`).join('');
 document.querySelectorAll('.nav').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); nav(a.dataset.v, a); }));
@@ -130,13 +164,12 @@ function parseGridToDRE(grade) {
   let r = { bruto: 0, desp: 0, liq: 0, maq: 0, rep: 0, un: 0, tkt: 0, lBar: 0, cmv: 0, bilh: 0, mo: 0, insumos: 0, oper: 0, sis: 0, consumo: 0 };
   let prods = [], evs = [];
 
-  // 1. SCANNER DE DRE (Busca KPIs em qualquer lugar da planilha, como Coluna P e R)
+  // 1. SCANNER DE DRE
   grade.forEach((row, rowIndex) => {
     row.forEach((cell, colIndex) => {
       let t = String(cell).toUpperCase().trim();
       if (!t) return;
       
-      // Procura o valor numérico nas próximas células da mesma linha
       let val = 0;
       for (let offset = 1; offset <= 3; offset++) {
          let nextCell = row[colIndex + offset];
@@ -146,7 +179,6 @@ function parseGridToDRE(grade) {
          }
       }
 
-      // Mapeamento exato de KPIs independente de onde estiverem
       if (t === 'BRUTO' || t === 'FATURAMENTO' || t === 'RECEITA BRUTA') r.bruto = val;
       if (t === 'DESPESAS GERAL' || t === 'DESPESAS GERAIS' || t === 'TOTAL DESPESAS') r.desp = val;
       if (t === 'LUCRO LÍQUIDO' || t === 'LUCRO LIQUIDO' || t === 'LUCRO FINAL') r.liq = val;
@@ -160,7 +192,7 @@ function parseGridToDRE(grade) {
     });
   });
 
-  // 2. BUSCA INTELIGENTE DE PRODUTOS E CATEGORIAS
+  // 2. BUSCA INTELIGENTE DE PRODUTOS
   let prodH = { nome: -1, qtd: -1, unit: -1, vendas: -1, custo: -1, lucro: -1 };
   let inProd = false;
   let currentCategory = 'GERAL';
@@ -169,7 +201,6 @@ function parseGridToDRE(grade) {
     let rowStr = row.join(' ').toUpperCase();
     let t0 = String(row[0]).toUpperCase().trim();
     
-    // Acha a linha de cabeçalho dos produtos
     if (!inProd && rowStr.includes('PRODUTO') && (rowStr.includes('VENDIDO') || rowStr.includes('QTD') || rowStr.includes('CONSUMAÇÃO'))) {
       inProd = true;
       row.forEach((h, i) => {
@@ -181,7 +212,6 @@ function parseGridToDRE(grade) {
         if (ht === 'CUSTO TOTAL' || ht === 'CUSTO' || ht.includes('CUSTO')) prodH.custo = i;
         if (ht === 'LUCRO TOTAL' || ht === 'LUCRO') prodH.lucro = i;
       });
-      // Fallbacks padrões baseados no Excel da foto se o cabeçalho estiver quebrado
       if (prodH.nome === -1) prodH.nome = 0;
       if (prodH.qtd === -1) prodH.qtd = 2; 
       if (prodH.unit === -1) prodH.unit = 5; 
@@ -192,21 +222,18 @@ function parseGridToDRE(grade) {
     }
 
     if (inProd && t0) {
-      // Identifica Header de Categoria (Linha que tem texto na Col A, mas a qtd/vendas são vazios ou não numéricos)
       let checkQtd = parseNum(row[prodH.qtd]);
       let checkVend = parseNum(row[prodH.vendas]);
       if (checkQtd === 0 && checkVend === 0 && !String(row[prodH.qtd]).trim() && !String(row[prodH.vendas]).trim()) {
-         currentCategory = t0; // Ex: "SOFT DRINKS", "DRINKS"
+         currentCategory = t0; 
          return;
       }
 
-      // Pula lixo ou totais
       if (t0 === 'AVULSO' || t0.includes('TOTAL') || t0 === 'RESUMO' || t0.includes('BILHETERIA')) return;
 
       let qtd = parseNum(row[prodH.qtd]);
       let valTot = parseNum(row[prodH.vendas]);
       
-      // TRAVA DE SEGURANÇA: Só entra produto real que girou!
       if (qtd > 0 || valTot > 0) {
         let nome = row[prodH.nome];
         let valUnit = parseNum(row[prodH.unit]);
@@ -222,7 +249,7 @@ function parseGridToDRE(grade) {
     }
   });
 
-    // 3. MASTER EVENTOS: cada coluna é lida pelo nome exato do cabeçalho
+  // 3. MASTER EVENTOS
   const MESES = ['JANEIRO', 'FEVEREIRO', 'MARÇO', 'ABRIL', 'MAIO', 'JUNHO', 'JULHO', 'AGOSTO', 'SETEMBRO', 'OUTUBRO', 'NOVEMBRO', 'DEZEMBRO'];
   let inEv = false, H = {};
   grade.forEach((row) => {
@@ -245,7 +272,7 @@ function parseGridToDRE(grade) {
     const sb = g(H.sb), sv = g(H.sv), rb = g(H.rb), rv = g(H.rv);
     const consumo = g(H.cons), pirulitos = g(H.pir), chapeus = g(H.cha), estoque = g(H.est);
     const saida = sb + sv, retorno = rb + rv, lucroBase = g(H.lucroOp), lucroFinal = g(H.lucroFinal);
-    if (saida <= 0 && retorno <= 0 && lucroFinal === 0) return;           // linha de mês ou vazia
+    if (saida <= 0 && retorno <= 0 && lucroFinal === 0) return;           
     const data = String(row[H.data] || '');
     const mes = data.includes('/') ? (MESES[parseInt(data.split('/')[1], 10) - 1] || 'GERAL') : 'GERAL';
     evs.push({ evento: nome, data, mes, saida, retorno, lucroBase, roi: saida ? lucroBase / saida : 0,
@@ -259,27 +286,7 @@ function parseGridToDRE(grade) {
   return { r, prods, evs };
 }
 
-/* ---------- RENDERIZAÇÃO VISUAL ---------- */
-const isMaster = (n) => n.toUpperCase().includes('LUCRO BAR GERAL');
-const isInternal = (n) => n.toUpperCase().includes('STRATUS') && !isMaster(n);
-
-function card(f, type) {
-  const c = document.createElement('div');
-  if (type === 'master') {
-     c.className = `bg-amber-950/20 border border-amber-500/30 hover:border-amber-500/60 transition-all rounded-2xl p-5 cursor-pointer flex justify-between items-center`;
-     c.innerHTML = `<div><h4 class="text-base font-bold text-amber-400">Dashboard Executivo</h4><p class="text-[11px] text-amber-500/70 mt-1">${esc(f.name)}</p></div><i class="fas fa-arrow-right text-amber-400"></i>`;
-     c.addEventListener('click', () => openMaster(f));
-  } else if (type === 'internal') {
-     c.className = `bg-emerald-950/10 border border-emerald-500/30 hover:border-emerald-500/60 transition-all rounded-2xl p-5 cursor-pointer flex flex-col justify-between`;
-     c.innerHTML = `<div><h4 class="text-sm font-bold text-white mb-1 leading-tight">${esc(f.name)}</h4></div><span class="text-[10px] mt-3 inline-block font-bold text-emerald-400 uppercase tracking-wider"><i class="fas fa-lock mr-1"></i>Resumo Interno &rarr;</span>`;
-     c.addEventListener('click', () => openEvent(f, null, 'internal'));
-  } else {
-     c.className = `bg-zinc-900/40 border border-zinc-800 hover:border-teal-500/50 transition-all rounded-2xl p-5 cursor-pointer flex flex-col justify-between`;
-     c.innerHTML = `<div><h4 class="text-sm font-bold text-white mb-1 leading-tight">${esc(f.name)}</h4></div><span class="text-[10px] mt-3 inline-block font-bold text-teal-400 uppercase tracking-wider"><i class="fas fa-file-invoice-dollar mr-1"></i>Abrir Apuração &rarr;</span>`;
-     c.addEventListener('click', () => openEvent(f, null, 'client'));
-  }
-  return c;
-}
+/* ---------- RENDERIZAÇÃO DE LISTAS (PLANILHAS) ---------- */
 
 async function loadFiles() {
   try {
@@ -288,34 +295,93 @@ async function loadFiles() {
     if (!r.ok) throw new Error([data.error, data.details].filter(Boolean).join(' — '));
     files = Array.isArray(data) ? data : [];
 
-    $('producer-cards').innerHTML = ''; $('stratus-cards').innerHTML = '';
+    sheetFiles = { master: [], internal: [], client: [], estoque: [] };
+    fileMap = {};
+
     if (!files.length) {
-      $('producer-cards').innerHTML = '<p class="text-xs text-amber-400 col-span-full">Nenhuma planilha encontrada. Compartilhe as planilhas com o e-mail da conta de serviço do Google (abra /api/health para ver qual é).</p>';
+      const msg = '<p class="text-xs text-amber-400 col-span-full py-4 px-2 border border-amber-500/20 bg-amber-500/5 rounded-xl">Nenhuma planilha encontrada. Compartilhe as planilhas com o robô da Stratus.</p>';
+      $('master-cards').innerHTML = msg; $('producer-cards').innerHTML = msg; $('stratus-cards').innerHTML = msg; $('estoque-cards').innerHTML = msg;
       return;
     }
-    const masterFile = files.find(f => isMaster(f.name));
-    if (masterFile) {
-        const mCard = card(masterFile, 'master');
-        mCard.classList.add('mb-4');
-        $('stratus-cards').appendChild(mCard);
-    }
+
     files.forEach((f) => {
-      if (isMaster(f.name)) return; 
-      if (isInternal(f.name)) $('stratus-cards').appendChild(card(f, 'internal'));
-      else $('producer-cards').appendChild(card(f, 'client'));
+      fileMap[f.id] = f;
+      const n = f.name.toUpperCase();
+      if (n.includes('LUCRO BAR GERAL')) sheetFiles.master.push(f);
+      else if (n.includes('ESTOQUE')) sheetFiles.estoque.push(f);
+      else if (n.includes('STRATUS')) sheetFiles.internal.push(f);
+      else sheetFiles.client.push(f);
     });
+    
+    renderCards();
   } catch (e) {
-    files = [];
-    $('producer-cards').innerHTML = `<p class="text-xs text-red-400 col-span-full">Não foi possível carregar as planilhas: ${esc(e.message)}</p>`;
+    const msg = `<p class="text-xs text-red-400 col-span-full py-4 px-2 border border-red-500/20 bg-red-500/5 rounded-xl">Erro: ${esc(e.message)}</p>`;
+    $('master-cards').innerHTML = msg; $('producer-cards').innerHTML = msg; $('stratus-cards').innerHTML = msg; $('estoque-cards').innerHTML = msg;
   }
 }
+
+function makeCard(f, type) {
+  if (type === 'internal') {
+    return `<div class="bg-emerald-950/10 border border-emerald-500/30 hover:border-emerald-500/60 hover:bg-emerald-500/10 transition-all rounded-xl p-4 cursor-pointer flex flex-col justify-between" onclick="openEvent(fileMap['${f.id}'], null, 'internal')">
+       <h4 class="text-sm font-bold text-white mb-1 leading-tight line-clamp-2">${esc(f.name)}</h4>
+       <span class="text-[9px] mt-2 inline-block font-bold text-emerald-400 uppercase tracking-wider"><i class="fas fa-lock mr-1"></i>Resumo Interno &rarr;</span>
+    </div>`;
+  } else if (type === 'estoque') {
+    return `<div class="bg-blue-950/10 border border-blue-500/30 hover:border-blue-500/60 hover:bg-blue-500/10 transition-all rounded-xl p-4 cursor-pointer flex flex-col justify-between" onclick="openEvent(fileMap['${f.id}'], null, 'client')">
+       <h4 class="text-sm font-bold text-white mb-1 leading-tight line-clamp-2">${esc(f.name)}</h4>
+       <span class="text-[9px] mt-2 inline-block font-bold text-blue-400 uppercase tracking-wider"><i class="fas fa-boxes mr-1"></i>Planilha Estoque &rarr;</span>
+    </div>`;
+  } else {
+    return `<div class="bg-zinc-900/40 border border-zinc-800 hover:border-teal-500/50 hover:bg-zinc-800/50 transition-all rounded-xl p-4 cursor-pointer flex flex-col justify-between" onclick="openEvent(fileMap['${f.id}'], null, 'client')">
+       <h4 class="text-sm font-bold text-white mb-1 leading-tight line-clamp-2">${esc(f.name)}</h4>
+       <span class="text-[9px] mt-2 inline-block font-bold text-teal-400 uppercase tracking-wider"><i class="fas fa-file-invoice-dollar mr-1"></i>Abrir Apuração &rarr;</span>
+    </div>`;
+  }
+}
+
+window.renderCards = () => {
+  const q = searchQuery.toLowerCase();
+  const filter = (arr) => arr.filter(f => f.name.toLowerCase().includes(q));
+  
+  const m = filter(sheetFiles.master);
+  const c = filter(sheetFiles.client);
+  const i = filter(sheetFiles.internal);
+  const e = filter(sheetFiles.estoque);
+
+  // Render Master
+  $('master-cards').innerHTML = m.map(f => `
+     <div class="bg-amber-950/20 border border-amber-500/30 hover:border-amber-500/60 hover:bg-amber-500/10 transition-all rounded-2xl p-5 cursor-pointer flex justify-between items-center" onclick="openMaster(fileMap['${f.id}'])">
+        <div><h4 class="text-base font-bold text-amber-400">Dashboard Executivo</h4><p class="text-[11px] text-amber-500/70 mt-1">${esc(f.name)}</p></div><i class="fas fa-arrow-right text-amber-400 text-lg"></i>
+     </div>
+  `).join('') || `<div class="py-4 text-center text-[11px] text-zinc-600 border border-zinc-800 border-dashed rounded-xl">Master não encontrado.</div>`;
+
+  // Render Outras Listas (Paginadas)
+  const build = (arr, key, cid, type) => {
+    let list = arr;
+    let html = '';
+    if (!expSheets[key] && list.length > 5) {
+      list = list.slice(0, 5);
+      html = list.map(f => makeCard(f, type)).join('');
+      html += `<button onclick="expSheets.${key}=true; renderCards()" class="w-full py-2.5 mt-2 bg-zinc-900/40 hover:bg-zinc-800 border border-zinc-700/50 text-white text-xs font-bold rounded-xl transition-colors">Ver mais planilhas (${arr.length - 5}) <i class="fas fa-chevron-down ml-1"></i></button>`;
+    } else {
+      html = list.map(f => makeCard(f, type)).join('');
+      if (expSheets[key] && arr.length > 5) {
+        html += `<button onclick="expSheets.${key}=false; renderCards()" class="w-full py-2.5 mt-2 bg-zinc-900/40 hover:bg-zinc-800 border border-zinc-700/50 text-zinc-400 text-xs font-bold rounded-xl transition-colors">Ver menos <i class="fas fa-chevron-up ml-1"></i></button>`;
+      }
+    }
+    $(cid).innerHTML = html || `<div class="py-4 text-center text-[11px] text-zinc-600 border border-zinc-800 border-dashed rounded-xl">Nenhuma planilha localizada.</div>`;
+  };
+  
+  build(c, 'client', 'producer-cards', 'client');
+  build(i, 'internal', 'stratus-cards', 'internal');
+  build(e, 'estoque', 'estoque-cards', 'estoque');
+};
 
 async function api(id, tab) {
   const r = await fetch('/api/sheet-data?id=' + encodeURIComponent(id) + (tab ? '&tab=' + encodeURIComponent(tab) : ''));
   return await r.json();
 }
 
-// Escolhe a aba que realmente tem dados: prefere DRE/GERAL e deixa PROJEÇÃO por último
 async function apiBest(id) {
   const first = await api(id);
   const ok = (x) => { const p = parseGridToDRE(x.grade || []); return p.r.bruto > 0 || p.prods.length > 0 || p.evs.length > 0; };
@@ -393,7 +459,6 @@ function renderClient(d, f) {
   const list = (arr, fmt) => arr.slice(0, 5).map((x) => line(x.nome, fmt(x))).join('') || '<p class="text-[11px] text-zinc-500">Sem dados.</p>';
   const comCusto = p.filter((x) => x.custo > 0 && x.vendas > 0);
   
-  // Categorias (Restauradas)
   const cats = {};
   p.forEach(x => { const c = (cats[x.categoria] ||= { v: 0, l: 0, u: 0 }); c.v += x.vendas; c.l += x.lucro; c.u += x.vendido; });
   const catHtml = Object.keys(cats).length ? box('Resultado por categoria', 'fa-layer-group text-teal-400', Object.entries(cats).sort((a,b)=>b[1].l - a[1].l).map(([n,c]) => bar(n, c.l, Math.max(...Object.values(cats).map(x=>x.l)), 'bg-emerald-400', `${c.u} un · Vendas ${R(c.v)} · Lucro ${R(c.l)} (${P(c.l, r.lBar||r.bruto)})`)).join('')) : '';
@@ -432,7 +497,6 @@ function renderInternal(d, f, mst) {
   const tabs = `<div class="flex flex-wrap gap-2 items-center text-[11px] mb-6 mt-8 font-bold"><span class="text-zinc-500 mr-2">Detalhe da planilha interna:</span>` +
     (d.abas || []).map((a) => `<button onclick="openEvent(curFile, '${esc(a)}', 'internal')" class="px-4 py-1.5 rounded-lg border transition-colors ${a === d.tab ? 'border-teal-500 text-teal-400 bg-teal-500/10' : 'border-zinc-800 text-zinc-400 hover:bg-zinc-900 hover:text-white'}">${esc(a)}</button>`).join('') + `</div>`;
 
-  // acha a linha do evento na planilha Master (pelo nome do evento dentro do nome do arquivo)
   const nm = (s) => String(s).toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   const ordenado = mst ? [...mst.evs].sort((a, b) => b.lucroFinal - a.lucroFinal) : [];
   const ev = ordenado.find((x) => nm(f.name).includes(nm(x.evento)));
@@ -511,25 +575,8 @@ function renderMaster(parsed, rawGrade) {
   </div>`;
 }
 
-/* ---------- SIMULADOR E ESTABELECIMENTOS ---------- */
-function calcSim() {
-  if(!$('sim-results')) return;
-  const v = (id) => parseFloat($(id).value.replace(',','.')) || 0;
-  const fat = v('sim-fat'), mc = v('sim-mc')/100, mp = v('sim-mp')/100, md = v('sim-md')/100, mdi = v('sim-mdi')/100;
-  const tc = v('sim-tc')/100, tp = v('sim-tp')/100, td = v('sim-td')/100, tdi = v('sim-tdi')/100;
-  const custoCred = 0.032, custoPix = 0.0049, custoDeb = 0.0114, custoDin = 0;
-  const vC = fat * mc, vP = fat * mp, vD = fat * md, vDi = fat * mdi;
-  const rC = vC * tc, rP = vP * tp, rD = vD * td, rDi = vDi * tdi;
-  const cC = vC * custoCred, cP = vP * custoPix, cD = vD * custoDeb, cDi = vDi * custoDin;
-  const recBruta = rC + rP + rD + rDi, custoOp = cC + cP + cD + cDi, lucro = recBruta - custoOp;
-
-  const tr = (nome, vol, tx, rec, cust, pct, luc) => `<tr class="border-t border-zinc-800/50 hover:bg-zinc-800/20"><td class="py-3 px-4 text-white font-bold">${nome}</td><td class="py-3 px-4 font-mono text-right text-zinc-300">${R(vol)}</td><td class="py-3 px-4 font-mono text-right text-zinc-300">${(tx*100).toFixed(2).replace('.',',')}%</td><td class="py-3 px-4 font-mono text-right text-amber-400">${R(rec)}</td><td class="py-3 px-4 font-mono text-right text-zinc-500">${R(cust)}</td><td class="py-3 px-4 font-mono text-right text-zinc-500">${(pct*100).toFixed(2).replace('.',',')}%</td><td class="py-3 px-4 font-mono text-right font-bold ${luc < 0 ? 'text-red-500' : 'text-emerald-400'}">${luc > 0 ? '+ ' : '- '}${R(Math.abs(luc))}</td></tr>`;
-
-  $('sim-results').innerHTML = `<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-8"><div class="bg-zinc-950 border border-zinc-800 rounded-xl p-5"><p class="text-[11px] text-zinc-500 mb-1">Faturamento Mensal</p><h3 class="text-xl font-bold text-white">${R(fat)}</h3></div><div class="bg-zinc-950 border border-zinc-800 rounded-xl p-5"><p class="text-[11px] text-zinc-500 mb-1">Receita Gerada Bruta</p><h3 class="text-xl font-bold text-amber-400">${R(recBruta)}</h3></div><div class="bg-zinc-950 border border-zinc-800 rounded-xl p-5"><p class="text-[11px] text-zinc-500 mb-1">Custo Operacional Stratus</p><h3 class="text-xl font-bold text-red-400">- ${R(custoOp)}</h3></div><div class="bg-zinc-950 border border-zinc-800 rounded-xl p-5"><p class="text-[11px] text-zinc-500 mb-1">Lucro Líquido Stratus</p><h3 class="text-xl font-bold text-emerald-400">${R(lucro)}</h3><p class="text-[10px] text-zinc-500 mt-1">Margem do faturamento: ${((lucro/fat)*100 || 0).toFixed(2).replace('.',',')}%</p></div></div><div class="mt-8 space-y-4"><div class="overflow-x-auto border border-zinc-800 rounded-xl bg-zinc-950/80"><table class="w-full text-[11px] text-left whitespace-nowrap"><thead class="text-zinc-500 uppercase bg-zinc-950"><tr><th class="py-3 px-4">Meio</th><th class="py-3 px-4 text-right">Volume</th><th class="py-3 px-4 text-right">Taxa (Cliente)</th><th class="py-3 px-4 text-right">Receita (Bruta)</th><th class="py-3 px-4 text-right">Custo Stratus</th><th class="py-3 px-4 text-right">Custo %</th><th class="py-3 px-4 text-right">Lucro/Prejuízo</th></tr></thead><tbody class="divide-y divide-zinc-800/50">${tr('Crédito', vC, tc, rC, cC, custoCred, rC-cC)}${tr('Pix', vP, tp, rP, cP, custoPix, rP-cP)}${tr('Débito', vD, td, rD, cD, custoDeb, rD-cD)}${tr('Dinheiro', vDi, tdi, rDi, cDi, custoDin, rDi-cDi)}</tbody></table></div></div>`;
-}
-
 /* ---------- BANCO DE DADOS E MÓDULOS BASE ---------- */
-let DB = {}, cur = 'main-view', calM = 0, curFile = null, activeEstId = null;
+let DB = {}, cur = 'bar-view', calM = 0, curFile = null, activeEstId = null;
 const TODAY = () => new Date(Date.now() - new Date().getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
 const fd = (s) => (s ? s.split('-').reverse().join('/') : '-');
 const uid = () => Math.random().toString(36).slice(2, 9);
@@ -550,380 +597,128 @@ function form(key, fields, btnText = 'Cadastrar') {
 const del = (key, r) => `<button data-del="${key}|${r.id}" title="Excluir" class="text-zinc-500 hover:text-red-400 p-1 transition-colors"><i class="fas fa-trash"></i></button>`;
 
 const MODS = {};
-MODS['main-view'] = () => head('Painel', 'Visão geral da operação da Stratus.') + `<div class="flex flex-wrap gap-3 mt-8"><button data-go="bar-view" class="px-4 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-sm text-zinc-300 hover:border-teal-500/50"><i class="fas fa-glass-cheers text-teal-400 mr-2"></i>Ir para Painel de Bar</button></div>`;
 MODS.contracts = () => head('Contratos', 'Módulo temporariamente minimizado.');
 MODS.reports = () => head('Relatórios', 'Módulo temporariamente minimizado.');
 
 /* ---------- MÓDULO DE PESSOAS E FORNECEDORES ---------- */
 MODS.people = () => {
   const pessoas = DB.pessoas || [];
-  
-  // Categorias alfabéticas para facilitar a busca
-  const CATEGORIAS_FORN = [
-    'Alimentação', 'Artístico', 'Bilheteria', 'Brigada / Bombeiros',
-    'Designers', 'Estrutura', 'Fotografia e Vídeo', 'Limpeza', 'Logística',
-    'Marketing / Assessoria', 'Operação de Bar', 'Produção', 'Segurança', 'Som e Iluminação'
-  ];
-
-  // Cores e Ícones por categoria para bater o olho e já saber quem é quem
+  const CATEGORIAS_FORN = ['Alimentação', 'Artístico', 'Bilheteria', 'Brigada / Bombeiros', 'Designers', 'Estrutura', 'Fotografia e Vídeo', 'Limpeza', 'Logística', 'Marketing / Assessoria', 'Operação de Bar', 'Produção', 'Segurança', 'Som e Iluminação'];
   const catIcons = {
-    'Alimentação': 'fa-hamburger text-red-400 bg-red-500/10 border-red-500/30',
-    'Artístico': 'fa-music text-yellow-400 bg-yellow-500/10 border-yellow-500/30',
-    'Bilheteria': 'fa-ticket-alt text-teal-400 bg-teal-500/10 border-teal-500/30',
-    'Brigada / Bombeiros': 'fa-fire-extinguisher text-red-500 bg-red-500/10 border-red-500/30',
-    'Designers': 'fa-paint-brush text-indigo-400 bg-indigo-500/10 border-indigo-500/30',
-    'Estrutura': 'fa-hard-hat text-orange-400 bg-orange-500/10 border-orange-500/30',
-    'Fotografia e Vídeo': 'fa-camera text-pink-400 bg-pink-500/10 border-pink-500/30',
-    'Limpeza': 'fa-broom text-blue-400 bg-blue-500/10 border-blue-500/30',
-    'Logística': 'fa-truck text-cyan-400 bg-cyan-500/10 border-cyan-500/30',
-    'Marketing / Assessoria': 'fa-bullhorn text-blue-500 bg-blue-500/10 border-blue-500/30',
-    'Operação de Bar': 'fa-glass-cheers text-emerald-400 bg-emerald-500/10 border-emerald-500/30',
-    'Produção': 'fa-headset text-zinc-300 bg-zinc-500/10 border-zinc-500/30',
-    'Segurança': 'fa-shield-alt text-amber-400 bg-amber-500/10 border-amber-500/30',
-    'Som e Iluminação': 'fa-volume-up text-purple-400 bg-purple-500/10 border-purple-500/30'
+    'Alimentação': 'fa-hamburger text-red-400 bg-red-500/10 border-red-500/30', 'Artístico': 'fa-music text-yellow-400 bg-yellow-500/10 border-yellow-500/30', 'Bilheteria': 'fa-ticket-alt text-teal-400 bg-teal-500/10 border-teal-500/30', 'Brigada / Bombeiros': 'fa-fire-extinguisher text-red-500 bg-red-500/10 border-red-500/30', 'Designers': 'fa-paint-brush text-indigo-400 bg-indigo-500/10 border-indigo-500/30', 'Estrutura': 'fa-hard-hat text-orange-400 bg-orange-500/10 border-orange-500/30', 'Fotografia e Vídeo': 'fa-camera text-pink-400 bg-pink-500/10 border-pink-500/30', 'Limpeza': 'fa-broom text-blue-400 bg-blue-500/10 border-blue-500/30', 'Logística': 'fa-truck text-cyan-400 bg-cyan-500/10 border-cyan-500/30', 'Marketing / Assessoria': 'fa-bullhorn text-blue-500 bg-blue-500/10 border-blue-500/30', 'Operação de Bar': 'fa-glass-cheers text-emerald-400 bg-emerald-500/10 border-emerald-500/30', 'Produção': 'fa-headset text-zinc-300 bg-zinc-500/10 border-zinc-500/30', 'Segurança': 'fa-shield-alt text-amber-400 bg-amber-500/10 border-amber-500/30', 'Som e Iluminação': 'fa-volume-up text-purple-400 bg-purple-500/10 border-purple-500/30'
   };
 
-  const formFields = [
-    { k: 'nome', label: 'Nome / Empresa', req: 1, full: true },
-    { k: 'categoria', label: 'Categoria Principal', opts: CATEGORIAS_FORN },
-    { k: 'telefone', label: 'WhatsApp' },
-    { k: 'pix', label: 'Chave PIX (Para Pagamento)' },
-    { k: 'observacao', label: 'Observação (Cachê, Restrições, Especialidade)', full: true }
-  ];
+  const formFields = [{ k: 'nome', label: 'Nome / Empresa', req: 1, full: true }, { k: 'categoria', label: 'Categoria Principal', opts: CATEGORIAS_FORN }, { k: 'telefone', label: 'WhatsApp' }, { k: 'pix', label: 'Chave PIX' }, { k: 'observacao', label: 'Observação (Cachê, Restrições)', full: true }];
 
   const cards = pessoas.map(p => {
-    const iconClass = catIcons[p.categoria] || 'fa-user text-zinc-400 bg-zinc-800 border-zinc-700';
-    const ic = iconClass.split(' ')[0];
-    const bg = iconClass.split(' ').slice(1).join(' ');
-
-    return `
-    <div class="bg-zinc-900/60 border border-zinc-800 hover:border-teal-500/30 transition-all rounded-2xl p-5 relative group flex flex-col justify-between shadow-sm">
-      <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
-        <button onclick="editPessoa('${p.id}')" class="text-zinc-500 hover:text-amber-400 transition-colors" title="Editar Contato"><i class="fas fa-edit"></i></button>
-        ${del('pessoas', p)}
-      </div>
-      
-      <div>
-        <div class="flex items-center gap-2 mb-3">
-          <span class="text-[9px] font-bold uppercase border px-2 py-0.5 rounded-md ${bg}">
-            <i class="fas ${ic} mr-1"></i>${esc(p.categoria)}
-          </span>
-        </div>
-        <h4 class="text-base font-bold text-white pr-8">${esc(p.nome)}</h4>
-        
-        <div class="mt-3 space-y-1.5">
-          ${p.telefone ? `<p class="text-[11px] text-zinc-300"><i class="fab fa-whatsapp text-emerald-400 w-4"></i>${esc(p.telefone)}</p>` : ''}
-          ${p.pix ? `<p class="text-[11px] text-zinc-300"><i class="fas fa-key text-amber-400 w-4"></i>${esc(p.pix)}</p>` : ''}
-        </div>
-      </div>
-      
-      ${p.observacao ? `<div class="mt-4 pt-3 border-t border-zinc-800/50 text-[10px] text-zinc-500 leading-relaxed italic">"${esc(p.observacao)}"</div>` : ''}
-    </div>
-    `;
+    const icClass = catIcons[p.categoria] || 'fa-user text-zinc-400 bg-zinc-800 border-zinc-700';
+    const ic = icClass.split(' ')[0], bg = icClass.split(' ').slice(1).join(' ');
+    return `<div class="bg-zinc-900/60 border border-zinc-800 hover:border-teal-500/30 transition-all rounded-2xl p-5 relative group flex flex-col justify-between shadow-sm"><div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2"><button onclick="editPessoa('${p.id}')" class="text-zinc-500 hover:text-amber-400 transition-colors" title="Editar Contato"><i class="fas fa-edit"></i></button>${del('pessoas', p)}</div><div><div class="flex items-center gap-2 mb-3"><span class="text-[9px] font-bold uppercase border px-2 py-0.5 rounded-md ${bg}"><i class="fas ${ic} mr-1"></i>${esc(p.categoria)}</span></div><h4 class="text-base font-bold text-white pr-8">${esc(p.nome)}</h4><div class="mt-3 space-y-1.5">${p.telefone ? `<p class="text-[11px] text-zinc-300"><i class="fab fa-whatsapp text-emerald-400 w-4"></i>${esc(p.telefone)}</p>` : ''}${p.pix ? `<p class="text-[11px] text-zinc-300"><i class="fas fa-key text-amber-400 w-4"></i>${esc(p.pix)}</p>` : ''}</div></div>${p.observacao ? `<div class="mt-4 pt-3 border-t border-zinc-800/50 text-[10px] text-zinc-500 leading-relaxed italic">"${esc(p.observacao)}"</div>` : ''}</div>`;
   }).join('');
 
-  return head('Pessoas & Fornecedores', 'Diretório de contatos, prestadores de serviço e parceiros de operação.') + `
-  <div class="mb-8 mt-4 bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6">
-    <h3 class="text-sm font-bold text-white mb-3"><i class="fas fa-user-plus text-teal-400 mr-2"></i>Cadastrar Novo Contato</h3>
-    ${form('pessoas', formFields, 'Salvar Contato')}
-  </div>
-  
-  <div class="flex items-center justify-between mb-4">
-    <h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fas fa-address-book text-teal-400"></i>Contatos Cadastrados</h3>
-    <span class="text-[10px] font-bold bg-zinc-900 border border-zinc-700 text-zinc-400 px-2 py-1 rounded-lg">${pessoas.length}</span>
-  </div>
-  
-  <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-    ${cards || '<div class="col-span-full py-10 text-center text-zinc-500 bg-zinc-900/30 border border-zinc-800 border-dashed rounded-2xl">Nenhum contato cadastrado ainda.</div>'}
-  </div>
-  `;
+  return head('Pessoas & Fornecedores', 'Diretório de contatos e parceiros.') + `<div class="mb-8 mt-4 bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6"><h3 class="text-sm font-bold text-white mb-3"><i class="fas fa-user-plus text-teal-400 mr-2"></i>Cadastrar Novo Contato</h3>${form('pessoas', formFields, 'Salvar Contato')}</div><div class="flex items-center justify-between mb-4"><h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fas fa-address-book text-teal-400"></i>Contatos Cadastrados</h3><span class="text-[10px] font-bold bg-zinc-900 border border-zinc-700 text-zinc-400 px-2 py-1 rounded-lg">${pessoas.length}</span></div><div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">${cards || '<div class="col-span-full py-10 text-center text-zinc-500 bg-zinc-900/30 border border-zinc-800 border-dashed rounded-2xl">Nenhum contato cadastrado.</div>'}</div>`;
 };
 
-// --- Função de Ação do Diretório de Pessoas ---
 window.editPessoa = (id) => {
    const p = (DB.pessoas || []).find(x => x.id === id);
    if (!p) return;
-   
-   const novoNome = prompt("Editar Nome / Empresa:", p.nome);
-   if (novoNome === null) return;
-   
-   const novoTel = prompt("Editar WhatsApp:", p.telefone || '');
-   if (novoTel === null) return;
-   
-   const novoPix = prompt("Editar Chave PIX:", p.pix || '');
-   if (novoPix === null) return;
-   
-   p.nome = novoNome;
-   p.telefone = novoTel;
-   p.pix = novoPix;
-   
+   const n = prompt("Editar Nome:", p.nome); if (n === null) return;
+   const t = prompt("Editar WhatsApp:", p.telefone || ''); if (t === null) return;
+   const px = prompt("Editar Chave PIX:", p.pix || ''); if (px === null) return;
+   p.nome = n; p.telefone = t; p.pix = px;
    save(); render();
 };
 
 /* ---------- MÓDULO DE CALENDÁRIO ---------- */
 MODS.calendar = () => {
   const eventosCal = DB.calendario || [];
-  
-  // Lógica de Datas
-  const d = new Date();
-  d.setMonth(d.getMonth() + calM); // calM é a variável global que controla a navegação dos meses
-  const month = d.getMonth();
-  const year = d.getFullYear();
-  
+  const d = new Date(); d.setMonth(d.getMonth() + calM); 
+  const month = d.getMonth(), year = d.getFullYear();
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const todayStr = new Date(Date.now() - new Date().getTimezoneOffset() * 6e4).toISOString().slice(0,10);
-  
   const monthName = d.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }).toUpperCase();
   
-  // Estilização das Operações
-  const opColors = {
-    'Bilheteria e Bar': 'bg-teal-500/10 border-teal-500/30 text-teal-400',
-    'Apenas Bilheteria': 'bg-amber-500/10 border-amber-500/30 text-amber-400',
-    'Apenas Bar': 'bg-purple-500/10 border-purple-500/30 text-purple-400'
-  };
-
-  const opIcons = {
-    'Bilheteria e Bar': 'fa-ticket-alt',
-    'Apenas Bilheteria': 'fa-receipt',
-    'Apenas Bar': 'fa-glass-cheers'
-  };
+  const opColors = { 'Bilheteria e Bar': 'bg-teal-500/10 border-teal-500/30 text-teal-400', 'Apenas Bilheteria': 'bg-amber-500/10 border-amber-500/30 text-amber-400', 'Apenas Bar': 'bg-purple-500/10 border-purple-500/30 text-purple-400' };
+  const opIcons = { 'Bilheteria e Bar': 'fa-ticket-alt', 'Apenas Bilheteria': 'fa-receipt', 'Apenas Bar': 'fa-glass-cheers' };
 
   let cells = '';
   const daysOfWeek = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-  
-  // Cabeçalhos dos dias da semana
   const headerCells = daysOfWeek.map(day => `<div class="text-center font-bold text-[11px] text-zinc-500 uppercase tracking-wider py-2">${day}</div>`).join('');
   
-  // Espaços em branco antes do dia 1 (para o calendário alinhar os dias da semana)
-  for (let i = 0; i < firstDay; i++) {
-    cells += `<div class="min-h-[100px] lg:min-h-[120px] bg-zinc-950/30 border border-zinc-800/30 rounded-xl"></div>`;
-  }
+  for (let i = 0; i < firstDay; i++) { cells += `<div class="min-h-[100px] lg:min-h-[120px] bg-zinc-950/30 border border-zinc-800/30 rounded-xl"></div>`; }
   
-  // Renderização dos Dias do mês
   for (let i = 1; i <= daysInMonth; i++) {
     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
     const isToday = dateStr === todayStr;
-    
-    // Filtra os eventos agendados para este dia específico
     const dayEvents = eventosCal.filter(ev => ev.data === dateStr);
     
-    const eventChips = dayEvents.map(ev => `
-      <div class="mt-1.5 flex flex-col gap-1 relative group">
-        <div class="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 z-10 bg-zinc-900 rounded-md shadow-lg border border-zinc-700">
-           ${del('calendario', ev)}
-        </div>
-        <div class="px-2 py-1.5 text-[9px] font-bold uppercase rounded-lg border truncate transition-all ${opColors[ev.operacao] || 'bg-zinc-800 border-zinc-700 text-zinc-400'}" title="${esc(ev.titulo)}">
-           <i class="fas ${opIcons[ev.operacao] || 'fa-calendar'} mr-1"></i>${esc(ev.titulo)}
-        </div>
-      </div>
-    `).join('');
-
-    cells += `
-    <div class="min-h-[100px] lg:min-h-[120px] bg-zinc-900/40 border ${isToday ? 'border-teal-500/50 bg-teal-950/10' : 'border-zinc-800'} rounded-xl p-2 flex flex-col transition-colors hover:border-zinc-600">
-      <span class="text-xs font-bold ${isToday ? 'text-teal-400 bg-teal-500/20 px-2 py-0.5 rounded-md self-start' : 'text-zinc-500'}">${i}</span>
-      <div class="flex-1 overflow-y-auto custom-scrollbar mt-1">${eventChips}</div>
-    </div>
-    `;
+    const eventChips = dayEvents.map(ev => `<div class="mt-1.5 flex flex-col gap-1 relative group"><div class="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 z-10 bg-zinc-900 rounded-md shadow-lg border border-zinc-700">${del('calendario', ev)}</div><div class="px-2 py-1.5 text-[9px] font-bold uppercase rounded-lg border truncate transition-all ${opColors[ev.operacao] || 'bg-zinc-800 border-zinc-700 text-zinc-400'}" title="${esc(ev.titulo)}"><i class="fas ${opIcons[ev.operacao] || 'fa-calendar'} mr-1"></i>${esc(ev.titulo)}</div></div>`).join('');
+    cells += `<div class="min-h-[100px] lg:min-h-[120px] bg-zinc-900/40 border ${isToday ? 'border-teal-500/50 bg-teal-950/10' : 'border-zinc-800'} rounded-xl p-2 flex flex-col transition-colors hover:border-zinc-600"><span class="text-xs font-bold ${isToday ? 'text-teal-400 bg-teal-500/20 px-2 py-0.5 rounded-md self-start' : 'text-zinc-500'}">${i}</span><div class="flex-1 overflow-y-auto custom-scrollbar mt-1">${eventChips}</div></div>`;
   }
 
-  return head('Calendário de Eventos', 'Visão geral da agenda e programação de operações.') + `
-  <div class="mb-6 mt-4 bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6 shadow-sm">
-    <h3 class="text-sm font-bold text-white mb-4"><i class="fas fa-calendar-plus text-teal-400 mr-2"></i>Adicionar Evento à Agenda</h3>
-    <form onsubmit="addCalEvento(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-       <label class="text-[11px] text-zinc-500 space-y-1 block md:col-span-2"><span>Nome do Evento</span><input required name="titulo" class="${inp}" placeholder="Ex: Baile da Bateu..."></label>
-       <label class="text-[11px] text-zinc-500 space-y-1 block"><span>Data do Evento</span><input required type="date" name="data" class="${inp}"></label>
-       <label class="text-[11px] text-zinc-500 space-y-1 block"><span>Escopo da Operação Stratus</span>
-          <select name="operacao" class="${inp}">
-            <option>Bilheteria e Bar</option><option>Apenas Bilheteria</option><option>Apenas Bar</option>
-          </select>
-       </label>
-       <div class="md:col-span-4 flex justify-end mt-2 pt-4 border-t border-zinc-800">
-         <button type="submit" class="bg-teal-500/15 border border-teal-500/40 text-teal-400 rounded-lg px-6 py-2.5 text-sm font-bold hover:bg-teal-500/25 transition-colors"><i class="fas fa-plus mr-2"></i>Salvar no Calendário</button>
-       </div>
-    </form>
-  </div>
-  
-  <div class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-6">
-    <div class="flex justify-between items-center mb-6">
-       <button onclick="calM--; render()" class="w-10 h-10 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-white hover:border-teal-500/50 transition-all"><i class="fas fa-chevron-left"></i></button>
-       <h3 class="text-xl font-bold text-white tracking-widest flex items-center gap-3"><i class="far fa-calendar-alt text-teal-400"></i>${monthName}</h3>
-       <button onclick="calM++; render()" class="w-10 h-10 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-white hover:border-teal-500/50 transition-all"><i class="fas fa-chevron-right"></i></button>
-    </div>
-    
-    <div class="grid grid-cols-7 gap-2 mb-2">
-       ${headerCells}
-    </div>
-    <div class="grid grid-cols-7 gap-2">
-       ${cells}
-    </div>
-  </div>
-  `;
+  return head('Calendário de Eventos', 'Visão geral da agenda de operações.') + `<div class="mb-6 mt-4 bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6 shadow-sm"><h3 class="text-sm font-bold text-white mb-4"><i class="fas fa-calendar-plus text-teal-400 mr-2"></i>Adicionar Evento</h3><form onsubmit="addCalEvento(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end"><label class="text-[11px] text-zinc-500 space-y-1 block md:col-span-2"><span>Nome do Evento</span><input required name="titulo" class="${inp}" placeholder="Ex: Baile da Bateu..."></label><label class="text-[11px] text-zinc-500 space-y-1 block"><span>Data do Evento</span><input required type="date" name="data" class="${inp}"></label><label class="text-[11px] text-zinc-500 space-y-1 block"><span>Escopo da Operação</span><select name="operacao" class="${inp}"><option>Bilheteria e Bar</option><option>Apenas Bilheteria</option><option>Apenas Bar</option></select></label><div class="md:col-span-4 flex justify-end mt-2 pt-4 border-t border-zinc-800"><button type="submit" class="bg-teal-500/15 border border-teal-500/40 text-teal-400 rounded-lg px-6 py-2.5 text-sm font-bold hover:bg-teal-500/25 transition-colors"><i class="fas fa-plus mr-2"></i>Salvar no Calendário</button></div></form></div><div class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-6"><div class="flex justify-between items-center mb-6"><button onclick="calM--; render()" class="w-10 h-10 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-white hover:border-teal-500/50 transition-all"><i class="fas fa-chevron-left"></i></button><h3 class="text-xl font-bold text-white tracking-widest flex items-center gap-3"><i class="far fa-calendar-alt text-teal-400"></i>${monthName}</h3><button onclick="calM++; render()" class="w-10 h-10 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-white hover:border-teal-500/50 transition-all"><i class="fas fa-chevron-right"></i></button></div><div class="grid grid-cols-7 gap-2 mb-2">${headerCells}</div><div class="grid grid-cols-7 gap-2">${cells}</div></div>`;
 };
 
-// --- Função de Ação do Calendário ---
 window.addCalEvento = (e) => {
-   e.preventDefault();
-   const fd = new FormData(e.target);
+   e.preventDefault(); const fd = new FormData(e.target);
    DB.calendario = DB.calendario || [];
-   DB.calendario.push({
-      id: uid(),
-      titulo: fd.get('titulo'),
-      data: fd.get('data'),
-      operacao: fd.get('operacao')
-   });
+   DB.calendario.push({ id: uid(), titulo: fd.get('titulo'), data: fd.get('data'), operacao: fd.get('operacao') });
    save(); render();
 };
 
 /* ---------- MÓDULO DE REUNIÕES & ATAS ---------- */
 MODS.meetings = () => {
   const reunioes = DB.reunioes || [];
-
-  // Ordena por data (mais antigas/próximas primeiro)
   const sorted = [...reunioes].sort((a, b) => new Date(a.data) - new Date(b.data));
   const agendadas = sorted.filter(r => r.status === 'Agendada');
-  // O histórico mostra as concluídas/canceladas mais recentes no topo
   const historico = sorted.filter(r => r.status !== 'Agendada').sort((a, b) => new Date(b.data) - new Date(a.data)); 
 
-  const typeColors = {
-    'Online': 'text-blue-400 bg-blue-500/10 border-blue-500/30',
-    'Presencial': 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30',
-    'Call / Telefone': 'text-amber-400 bg-amber-500/10 border-amber-500/30'
+  const typeColors = { 'Online': 'text-blue-400 bg-blue-500/10 border-blue-500/30', 'Presencial': 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30', 'Call / Telefone': 'text-amber-400 bg-amber-500/10 border-amber-500/30' };
+
+  const formatData = (iso) => { if(!iso) return ''; return new Date(iso).toLocaleDateString('pt-BR', {weekday: 'short', day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'}).replace('.', ','); };
+
+  const cardHtml = (r, isH) => `<div class="bg-zinc-900/60 border border-zinc-800 rounded-xl p-5 flex flex-col gap-3 relative group hover:border-teal-500/30 transition-colors shadow-sm"><div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">${isH && r.status === 'Concluída' ? `<button onclick="editAta('${r.id}')" class="text-zinc-500 hover:text-amber-400 transition-colors" title="Editar Ata"><i class="fas fa-edit"></i></button>` : ''}${del('reunioes', r)}</div><div class="flex items-center gap-2 mb-1"><span class="text-[9px] font-bold uppercase border px-2 py-0.5 rounded-md ${typeColors[r.tipo] || 'text-zinc-400 bg-zinc-800 border-zinc-700'}"><i class="fas ${r.tipo === 'Online' ? 'fa-video' : r.tipo === 'Presencial' ? 'fa-handshake' : 'fa-phone'} mr-1"></i>${esc(r.tipo)}</span>${isH ? `<span class="text-[9px] font-bold uppercase border px-2 py-0.5 rounded-md ${r.status === 'Concluída' ? 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10' : 'text-red-400 border-red-500/30 bg-red-500/10'}">${esc(r.status)}</span>` : ''}</div><div><h4 class="text-base font-bold text-white leading-tight pr-12">${esc(r.titulo)}</h4><p class="text-[11px] text-teal-400 font-mono mt-1 capitalize"><i class="far fa-calendar-alt mr-1"></i>${formatData(r.data)}</p></div>${r.participantes ? `<div class="text-[11px] text-zinc-400 mt-1"><i class="fas fa-users mr-1"></i>${esc(r.participantes)}</div>` : ''}${r.pauta ? `<div class="mt-2 text-[11px] text-zinc-300 bg-zinc-950 p-3 rounded-lg border border-zinc-800/50"><strong class="text-zinc-500 block mb-1 uppercase tracking-wider text-[9px]">Pauta / Detalhes:</strong>${esc(r.pauta).replace(/\n/g, '<br>')}</div>` : ''}${isH && r.ata ? `<div class="mt-2 text-[11px] text-emerald-200 bg-emerald-950/20 p-3 rounded-lg border border-emerald-900/30"><strong class="text-emerald-500 block mb-1 uppercase tracking-wider text-[9px]">Ata e Decisões:</strong>${esc(r.ata).replace(/\n/g, '<br>')}</div>` : ''}${!isH ? `<div class="mt-auto pt-4 border-t border-zinc-800/50 flex gap-2"><button onclick="concluirReuniao('${r.id}')" class="flex-1 bg-teal-500/15 border border-teal-500/40 text-teal-400 rounded-lg py-2 text-[11px] uppercase tracking-wider font-bold hover:bg-teal-500/25 transition-colors"><i class="fas fa-check mr-2"></i>Realizar & Gerar Ata</button><button onclick="cancelarReuniao('${r.id}')" class="px-4 bg-red-500/10 border border-red-500/30 text-red-400 rounded-lg text-[11px] hover:bg-red-500/20 transition-colors" title="Cancelar Reunião"><i class="fas fa-times"></i></button></div>` : ''}</div>`;
+
+  return head('Reuniões & Atas', 'Agendamento e registro de decisões.') + `<div class="mb-8 mt-4 bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6"><h3 class="text-sm font-bold text-white mb-4"><i class="fas fa-plus text-teal-400 mr-2"></i>Agendar Nova Reunião</h3><form onsubmit="addReuniao(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-start"><label class="text-[11px] text-zinc-500 space-y-1 block md:col-span-2"><span>Assunto / Título</span><input required name="titulo" class="${inp}"></label><label class="text-[11px] text-zinc-500 space-y-1 block"><span>Data e Hora</span><input required type="datetime-local" name="data" class="${inp}"></label><label class="text-[11px] text-zinc-500 space-y-1 block"><span>Formato</span><select name="tipo" class="${inp}"><option>Online</option><option>Presencial</option><option>Call / Telefone</option></select></label><label class="text-[11px] text-zinc-500 space-y-1 block md:col-span-2"><span>Pauta</span><textarea name="pauta" rows="2" class="${inp}"></textarea></label><label class="text-[11px] text-zinc-500 space-y-1 block md:col-span-2"><span>Participantes</span><textarea name="participantes" rows="2" class="${inp}"></textarea></label><div class="md:col-span-4 flex justify-end pt-3 border-t border-zinc-800 mt-2"><button type="submit" class="bg-teal-500/15 border border-teal-500/40 text-teal-400 rounded-lg px-6 py-2.5 text-sm font-bold hover:bg-teal-500/25 transition-colors"><i class="fas fa-calendar-check mr-2"></i>Agendar Reunião</button></div></form></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-8"><div><div class="flex items-center justify-between pb-3 border-b border-zinc-800 mb-4"><h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fas fa-clock text-amber-400"></i>Próximas Reuniões</h3><span class="text-[10px] font-bold bg-zinc-900 border border-zinc-700 text-zinc-400 px-2 py-1 rounded-lg">${agendadas.length}</span></div><div class="flex flex-col gap-4">${agendadas.map(r => cardHtml(r, false)).join('') || '<div class="text-center text-[11px] text-zinc-600 py-8 border border-zinc-800 border-dashed rounded-xl">Nenhuma reunião agendada.</div>'}</div></div><div><div class="flex items-center justify-between pb-3 border-b border-zinc-800 mb-4"><h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fas fa-archive text-zinc-400"></i>Histórico & Atas</h3><span class="text-[10px] font-bold bg-zinc-900 border border-zinc-700 text-zinc-400 px-2 py-1 rounded-lg">${historico.length}</span></div><div class="flex flex-col gap-4">${historico.map(r => cardHtml(r, true)).join('') || '<div class="text-center text-[11px] text-zinc-600 py-8 border border-zinc-800 border-dashed rounded-xl">Nenhum histórico disponível.</div>'}</div></div></div>`;
+};
+
+window.addReuniao = (e) => { e.preventDefault(); const fd = new FormData(e.target); DB.reunioes = DB.reunioes || []; DB.reunioes.push({ id: uid(), titulo: fd.get('titulo'), data: fd.get('data'), tipo: fd.get('tipo'), pauta: fd.get('pauta'), participantes: fd.get('participantes'), status: 'Agendada', ata: '' }); save(); render(); };
+window.concluirReuniao = (id) => { const r = (DB.reunioes || []).find(x => x.id === id); if (!r) return; const ata = prompt(`Reunião: ${r.titulo}\nEscreva a Ata:`); if (ata !== null) { r.status = 'Concluída'; r.ata = ata; save(); render(); } };
+window.cancelarReuniao = (id) => { if(confirm('Cancelar reunião?')) { const r = (DB.reunioes || []).find(x => x.id === id); if (r) { r.status = 'Cancelada'; save(); render(); } } };
+window.editAta = (id) => { const r = (DB.reunioes || []).find(x => x.id === id); if (!r) return; const ata = prompt(`Editar Ata:`, r.ata || ''); if (ata !== null) { r.ata = ata; save(); render(); } };
+
+/* ---------- MÓDULO DE DEMANDAS (KANBAN) ---------- */
+MODS.demands = () => {
+  const demandas = DB.demandas || [];
+  const STATUS = ['Pendente', 'Em Andamento', 'Concluída'];
+  const URG_COLORS = { 'Baixa': 'bg-blue-500/10 border-blue-500/30 text-blue-400', 'Média': 'bg-amber-500/10 border-amber-500/30 text-amber-400', 'Alta': 'bg-orange-500/10 border-orange-500/30 text-orange-400', 'Urgente': 'bg-red-500/10 border-red-500/30 text-red-400' };
+
+  const colHtml = (status, icon, colorClass) => {
+    const items = demandas.filter(d => d.status === status);
+    const cards = items.map(d => {
+      const currIdx = STATUS.indexOf(d.status);
+      const btnPrev = currIdx > 0 ? `<button onclick="moveDemanda('${d.id}', '${STATUS[currIdx - 1]}')" class="p-1.5 text-zinc-500 hover:text-white transition-colors" title="Mover para trás"><i class="fas fa-arrow-left"></i></button>` : '<div class="w-7"></div>';
+      const btnNext = currIdx < 2 ? `<button onclick="moveDemanda('${d.id}', '${STATUS[currIdx + 1]}')" class="p-1.5 text-zinc-500 hover:text-white transition-colors" title="Mover para frente"><i class="fas fa-arrow-right"></i></button>` : '<div class="w-7"></div>';
+      return `<div class="bg-zinc-900/60 border border-zinc-800 rounded-xl p-4 flex flex-col gap-3 relative group hover:border-teal-500/30 transition-colors shadow-sm"><div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">${del('demandas', d)}</div><div><div class="flex items-center gap-2 mb-3"><span class="text-[9px] font-bold uppercase border px-2 py-0.5 rounded-md ${URG_COLORS[d.urgencia] || 'bg-zinc-800 text-zinc-400'}">${esc(d.urgencia)}</span><span class="text-[9px] font-bold uppercase text-zinc-400 bg-zinc-800 border border-zinc-700 rounded-md px-2 py-0.5">${esc(d.tipo)}</span></div><h4 class="text-sm font-bold text-white leading-tight pr-6">${esc(d.titulo)}</h4></div><p class="text-[11px] text-zinc-400 leading-relaxed line-clamp-3">${esc(d.descricao).replace(/\n/g, '<br>')}</p><div class="flex justify-between items-center mt-2 pt-3 border-t border-zinc-800/50"><div class="flex items-center gap-2 text-[10px] text-zinc-400 font-bold bg-zinc-950 px-2 py-1 rounded-lg border border-zinc-800"><i class="fas fa-user-circle text-teal-400 text-sm"></i>${esc(d.responsavel)}</div><div class="flex items-center gap-1 bg-zinc-950 rounded-lg border border-zinc-800">${btnPrev}${btnNext}</div></div></div>`;
+    }).join('');
+    return `<div class="flex flex-col gap-4"><div class="flex items-center justify-between pb-3 border-b-2 border-zinc-800/80"><h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fas ${icon} ${colorClass}"></i>${status}</h3><span class="text-[10px] font-bold bg-zinc-900 border border-zinc-700 text-zinc-400 px-2 py-1 rounded-lg">${items.length}</span></div><div class="flex flex-col gap-3 min-h-[10rem]">${cards || `<div class="text-center text-[11px] text-zinc-600 py-6 border border-zinc-800 border-dashed rounded-xl">Nenhuma demanda aqui.</div>`}</div></div>`;
   };
 
-  const formatData = (iso) => {
-    if(!iso) return '';
-    const d = new Date(iso);
-    return d.toLocaleDateString('pt-BR', {weekday: 'short', day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'}).replace('.', ',');
-  };
-
-  const cardHtml = (r, isHistory) => `
-    <div class="bg-zinc-900/60 border border-zinc-800 rounded-xl p-5 flex flex-col gap-3 relative group hover:border-teal-500/30 transition-colors shadow-sm">
-      <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
-        ${isHistory && r.status === 'Concluída' ? `<button onclick="editAta('${r.id}')" class="text-zinc-500 hover:text-amber-400 transition-colors" title="Editar Ata"><i class="fas fa-edit"></i></button>` : ''}
-        ${del('reunioes', r)}
-      </div>
-      
-      <div class="flex items-center gap-2 mb-1">
-        <span class="text-[9px] font-bold uppercase border px-2 py-0.5 rounded-md ${typeColors[r.tipo] || 'text-zinc-400 bg-zinc-800 border-zinc-700'}"><i class="fas ${r.tipo === 'Online' ? 'fa-video' : r.tipo === 'Presencial' ? 'fa-handshake' : 'fa-phone'} mr-1"></i>${esc(r.tipo)}</span>
-        ${isHistory ? `<span class="text-[9px] font-bold uppercase border px-2 py-0.5 rounded-md ${r.status === 'Concluída' ? 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10' : 'text-red-400 border-red-500/30 bg-red-500/10'}">${esc(r.status)}</span>` : ''}
-      </div>
-      
-      <div>
-         <h4 class="text-base font-bold text-white leading-tight pr-12">${esc(r.titulo)}</h4>
-         <p class="text-[11px] text-teal-400 font-mono mt-1 capitalize"><i class="far fa-calendar-alt mr-1"></i>${formatData(r.data)}</p>
-      </div>
-      
-      ${r.participantes ? `<div class="text-[11px] text-zinc-400 mt-1"><i class="fas fa-users mr-1"></i>${esc(r.participantes)}</div>` : ''}
-      
-      ${r.pauta ? `<div class="mt-2 text-[11px] text-zinc-300 bg-zinc-950 p-3 rounded-lg border border-zinc-800/50"><strong class="text-zinc-500 block mb-1 uppercase tracking-wider text-[9px]">Pauta / Detalhes:</strong>${esc(r.pauta).replace(/\n/g, '<br>')}</div>` : ''}
-      
-      ${isHistory && r.ata ? `<div class="mt-2 text-[11px] text-emerald-200 bg-emerald-950/20 p-3 rounded-lg border border-emerald-900/30"><strong class="text-emerald-500 block mb-1 uppercase tracking-wider text-[9px]">Ata e Decisões da Reunião:</strong>${esc(r.ata).replace(/\n/g, '<br>')}</div>` : ''}
-
-      ${!isHistory ? `
-      <div class="mt-auto pt-4 border-t border-zinc-800/50 flex gap-2">
-        <button onclick="concluirReuniao('${r.id}')" class="flex-1 bg-teal-500/15 border border-teal-500/40 text-teal-400 rounded-lg py-2 text-[11px] uppercase tracking-wider font-bold hover:bg-teal-500/25 transition-colors"><i class="fas fa-check mr-2"></i>Realizar & Gerar Ata</button>
-        <button onclick="cancelarReuniao('${r.id}')" class="px-4 bg-red-500/10 border border-red-500/30 text-red-400 rounded-lg text-[11px] hover:bg-red-500/20 transition-colors" title="Cancelar Reunião"><i class="fas fa-times"></i></button>
-      </div>` : ''}
-    </div>
-  `;
-
-  return head('Reuniões & Atas', 'Agendamento, registro de pautas e consolidação de decisões (Atas).') + `
-  <div class="mb-8 mt-4 bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6">
-    <h3 class="text-sm font-bold text-white mb-4"><i class="fas fa-plus text-teal-400 mr-2"></i>Agendar Nova Reunião</h3>
-    <form onsubmit="addReuniao(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-start">
-       <label class="text-[11px] text-zinc-500 space-y-1 block md:col-span-2"><span>Assunto / Título</span><input required name="titulo" class="${inp}" placeholder="Ex: Alinhamento de Marketing"></label>
-       <label class="text-[11px] text-zinc-500 space-y-1 block"><span>Data e Hora</span><input required type="datetime-local" name="data" class="${inp}"></label>
-       <label class="text-[11px] text-zinc-500 space-y-1 block"><span>Formato</span>
-          <select name="tipo" class="${inp}">
-            <option>Online</option><option>Presencial</option><option>Call / Telefone</option>
-          </select>
-       </label>
-       <label class="text-[11px] text-zinc-500 space-y-1 block md:col-span-2"><span>Pauta (O que será discutido)</span><textarea name="pauta" rows="2" class="${inp}" placeholder="Tópicos da reunião..."></textarea></label>
-       <label class="text-[11px] text-zinc-500 space-y-1 block md:col-span-2"><span>Participantes (Internos e Externos)</span><textarea name="participantes" rows="2" class="${inp}" placeholder="Ex: PV, Cefas, Fornecedor de Bebidas..."></textarea></label>
-       
-       <div class="md:col-span-4 flex justify-end pt-3 border-t border-zinc-800 mt-2">
-         <button type="submit" class="bg-teal-500/15 border border-teal-500/40 text-teal-400 rounded-lg px-6 py-2.5 text-sm font-bold hover:bg-teal-500/25 transition-colors"><i class="fas fa-calendar-check mr-2"></i>Agendar Reunião</button>
-       </div>
-    </form>
-  </div>
-  
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-    <div>
-       <div class="flex items-center justify-between pb-3 border-b border-zinc-800 mb-4">
-         <h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fas fa-clock text-amber-400"></i>Próximas Reuniões</h3>
-         <span class="text-[10px] font-bold bg-zinc-900 border border-zinc-700 text-zinc-400 px-2 py-1 rounded-lg">${agendadas.length}</span>
-       </div>
-       <div class="flex flex-col gap-4">
-         ${agendadas.map(r => cardHtml(r, false)).join('') || '<div class="text-center text-[11px] text-zinc-600 py-8 border border-zinc-800 border-dashed rounded-xl">Nenhuma reunião agendada.</div>'}
-       </div>
-    </div>
-    
-    <div>
-       <div class="flex items-center justify-between pb-3 border-b border-zinc-800 mb-4">
-         <h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fas fa-archive text-zinc-400"></i>Histórico & Atas</h3>
-         <span class="text-[10px] font-bold bg-zinc-900 border border-zinc-700 text-zinc-400 px-2 py-1 rounded-lg">${historico.length}</span>
-       </div>
-       <div class="flex flex-col gap-4">
-         ${historico.map(r => cardHtml(r, true)).join('') || '<div class="text-center text-[11px] text-zinc-600 py-8 border border-zinc-800 border-dashed rounded-xl">Nenhum histórico disponível.</div>'}
-       </div>
-    </div>
-  </div>
-  `;
+  return head('Demandas Gerais', 'Gestão de tarefas e backlog.') + `<div class="mb-8 mt-4 bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6"><h3 class="text-sm font-bold text-white mb-4"><i class="fas fa-plus text-teal-400 mr-2"></i>Nova Demanda</h3><form onsubmit="addDemanda(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-start"><label class="text-[11px] text-zinc-500 space-y-1 block md:col-span-2"><span>Título da Demanda</span><input required name="titulo" class="${inp}"></label><label class="text-[11px] text-zinc-500 space-y-1 block"><span>Responsável</span><input required name="responsavel" class="${inp}"></label><label class="text-[11px] text-zinc-500 space-y-1 block"><span>Urgência</span><select name="urgencia" class="${inp}"><option>Baixa</option><option>Média</option><option>Alta</option><option>Urgente</option></select></label><label class="text-[11px] text-zinc-500 space-y-1 block md:col-span-3"><span>Descrição</span><textarea required name="descricao" rows="2" class="${inp}"></textarea></label><label class="text-[11px] text-zinc-500 space-y-1 block"><span>Tipo</span><select name="tipo" class="${inp}"><option>Operacional</option><option>Financeiro</option><option>Comercial</option><option>Tecnologia</option><option>Marketing / Design</option><option>Outros</option></select></label><div class="md:col-span-4 flex justify-end pt-3 border-t border-zinc-800 mt-2"><button type="submit" class="bg-teal-500/15 border border-teal-500/40 text-teal-400 rounded-lg px-6 py-2.5 text-sm font-bold hover:bg-teal-500/25 transition-colors"><i class="fas fa-save mr-2"></i>Criar Demanda</button></div></form></div><div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 mt-4">${colHtml('Pendente', 'fa-clipboard-list', 'text-zinc-400')}${colHtml('Em Andamento', 'fa-spinner fa-spin-pulse', 'text-amber-400')}${colHtml('Concluída', 'fa-check-circle', 'text-emerald-400')}</div>`;
 };
 
-// --- Funções de Ação Específicas do Módulo de Reuniões ---
+window.addDemanda = (e) => { e.preventDefault(); const fd = new FormData(e.target); DB.demandas = DB.demandas || []; DB.demandas.push({ id: uid(), titulo: fd.get('titulo'), descricao: fd.get('descricao'), responsavel: fd.get('responsavel'), urgencia: fd.get('urgencia'), tipo: fd.get('tipo'), status: 'Pendente', dataCriacao: new Date().toISOString() }); save(); render(); };
+window.moveDemanda = (id, newStatus) => { const d = (DB.demandas || []).find(x => x.id === id); if (d) { d.status = newStatus; save(); render(); } };
 
-window.addReuniao = (e) => {
-   e.preventDefault();
-   const fd = new FormData(e.target);
-   DB.reunioes = DB.reunioes || [];
-   DB.reunioes.push({
-      id: uid(),
-      titulo: fd.get('titulo'),
-      data: fd.get('data'),
-      tipo: fd.get('tipo'),
-      pauta: fd.get('pauta'),
-      participantes: fd.get('participantes'),
-      status: 'Agendada',
-      ata: ''
-   });
-   save(); render();
-};
-
-window.concluirReuniao = (id) => {
-   const r = (DB.reunioes || []).find(x => x.id === id);
-   if (!r) return;
-   const ata = prompt(`Reunião: ${r.titulo}\n\nEscreva a Ata / Resumo das decisões tomadas (opcional):`);
-   if (ata !== null) { // Cancela se o usuário clicar em "Cancel" no prompt
-      r.status = 'Concluída';
-      r.ata = ata;
-      save(); render();
-   }
-};
-
-window.cancelarReuniao = (id) => {
-   if(confirm('Tem certeza que deseja cancelar esta reunião?')) {
-       const r = (DB.reunioes || []).find(x => x.id === id);
-       if (r) { r.status = 'Cancelada'; save(); render(); }
-   }
-};
-
-window.editAta = (id) => {
-   const r = (DB.reunioes || []).find(x => x.id === id);
-   if (!r) return;
-   const ata = prompt(`Editar Ata de: ${r.titulo}`, r.ata || '');
-   if (ata !== null) {
-      r.ata = ata;
-      save(); render();
-   }
-};
+/* ---------- MÓDULOS DE FINANCEIRO E SIMULADOR ---------- */
+let activeFinClient = null, activeFinEvent = null;
 
 MODS.est = () => {
   const ests = DB.estabelecimentos || [];
-  setTimeout(calcSim, 50);
+  setTimeout(() => { if($('sim-fat')) calcSim(); }, 50);
 
-  const simulatorHtml = `<div class="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6 mb-8 mt-4"><div class="flex items-center space-x-3 border-b border-zinc-800 pb-4 mb-6"><div class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center"><i class="fas fa-chart-line"></i></div><div><h3 class="text-base font-bold text-white">Simulador de Viabilidade Comercial</h3><p class="text-xs text-zinc-500">Ajuste o faturamento e as taxas.</p></div></div><div class="space-y-8"><div><h4 class="text-[11px] font-bold text-amber-400 mb-4 uppercase tracking-widest">1. Mix de Processamento</h4><div class="grid grid-cols-2 md:grid-cols-5 gap-4"><label class="block text-[11px] text-zinc-400">Fat Mensal (R$)<input type="number" id="sim-fat" value="90000" class="mt-2 w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-emerald-400 font-bold" oninput="calcSim()"></label><label class="block text-[11px] text-zinc-400">% Crédito<input type="number" id="sim-mc" value="50" class="mt-2 w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-white" oninput="calcSim()"></label><label class="block text-[11px] text-zinc-400">% Pix<input type="number" id="sim-mp" value="30" class="mt-2 w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-white" oninput="calcSim()"></label><label class="block text-[11px] text-zinc-400">% Débito<input type="number" id="sim-md" value="15" class="mt-2 w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-white" oninput="calcSim()"></label><label class="block text-[11px] text-zinc-400">% Dinheiro<input type="number" id="sim-mdi" value="5" class="mt-2 w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-white" oninput="calcSim()"></label></div></div><div><h4 class="text-[11px] font-bold text-teal-400 mb-4 uppercase tracking-widest">2. Taxas Propostas (%)</h4><div class="grid grid-cols-2 md:grid-cols-4 gap-4"><label class="block text-[11px] text-zinc-400">Tx Crédito<input type="number" step="0.01" id="sim-tc" value="2.80" class="mt-2 w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-white" oninput="calcSim()"></label><label class="block text-[11px] text-zinc-400">Tx Pix<input type="number" step="0.01" id="sim-tp" value="1.25" class="mt-2 w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-white" oninput="calcSim()"></label><label class="block text-[11px] text-zinc-400">Tx Débito<input type="number" step="0.01" id="sim-td" value="2.60" class="mt-2 w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-white" oninput="calcSim()"></label><label class="block text-[11px] text-zinc-400">Tx Dinheiro<input type="number" step="0.01" id="sim-tdi" value="1.00" class="mt-2 w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-white" oninput="calcSim()"></label></div></div></div><div id="sim-results"></div></div>`;
+  const simulatorHtml = `<div class="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6 mb-8 mt-4"><div class="flex items-center space-x-3 border-b border-zinc-800 pb-4 mb-6"><div class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center"><i class="fas fa-chart-line"></i></div><div><h3 class="text-base font-bold text-white">Simulador de Viabilidade Comercial</h3></div></div><div class="space-y-8"><div><h4 class="text-[11px] font-bold text-amber-400 mb-4 uppercase tracking-widest">1. Mix de Processamento</h4><div class="grid grid-cols-2 md:grid-cols-5 gap-4"><label class="block text-[11px] text-zinc-400">Fat Mensal (R$)<input type="number" id="sim-fat" value="90000" class="mt-2 w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-emerald-400 font-bold" oninput="calcSim()"></label><label class="block text-[11px] text-zinc-400">% Crédito<input type="number" id="sim-mc" value="50" class="mt-2 w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-white" oninput="calcSim()"></label><label class="block text-[11px] text-zinc-400">% Pix<input type="number" id="sim-mp" value="30" class="mt-2 w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-white" oninput="calcSim()"></label><label class="block text-[11px] text-zinc-400">% Débito<input type="number" id="sim-md" value="15" class="mt-2 w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-white" oninput="calcSim()"></label><label class="block text-[11px] text-zinc-400">% Dinheiro<input type="number" id="sim-mdi" value="5" class="mt-2 w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-white" oninput="calcSim()"></label></div></div><div><h4 class="text-[11px] font-bold text-teal-400 mb-4 uppercase tracking-widest">2. Taxas Propostas (%)</h4><div class="grid grid-cols-2 md:grid-cols-4 gap-4"><label class="block text-[11px] text-zinc-400">Tx Crédito<input type="number" step="0.01" id="sim-tc" value="2.80" class="mt-2 w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-white" oninput="calcSim()"></label><label class="block text-[11px] text-zinc-400">Tx Pix<input type="number" step="0.01" id="sim-tp" value="1.25" class="mt-2 w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-white" oninput="calcSim()"></label><label class="block text-[11px] text-zinc-400">Tx Débito<input type="number" step="0.01" id="sim-td" value="2.60" class="mt-2 w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-white" oninput="calcSim()"></label><label class="block text-[11px] text-zinc-400">Tx Dinheiro<input type="number" step="0.01" id="sim-tdi" value="1.00" class="mt-2 w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-white" oninput="calcSim()"></label></div></div></div><div id="sim-results"></div></div>`;
 
   const formFields = [{ k: 'nome', label: 'Nome', req: 1, full: true }, { k: 'tipo', label: 'Tipo', opts: TIPOS_EST }, { k: 'statusNegociacao', label: 'Status', opts: STATUS_NEG }, { k: 'capacidade', label: 'Capacidade', type: 'number' }, { k: 'responsavel', label: 'Responsável' }, { k: 'telefone', label: 'WhatsApp' }, { k: 'endereco', label: 'Endereço', full: true }];
   const estCards = ests.map((e) => `<div class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-5 relative"><div class="flex justify-between items-start"><div class="flex items-center space-x-3"><div class="w-10 h-10 rounded-xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400"><i class="fas fa-store"></i></div><div><h3 class="text-base font-bold text-white">${esc(e.nome)}</h3><p class="text-[11px] text-zinc-400">${esc(e.tipo)}</p></div></div>${del('estabelecimentos', e)}</div></div>`).join('');
@@ -931,425 +726,91 @@ MODS.est = () => {
   return head('Estabelecimentos', 'Gestão de casas parceiras.') + simulatorHtml + `<div class="mb-8"><h3 class="text-sm font-bold text-white mb-3">Cadastrar Novo</h3>${form('estabelecimentos', formFields, 'Cadastrar')}</div>` + (ests.length > 0 ? `<h3 class="text-sm font-bold text-white mb-3">Cadastrados</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-6">${estCards}</div>` : '');
 };
 
-/* ---------- MÓDULO DE DEMANDAS (KANBAN) ---------- */
-MODS.demands = () => {
-  const demandas = DB.demandas || [];
-  const STATUS = ['Pendente', 'Em Andamento', 'Concluída'];
-  const URG_COLORS = { 
-    'Baixa': 'bg-blue-500/10 border-blue-500/30 text-blue-400', 
-    'Média': 'bg-amber-500/10 border-amber-500/30 text-amber-400', 
-    'Alta': 'bg-orange-500/10 border-orange-500/30 text-orange-400', 
-    'Urgente': 'bg-red-500/10 border-red-500/30 text-red-400' 
-  };
+window.calcSim = () => {
+  if(!$('sim-results')) return;
+  const v = (id) => parseFloat($(id).value.replace(',','.')) || 0;
+  const fat = v('sim-fat'), mc = v('sim-mc')/100, mp = v('sim-mp')/100, md = v('sim-md')/100, mdi = v('sim-mdi')/100;
+  const tc = v('sim-tc')/100, tp = v('sim-tp')/100, td = v('sim-td')/100, tdi = v('sim-tdi')/100;
+  const custoCred = 0.032, custoPix = 0.0049, custoDeb = 0.0114, custoDin = 0;
+  const vC = fat * mc, vP = fat * mp, vD = fat * md, vDi = fat * mdi;
+  const rC = vC * tc, rP = vP * tp, rD = vD * td, rDi = vDi * tdi;
+  const cC = vC * custoCred, cP = vP * custoPix, cD = vD * custoDeb, cDi = vDi * custoDin;
+  const recBruta = rC + rP + rD + rDi, custoOp = cC + cP + cD + cDi, lucro = recBruta - custoOp;
 
-  // Construtor das colunas do Kanban
-  const colHtml = (status, icon, colorClass) => {
-    const items = demandas.filter(d => d.status === status);
-    
-    const cards = items.map(d => {
-      const currIdx = STATUS.indexOf(d.status);
-      const btnPrev = currIdx > 0 ? `<button onclick="moveDemanda('${d.id}', '${STATUS[currIdx - 1]}')" class="p-1.5 text-zinc-500 hover:text-white transition-colors" title="Mover para trás"><i class="fas fa-arrow-left"></i></button>` : '<div class="w-7"></div>';
-      const btnNext = currIdx < 2 ? `<button onclick="moveDemanda('${d.id}', '${STATUS[currIdx + 1]}')" class="p-1.5 text-zinc-500 hover:text-white transition-colors" title="Mover para frente"><i class="fas fa-arrow-right"></i></button>` : '<div class="w-7"></div>';
+  const tr = (nome, vol, tx, rec, cust, pct, luc) => `<tr class="border-t border-zinc-800/50 hover:bg-zinc-800/20"><td class="py-3 px-4 text-white font-bold">${nome}</td><td class="py-3 px-4 font-mono text-right text-zinc-300">${R(vol)}</td><td class="py-3 px-4 font-mono text-right text-zinc-300">${(tx*100).toFixed(2).replace('.',',')}%</td><td class="py-3 px-4 font-mono text-right text-amber-400">${R(rec)}</td><td class="py-3 px-4 font-mono text-right text-zinc-500">${R(cust)}</td><td class="py-3 px-4 font-mono text-right text-zinc-500">${(pct*100).toFixed(2).replace('.',',')}%</td><td class="py-3 px-4 font-mono text-right font-bold ${luc < 0 ? 'text-red-500' : 'text-emerald-400'}">${luc > 0 ? '+ ' : '- '}${R(Math.abs(luc))}</td></tr>`;
 
-      return `
-      <div class="bg-zinc-900/60 border border-zinc-800 rounded-xl p-4 flex flex-col gap-3 relative group hover:border-teal-500/30 transition-colors shadow-sm">
-        <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
-           ${del('demandas', d)}
-        </div>
-        <div>
-           <div class="flex items-center gap-2 mb-3">
-             <span class="text-[9px] font-bold uppercase border px-2 py-0.5 rounded-md ${URG_COLORS[d.urgencia] || 'bg-zinc-800 text-zinc-400'}">${esc(d.urgencia)}</span>
-             <span class="text-[9px] font-bold uppercase text-zinc-400 bg-zinc-800 border border-zinc-700 rounded-md px-2 py-0.5">${esc(d.tipo)}</span>
-           </div>
-           <h4 class="text-sm font-bold text-white leading-tight pr-6">${esc(d.titulo)}</h4>
-        </div>
-        <p class="text-[11px] text-zinc-400 leading-relaxed line-clamp-3">${esc(d.descricao).replace(/\n/g, '<br>')}</p>
-        <div class="flex justify-between items-center mt-2 pt-3 border-t border-zinc-800/50">
-           <div class="flex items-center gap-2 text-[10px] text-zinc-400 font-bold bg-zinc-950 px-2 py-1 rounded-lg border border-zinc-800">
-             <i class="fas fa-user-circle text-teal-400 text-sm"></i>
-             ${esc(d.responsavel)}
-           </div>
-           <div class="flex items-center gap-1 bg-zinc-950 rounded-lg border border-zinc-800">
-             ${btnPrev}
-             ${btnNext}
-           </div>
-        </div>
-      </div>
-      `;
-    }).join('');
-
-    return `
-    <div class="flex flex-col gap-4">
-      <div class="flex items-center justify-between pb-3 border-b-2 border-zinc-800/80">
-         <h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fas ${icon} ${colorClass}"></i>${status}</h3>
-         <span class="text-[10px] font-bold bg-zinc-900 border border-zinc-700 text-zinc-400 px-2 py-1 rounded-lg">${items.length}</span>
-      </div>
-      <div class="flex flex-col gap-3 min-h-[10rem]">
-         ${cards || `<div class="text-center text-[11px] text-zinc-600 py-6 border border-zinc-800 border-dashed rounded-xl">Nenhuma demanda aqui.</div>`}
-      </div>
-    </div>
-    `;
-  };
-
-  return head('Demandas Gerais', 'Gestão de tarefas, fluxo de trabalho e backlog da Stratus.') + `
-  <div class="mb-8 mt-4 bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6">
-    <h3 class="text-sm font-bold text-white mb-4"><i class="fas fa-plus text-teal-400 mr-2"></i>Nova Demanda</h3>
-    <form onsubmit="addDemanda(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-start">
-       <label class="text-[11px] text-zinc-500 space-y-1 block md:col-span-2"><span>Título da Demanda</span><input required name="titulo" class="${inp}" placeholder="Ex: Fechar layout do bar..."></label>
-       <label class="text-[11px] text-zinc-500 space-y-1 block"><span>Responsável</span><input required name="responsavel" class="${inp}" placeholder="Ex: PV, Mathaus..."></label>
-       <label class="text-[11px] text-zinc-500 space-y-1 block"><span>Urgência</span>
-          <select name="urgencia" class="${inp}">
-            <option>Baixa</option><option>Média</option><option>Alta</option><option>Urgente</option>
-          </select>
-       </label>
-       <label class="text-[11px] text-zinc-500 space-y-1 block md:col-span-3"><span>Detalhes / Descrição da Tarefa</span><textarea required name="descricao" rows="2" class="${inp}" placeholder="Detalhe o que precisa ser feito..."></textarea></label>
-       <label class="text-[11px] text-zinc-500 space-y-1 block"><span>Tipo de Demanda</span>
-          <select name="tipo" class="${inp}">
-            <option>Operacional</option><option>Financeiro</option><option>Comercial</option><option>Tecnologia</option><option>Marketing / Design</option><option>Outros</option>
-          </select>
-       </label>
-       <div class="md:col-span-4 flex justify-end pt-3 border-t border-zinc-800 mt-2">
-         <button type="submit" class="bg-teal-500/15 border border-teal-500/40 text-teal-400 rounded-lg px-6 py-2.5 text-sm font-bold hover:bg-teal-500/25 transition-colors"><i class="fas fa-save mr-2"></i>Criar Demanda</button>
-       </div>
-    </form>
-  </div>
-  
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 mt-4">
-    ${colHtml('Pendente', 'fa-clipboard-list', 'text-zinc-400')}
-    ${colHtml('Em Andamento', 'fa-spinner fa-spin-pulse', 'text-amber-400')}
-    ${colHtml('Concluída', 'fa-check-circle', 'text-emerald-400')}
-  </div>
-  `;
+  $('sim-results').innerHTML = `<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-8"><div class="bg-zinc-950 border border-zinc-800 rounded-xl p-5"><p class="text-[11px] text-zinc-500 mb-1">Faturamento Mensal</p><h3 class="text-xl font-bold text-white">${R(fat)}</h3></div><div class="bg-zinc-950 border border-zinc-800 rounded-xl p-5"><p class="text-[11px] text-zinc-500 mb-1">Receita Gerada Bruta</p><h3 class="text-xl font-bold text-amber-400">${R(recBruta)}</h3></div><div class="bg-zinc-950 border border-zinc-800 rounded-xl p-5"><p class="text-[11px] text-zinc-500 mb-1">Custo Operacional Stratus</p><h3 class="text-xl font-bold text-red-400">- ${R(custoOp)}</h3></div><div class="bg-zinc-950 border border-zinc-800 rounded-xl p-5"><p class="text-[11px] text-zinc-500 mb-1">Lucro Líquido Stratus</p><h3 class="text-xl font-bold text-emerald-400">${R(lucro)}</h3><p class="text-[10px] text-zinc-500 mt-1">Margem do faturamento: ${((lucro/fat)*100 || 0).toFixed(2).replace('.',',')}%</p></div></div><div class="mt-8 space-y-4"><div class="overflow-x-auto border border-zinc-800 rounded-xl bg-zinc-950/80"><table class="w-full text-[11px] text-left whitespace-nowrap"><thead class="text-zinc-500 uppercase bg-zinc-950"><tr><th class="py-3 px-4">Meio</th><th class="py-3 px-4 text-right">Volume</th><th class="py-3 px-4 text-right">Taxa (Cliente)</th><th class="py-3 px-4 text-right">Receita (Bruta)</th><th class="py-3 px-4 text-right">Custo Stratus</th><th class="py-3 px-4 text-right">Custo %</th><th class="py-3 px-4 text-right">Lucro/Prejuízo</th></tr></thead><tbody class="divide-y divide-zinc-800/50">${tr('Crédito', vC, tc, rC, cC, custoCred, rC-cC)}${tr('Pix', vP, tp, rP, cP, custoPix, rP-cP)}${tr('Débito', vD, td, rD, cD, custoDeb, rD-cD)}${tr('Dinheiro', vDi, tdi, rDi, cDi, custoDin, rDi-cDi)}</tbody></table></div></div>`;
 };
-
-// Funções de ação do Kanban (Demandas)
-window.addDemanda = (e) => {
-   e.preventDefault();
-   const fd = new FormData(e.target);
-   DB.demandas = DB.demandas || [];
-   DB.demandas.push({
-      id: uid(),
-      titulo: fd.get('titulo'),
-      descricao: fd.get('descricao'),
-      responsavel: fd.get('responsavel'),
-      urgencia: fd.get('urgencia'),
-      tipo: fd.get('tipo'),
-      status: 'Pendente',
-      dataCriacao: new Date().toISOString()
-   });
-   save(); render();
-};
-
-window.moveDemanda = (id, newStatus) => {
-   const d = (DB.demandas || []).find(x => x.id === id);
-   if (d) { d.status = newStatus; save(); render(); }
-};
-
-/* ---------- MÓDULO FINANCEIRO (CLIENTES, EVENTOS E COMPROVANTES) ---------- */
-let activeFinClient = null;
-let activeFinEvent = null;
 
 MODS.fin = () => {
-  const clientes = DB.finClientes || [];
-  const eventos = DB.finEventos || [];
-  const comprovantes = DB.finComprovantes || [];
+  const clientes = DB.finClientes || [], eventos = DB.finEventos || [], comprovantes = DB.finComprovantes || [];
+  const modalHtml = `<div id="comp-modal" class="fixed inset-0 z-[100] bg-black/95 hidden flex-col items-center p-4 md:p-8 backdrop-blur-sm"><div class="w-full max-w-5xl flex justify-between items-center mb-4"><h3 id="comp-modal-title" class="text-white font-bold text-lg">Comprovante</h3><button onclick="$('comp-modal').classList.add('hidden'); $('comp-modal').classList.remove('flex');" class="w-10 h-10 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-400 hover:text-white hover:bg-red-500/20 hover:border-red-500/50 transition-all flex items-center justify-center"><i class="fas fa-times"></i></button></div><div id="comp-modal-content" class="w-full flex-1 bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden flex items-center justify-center"></div></div>`;
 
-  // HTML do Modal de Visualização (Preview de Imagem e PDF)
-  const modalHtml = `
-    <div id="comp-modal" class="fixed inset-0 z-[100] bg-black/95 hidden flex-col items-center p-4 md:p-8 backdrop-blur-sm">
-      <div class="w-full max-w-5xl flex justify-between items-center mb-4">
-        <h3 id="comp-modal-title" class="text-white font-bold text-lg">Comprovante</h3>
-        <button onclick="$('comp-modal').classList.add('hidden'); $('comp-modal').classList.remove('flex');" class="w-10 h-10 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-400 hover:text-white hover:bg-red-500/20 hover:border-red-500/50 transition-all flex items-center justify-center"><i class="fas fa-times"></i></button>
-      </div>
-      <div id="comp-modal-content" class="w-full flex-1 bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden flex items-center justify-center"></div>
-    </div>
-  `;
-
-  // VISÃO 3: DENTRO DO EVENTO (LISTA DE COMPROVANTES)
   if (activeFinClient && activeFinEvent) {
-    const cliente = clientes.find(c => c.id === activeFinClient);
-    const evento = eventos.find(e => e.id === activeFinEvent);
+    const cliente = clientes.find(c => c.id === activeFinClient), evento = eventos.find(e => e.id === activeFinEvent);
     if (!cliente || !evento) { activeFinEvent = null; return render(); }
-    
     const compDoEvento = comprovantes.filter(c => c.eventoId === activeFinEvent);
-    
-    const trs = compDoEvento.map(c => `
-      <tr class="hover:bg-zinc-800/40 border-b border-zinc-800/50">
-        <td class="py-3 px-4 text-white font-bold">${esc(c.nome)}</td>
-        <td class="py-3 px-4 text-zinc-400">${esc(c.categoria)}</td>
-        <td class="py-3 px-4 text-zinc-400">${fd(c.data)}</td>
-        <td class="py-3 px-4 font-mono text-emerald-400">${R(c.valor)}</td>
-        <td class="py-3 px-4 text-right space-x-3">
-          ${c.arquivo ? `<button type="button" onclick="viewComp('${c.id}')" class="text-teal-400 hover:text-teal-300 transition-colors" title="Ver Arquivo"><i class="fas fa-eye"></i></button>` : ''}
-          <button type="button" onclick="editComp('${c.id}')" class="text-amber-400 hover:text-amber-300 transition-colors" title="Editar"><i class="fas fa-edit"></i></button>
-          ${del('finComprovantes', c)}
-        </td>
-      </tr>
-    `).join('');
+    const trs = compDoEvento.map(c => `<tr class="hover:bg-zinc-800/40 border-b border-zinc-800/50"><td class="py-3 px-4 text-white font-bold">${esc(c.nome)}</td><td class="py-3 px-4 text-zinc-400">${esc(c.categoria)}</td><td class="py-3 px-4 text-zinc-400">${fd(c.data)}</td><td class="py-3 px-4 font-mono text-emerald-400">${R(c.valor)}</td><td class="py-3 px-4 text-right space-x-3">${c.arquivo ? `<button type="button" onclick="viewComp('${c.id}')" class="text-teal-400 hover:text-teal-300 transition-colors" title="Ver Arquivo"><i class="fas fa-eye"></i></button>` : ''}<button type="button" onclick="editComp('${c.id}')" class="text-amber-400 hover:text-amber-300 transition-colors" title="Editar"><i class="fas fa-edit"></i></button>${del('finComprovantes', c)}</td></tr>`).join('');
 
-    return modalHtml + `
-      <div class="flex items-center space-x-3 mb-6 mt-4 text-sm font-bold">
-        <button onclick="activeFinClient = null; activeFinEvent = null; render();" class="text-zinc-500 hover:text-white transition-colors"><i class="fas fa-building mr-2"></i>Clientes</button>
-        <i class="fas fa-chevron-right text-zinc-700 text-xs"></i>
-        <button onclick="activeFinEvent = null; render();" class="text-zinc-400 hover:text-white transition-colors">${esc(cliente.nome)}</button>
-        <i class="fas fa-chevron-right text-zinc-700 text-xs"></i>
-        <span class="text-amber-400">${esc(evento.nome)}</span>
-      </div>
-      
-      <div class="flex justify-between items-center mb-6">
-        <div>
-          <h2 class="text-2xl font-bold text-white"><i class="fas fa-folder-open text-amber-400 mr-2"></i>${esc(evento.nome)}</h2>
-          <p class="text-xs text-zinc-400">Subpasta de comprovantes do evento</p>
-        </div>
-      </div>
-      
-      <div class="mb-8 bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6">
-        <h3 class="text-sm font-bold text-white mb-4"><i class="fas fa-plus text-teal-400 mr-2"></i>Lançar Comprovante</h3>
-        <form id="form-comp" onsubmit="saveComp(event)" class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
-           <input type="hidden" id="comp-id">
-           <label class="text-[11px] text-zinc-500 space-y-1 block"><span>Descrição</span><input required id="comp-nome" class="${inp}"></label>
-           <label class="text-[11px] text-zinc-500 space-y-1 block"><span>Categoria</span>
-              <select id="comp-cat" class="${inp}">
-                <option>Fornecedor</option><option>Staff / Equipe</option><option>Insumos / Bar</option><option>Logística</option><option>Impostos</option><option>Outros</option>
-              </select>
-           </label>
-           <label class="text-[11px] text-zinc-500 space-y-1 block"><span>Valor (R$)</span><input required type="number" step="0.01" id="comp-val" class="${inp}"></label>
-           <label class="text-[11px] text-zinc-500 space-y-1 block"><span>Data</span><input required type="date" id="comp-data" class="${inp}"></label>
-           <label class="text-[11px] text-zinc-500 space-y-1 block"><span>Anexo (Imagem/PDF)</span><input type="file" id="comp-file" class="${inp} p-1 text-xs" accept="image/*,.pdf"></label>
-           
-           <div class="md:col-span-5 flex justify-end space-x-3 mt-2 pt-4 border-t border-zinc-800">
-             <button type="button" onclick="resetCompForm()" class="px-4 py-2 rounded-lg text-sm text-zinc-400 hover:text-white border border-transparent hover:border-zinc-700 transition-colors">Limpar</button>
-             <button type="submit" class="bg-teal-500/15 border border-teal-500/40 text-teal-400 rounded-lg px-4 py-2 text-sm font-bold hover:bg-teal-500/25 transition-colors"><i class="fas fa-save mr-2"></i>Salvar Comprovante</button>
-           </div>
-        </form>
-      </div>
-
-      <div class="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-5">
-        <h4 class="text-sm font-bold text-white mb-4"><i class="fas fa-file-invoice-dollar text-emerald-400 mr-2"></i>Extrato do Evento</h4>
-        <div class="overflow-x-auto">
-          <table class="w-full text-[11px] text-left whitespace-nowrap">
-            <thead class="text-zinc-500 uppercase bg-zinc-950 border-b border-zinc-800">
-              <tr><th class="py-3 px-4">Descrição</th><th class="py-3 px-4">Categoria</th><th class="py-3 px-4">Data</th><th class="py-3 px-4">Valor</th><th class="py-3 px-4 text-right">Ações</th></tr>
-            </thead>
-            <tbody class="divide-y divide-zinc-800/50">${trs || '<tr><td colspan="5" class="py-6 text-center text-zinc-500">Nenhum comprovante lançado neste evento.</td></tr>'}</tbody>
-          </table>
-        </div>
-      </div>
-    `;
+    return modalHtml + `<div class="flex items-center space-x-3 mb-6 mt-4 text-sm font-bold"><button onclick="activeFinClient = null; activeFinEvent = null; render();" class="text-zinc-500 hover:text-white transition-colors"><i class="fas fa-building mr-2"></i>Clientes</button><i class="fas fa-chevron-right text-zinc-700 text-xs"></i><button onclick="activeFinEvent = null; render();" class="text-zinc-400 hover:text-white transition-colors">${esc(cliente.nome)}</button><i class="fas fa-chevron-right text-zinc-700 text-xs"></i><span class="text-amber-400">${esc(evento.nome)}</span></div><div class="mb-8 bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6"><h3 class="text-sm font-bold text-white mb-4"><i class="fas fa-plus text-teal-400 mr-2"></i>Lançar Comprovante</h3><form id="form-comp" onsubmit="saveComp(event)" class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end"><input type="hidden" id="comp-id"><label class="text-[11px] text-zinc-500 space-y-1 block"><span>Descrição</span><input required id="comp-nome" class="${inp}"></label><label class="text-[11px] text-zinc-500 space-y-1 block"><span>Categoria</span><select id="comp-cat" class="${inp}"><option>Fornecedor</option><option>Staff / Equipe</option><option>Insumos / Bar</option><option>Logística</option><option>Impostos</option><option>Outros</option></select></label><label class="text-[11px] text-zinc-500 space-y-1 block"><span>Valor (R$)</span><input required type="number" step="0.01" id="comp-val" class="${inp}"></label><label class="text-[11px] text-zinc-500 space-y-1 block"><span>Data</span><input required type="date" id="comp-data" class="${inp}"></label><label class="text-[11px] text-zinc-500 space-y-1 block"><span>Anexo (Imagem/PDF)</span><input type="file" id="comp-file" class="${inp} p-1 text-xs" accept="image/*,.pdf"></label><div class="md:col-span-5 flex justify-end space-x-3 mt-2 pt-4 border-t border-zinc-800"><button type="button" onclick="resetCompForm()" class="px-4 py-2 rounded-lg text-sm text-zinc-400 hover:text-white border border-transparent hover:border-zinc-700 transition-colors">Limpar</button><button type="submit" class="bg-teal-500/15 border border-teal-500/40 text-teal-400 rounded-lg px-4 py-2 text-sm font-bold hover:bg-teal-500/25 transition-colors"><i class="fas fa-save mr-2"></i>Salvar Comprovante</button></div></form></div><div class="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-5"><h4 class="text-sm font-bold text-white mb-4"><i class="fas fa-file-invoice-dollar text-emerald-400 mr-2"></i>Extrato do Evento</h4><div class="overflow-x-auto"><table class="w-full text-[11px] text-left whitespace-nowrap"><thead class="text-zinc-500 uppercase bg-zinc-950 border-b border-zinc-800"><tr><th class="py-3 px-4">Descrição</th><th class="py-3 px-4">Categoria</th><th class="py-3 px-4">Data</th><th class="py-3 px-4">Valor</th><th class="py-3 px-4 text-right">Ações</th></tr></thead><tbody class="divide-y divide-zinc-800/50">${trs || '<tr><td colspan="5" class="py-6 text-center text-zinc-500">Nenhum comprovante lançado neste evento.</td></tr>'}</tbody></table></div></div>`;
   }
 
-  // VISÃO 2: DENTRO DO CLIENTE (LISTA DE EVENTOS)
   if (activeFinClient) {
     const cliente = clientes.find(c => c.id === activeFinClient);
     if (!cliente) { activeFinClient = null; return render(); }
-    
     const eventosDoCliente = eventos.filter(e => e.clienteId === activeFinClient);
-    
     const evCards = eventosDoCliente.map(e => {
       const cTotal = comprovantes.filter(c => c.eventoId === e.id).reduce((a, b) => a + Number(b.valor), 0);
-      return `
-      <div class="bg-zinc-900/60 border border-zinc-800 hover:border-amber-500/50 transition-all rounded-2xl p-5 relative group flex flex-col justify-between h-full">
-        <div class="absolute top-4 right-4 space-x-2">
-          <button onclick="editEvento('${e.id}', '${esc(e.nome)}')" class="text-zinc-500 hover:text-amber-400 transition-colors" title="Editar Evento"><i class="fas fa-edit"></i></button>
-          ${del('finEventos', e)}
-        </div>
-        <div class="cursor-pointer" onclick="activeFinEvent = '${e.id}'; render();">
-          <i class="fas fa-folder text-4xl text-amber-400/80 mb-4 group-hover:text-amber-400 transition-colors"></i>
-          <h3 class="text-base font-bold text-white">${esc(e.nome)}</h3>
-          <p class="text-[11px] text-zinc-400 mb-4">Subpasta de evento</p>
-          <div class="pt-3 border-t border-zinc-800/50 flex justify-between items-center text-[11px]">
-             <span class="text-zinc-500">Total do Evento:</span>
-             <span class="font-bold text-emerald-400">${R(cTotal)}</span>
-          </div>
-        </div>
-      </div>
-    `}).join('');
+      return `<div class="bg-zinc-900/60 border border-zinc-800 hover:border-amber-500/50 transition-all rounded-2xl p-5 relative group flex flex-col justify-between h-full"><div class="absolute top-4 right-4 space-x-2"><button onclick="editEvento('${e.id}', '${esc(e.nome)}')" class="text-zinc-500 hover:text-amber-400 transition-colors" title="Editar Evento"><i class="fas fa-edit"></i></button>${del('finEventos', e)}</div><div class="cursor-pointer" onclick="activeFinEvent = '${e.id}'; render();"><i class="fas fa-folder text-4xl text-amber-400/80 mb-4 group-hover:text-amber-400 transition-colors"></i><h3 class="text-base font-bold text-white">${esc(e.nome)}</h3><p class="text-[11px] text-zinc-400 mb-4">Subpasta de evento</p><div class="pt-3 border-t border-zinc-800/50 flex justify-between items-center text-[11px]"><span class="text-zinc-500">Total do Evento:</span><span class="font-bold text-emerald-400">${R(cTotal)}</span></div></div></div>`;
+    }).join('');
 
-    return `
-      <div class="flex items-center space-x-3 mb-6 mt-4 text-sm font-bold">
-        <button onclick="activeFinClient = null; render();" class="text-zinc-500 hover:text-white transition-colors"><i class="fas fa-building mr-2"></i>Clientes</button>
-        <i class="fas fa-chevron-right text-zinc-700 text-xs"></i>
-        <span class="text-amber-400">${esc(cliente.nome)}</span>
-      </div>
-      
-      <div class="mb-8 bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6">
-        <h3 class="text-sm font-bold text-white mb-3">Criar Subpasta de Evento</h3>
-        <form onsubmit="addFinEvento(event)" class="flex flex-col md:flex-row gap-3 items-end">
-           <label class="text-[11px] text-zinc-500 space-y-1 block flex-1 w-full"><span>Nome do Evento (Ex: Halloween)</span><input required name="nome" class="${inp}"></label>
-           <button type="submit" class="bg-amber-500/15 border border-amber-500/40 text-amber-400 rounded-lg px-4 py-2 text-sm font-bold hover:bg-amber-500/25 transition-colors w-full md:w-auto"><i class="fas fa-plus mr-2"></i>Criar Evento</button>
-        </form>
-      </div>
-      
-      <div class="flex items-center space-x-2 mb-4">
-         <i class="fas fa-folders text-amber-400"></i>
-         <h3 class="text-sm font-bold text-white">Eventos de ${esc(cliente.nome)}</h3>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        ${evCards || '<div class="col-span-full py-10 text-center text-zinc-500 bg-zinc-900/30 border border-zinc-800 border-dashed rounded-2xl">Nenhum evento criado para este cliente.</div>'}
-      </div>
-    `;
+    return `<div class="flex items-center space-x-3 mb-6 mt-4 text-sm font-bold"><button onclick="activeFinClient = null; render();" class="text-zinc-500 hover:text-white transition-colors"><i class="fas fa-building mr-2"></i>Clientes</button><i class="fas fa-chevron-right text-zinc-700 text-xs"></i><span class="text-amber-400">${esc(cliente.nome)}</span></div><div class="mb-8 bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6"><h3 class="text-sm font-bold text-white mb-3">Criar Subpasta de Evento</h3><form onsubmit="addFinEvento(event)" class="flex flex-col md:flex-row gap-3 items-end"><label class="text-[11px] text-zinc-500 space-y-1 block flex-1 w-full"><span>Nome do Evento</span><input required name="nome" class="${inp}"></label><button type="submit" class="bg-amber-500/15 border border-amber-500/40 text-amber-400 rounded-lg px-4 py-2 text-sm font-bold hover:bg-amber-500/25 transition-colors w-full md:w-auto"><i class="fas fa-plus mr-2"></i>Criar Evento</button></form></div><div class="flex items-center space-x-2 mb-4"><i class="fas fa-folders text-amber-400"></i><h3 class="text-sm font-bold text-white">Eventos de ${esc(cliente.nome)}</h3></div><div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">${evCards || '<div class="col-span-full py-10 text-center text-zinc-500 bg-zinc-900/30 border border-zinc-800 border-dashed rounded-2xl">Nenhum evento criado.</div>'}</div>`;
   }
 
-  // VISÃO 1: LISTA DE CLIENTES (ROOT)
   const cliCards = clientes.map(c => {
     const evIds = eventos.filter(e => e.clienteId === c.id).map(e => e.id);
     const cTotal = comprovantes.filter(comp => evIds.includes(comp.eventoId)).reduce((a, b) => a + Number(b.valor), 0);
-    return `
-    <div class="bg-zinc-900/60 border border-zinc-800 hover:border-teal-500/50 transition-all rounded-2xl p-5 relative group flex flex-col justify-between h-full">
-      <div class="absolute top-4 right-4 space-x-2">
-        <button onclick="editCliente('${c.id}', '${esc(c.nome)}')" class="text-zinc-500 hover:text-teal-400 transition-colors" title="Editar Cliente"><i class="fas fa-edit"></i></button>
-        ${del('finClientes', c)}
-      </div>
-      <div class="cursor-pointer" onclick="activeFinClient = '${c.id}'; render();">
-        <i class="fas fa-building text-4xl text-teal-500/80 mb-4 group-hover:text-teal-400 transition-colors"></i>
-        <h3 class="text-base font-bold text-white">${esc(c.nome)}</h3>
-        <p class="text-[11px] text-zinc-400 mb-4">${evIds.length} subpasta(s) de evento</p>
-        <div class="pt-3 border-t border-zinc-800/50 flex justify-between items-center text-[11px]">
-           <span class="text-zinc-500">Gasto Acumulado:</span>
-           <span class="font-bold text-emerald-400">${R(cTotal)}</span>
-        </div>
-      </div>
-    </div>
-  `}).join('');
+    return `<div class="bg-zinc-900/60 border border-zinc-800 hover:border-teal-500/50 transition-all rounded-2xl p-5 relative group flex flex-col justify-between h-full"><div class="absolute top-4 right-4 space-x-2"><button onclick="editCliente('${c.id}', '${esc(c.nome)}')" class="text-zinc-500 hover:text-teal-400 transition-colors" title="Editar Cliente"><i class="fas fa-edit"></i></button>${del('finClientes', c)}</div><div class="cursor-pointer" onclick="activeFinClient = '${c.id}'; render();"><i class="fas fa-building text-4xl text-teal-500/80 mb-4 group-hover:text-teal-400 transition-colors"></i><h3 class="text-base font-bold text-white">${esc(c.nome)}</h3><p class="text-[11px] text-zinc-400 mb-4">${evIds.length} subpasta(s) de evento</p><div class="pt-3 border-t border-zinc-800/50 flex justify-between items-center text-[11px]"><span class="text-zinc-500">Gasto Acumulado:</span><span class="font-bold text-emerald-400">${R(cTotal)}</span></div></div></div>`;
+  }).join('');
 
-  return head('Painel Financeiro', 'Organização de clientes, eventos e seus comprovantes em subpastas.') + `
-    <div class="mb-8 mt-4 bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6">
-      <h3 class="text-sm font-bold text-white mb-3">Nova Pasta de Cliente (Produtor/Marca)</h3>
-      <form onsubmit="addFinCliente(event)" class="flex flex-col md:flex-row gap-3 items-end">
-         <label class="text-[11px] text-zinc-500 space-y-1 block flex-1 w-full"><span>Nome do Cliente (Ex: Bateu, Híbrida)</span><input required name="nome" class="${inp}"></label>
-         <button type="submit" class="bg-teal-500/15 border border-teal-500/40 text-teal-400 rounded-lg px-4 py-2 text-sm font-bold hover:bg-teal-500/25 transition-colors w-full md:w-auto"><i class="fas fa-plus mr-2"></i>Criar Cliente</button>
-      </form>
-    </div>
-    
-    <div class="flex items-center space-x-2 mb-4">
-       <i class="fas fa-folder-open text-teal-400"></i>
-       <h3 class="text-sm font-bold text-white">Clientes Cadastrados</h3>
-    </div>
-    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      ${cliCards || '<div class="col-span-full py-10 text-center text-zinc-500 bg-zinc-900/30 border border-zinc-800 border-dashed rounded-2xl">Nenhum cliente cadastrado ainda.</div>'}
-    </div>
-  `;
+  return head('Painel Financeiro', 'Organização em subpastas.') + `<div class="mb-8 mt-4 bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6"><h3 class="text-sm font-bold text-white mb-3">Nova Pasta de Cliente (Produtor/Marca)</h3><form onsubmit="addFinCliente(event)" class="flex flex-col md:flex-row gap-3 items-end"><label class="text-[11px] text-zinc-500 space-y-1 block flex-1 w-full"><span>Nome do Cliente</span><input required name="nome" class="${inp}"></label><button type="submit" class="bg-teal-500/15 border border-teal-500/40 text-teal-400 rounded-lg px-4 py-2 text-sm font-bold hover:bg-teal-500/25 transition-colors w-full md:w-auto"><i class="fas fa-plus mr-2"></i>Criar Cliente</button></form></div><div class="flex items-center space-x-2 mb-4"><i class="fas fa-folder-open text-teal-400"></i><h3 class="text-sm font-bold text-white">Clientes Cadastrados</h3></div><div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">${cliCards || '<div class="col-span-full py-10 text-center text-zinc-500 bg-zinc-900/30 border border-zinc-800 border-dashed rounded-2xl">Nenhum cliente cadastrado ainda.</div>'}</div>`;
 };
 
-// --- FUNÇÕES DE AÇÃO ESPECÍFICAS DO FINANCEIRO ---
-
-window.addFinCliente = (e) => {
-   e.preventDefault();
-   const fd = new FormData(e.target);
-   DB.finClientes = DB.finClientes || [];
-   DB.finClientes.push({ id: uid(), nome: fd.get('nome') });
-   save(); render();
-};
-
-window.addFinEvento = (e) => {
-   e.preventDefault();
-   const fd = new FormData(e.target);
-   DB.finEventos = DB.finEventos || [];
-   DB.finEventos.push({ id: uid(), clienteId: activeFinClient, nome: fd.get('nome') });
-   save(); render();
-};
-
-window.editCliente = (id, nome) => {
-   const newNome = prompt("Editar Nome do Cliente:", nome);
-   if (newNome) { const c = DB.finClientes.find(x => x.id === id); if (c) { c.nome = newNome; save(); render(); } }
-};
-
-window.editEvento = (id, nome) => {
-   const newNome = prompt("Editar Nome do Evento:", nome);
-   if (newNome) { const e = DB.finEventos.find(x => x.id === id); if (e) { e.nome = newNome; save(); render(); } }
-};
+window.addFinCliente = (e) => { e.preventDefault(); const fd = new FormData(e.target); DB.finClientes = DB.finClientes || []; DB.finClientes.push({ id: uid(), nome: fd.get('nome') }); save(); render(); };
+window.addFinEvento = (e) => { e.preventDefault(); const fd = new FormData(e.target); DB.finEventos = DB.finEventos || []; DB.finEventos.push({ id: uid(), clienteId: activeFinClient, nome: fd.get('nome') }); save(); render(); };
+window.editCliente = (id, nome) => { const n = prompt("Editar Nome:", nome); if (n) { const c = DB.finClientes.find(x => x.id === id); if (c) { c.nome = n; save(); render(); } } };
+window.editEvento = (id, nome) => { const n = prompt("Editar Nome:", nome); if (n) { const e = DB.finEventos.find(x => x.id === id); if (e) { e.nome = n; save(); render(); } } };
 
 window.saveComp = async (e) => {
    e.preventDefault();
-   const btn = e.target.querySelector('button[type="submit"]');
-   btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Salvando...';
-   btn.disabled = true;
-
-   const id = $('comp-id').value;
-   const nome = $('comp-nome').value;
-   const cat = $('comp-cat').value;
-   const val = parseFloat($('comp-val').value) || 0;
-   const data = $('comp-data').value;
-   const fileInput = $('comp-file');
-   
-   let arquivoBase64 = null;
-   
+   const btn = e.target.querySelector('button[type="submit"]'); btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Salvando...'; btn.disabled = true;
+   const id = $('comp-id').value, nome = $('comp-nome').value, cat = $('comp-cat').value, val = parseFloat($('comp-val').value) || 0, data = $('comp-data').value, fileInput = $('comp-file');
+   let b64 = null;
    if (fileInput.files.length > 0) {
-      const file = fileInput.files[0];
-      arquivoBase64 = await new Promise((resolve) => {
-         const reader = new FileReader();
-         reader.onload = (ev) => resolve(ev.target.result);
-         reader.readAsDataURL(file);
-      });
+      b64 = await new Promise((res) => { const reader = new FileReader(); reader.onload = (ev) => res(ev.target.result); reader.readAsDataURL(fileInput.files[0]); });
    }
-
    DB.finComprovantes = DB.finComprovantes || [];
-   
-   if (id) {
-      const c = DB.finComprovantes.find(x => x.id === id);
-      if (c) {
-         c.nome = nome; c.categoria = cat; c.valor = val; c.data = data;
-         if (arquivoBase64) c.arquivo = arquivoBase64;
-      }
-   } else {
-      DB.finComprovantes.push({
-         id: uid(), eventoId: activeFinEvent, nome, categoria: cat, valor: val, data, arquivo: arquivoBase64
-      });
-   }
+   if (id) { const c = DB.finComprovantes.find(x => x.id === id); if (c) { c.nome = nome; c.categoria = cat; c.valor = val; c.data = data; if (b64) c.arquivo = b64; } } 
+   else { DB.finComprovantes.push({ id: uid(), eventoId: activeFinEvent, nome, categoria: cat, valor: val, data, arquivo: b64 }); }
    save(); render();
 };
 
-window.editComp = (id) => {
-   const c = DB.finComprovantes.find(x => x.id === id);
-   if (!c) return;
-   $('comp-id').value = c.id;
-   $('comp-nome').value = c.nome;
-   $('comp-cat').value = c.categoria;
-   $('comp-val').value = c.valor;
-   $('comp-data').value = c.data;
-   $('comp-nome').focus();
-};
-
-window.resetCompForm = () => {
-   $('form-comp').reset();
-   $('comp-id').value = '';
-};
-
-window.viewComp = (id) => {
-   const c = DB.finComprovantes.find(x => x.id === id);
-   if (!c || !c.arquivo) return;
-   
-   const content = $('comp-modal-content');
-   // Verifica se é PDF para renderizar num iframe, caso contrário assume imagem
-   if (c.arquivo.startsWith('data:application/pdf')) {
-      content.innerHTML = `<iframe src="${c.arquivo}" class="w-full h-full border-none"></iframe>`;
-   } else {
-      content.innerHTML = `<img src="${c.arquivo}" class="max-w-full max-h-full object-contain p-2">`;
-   }
-   
-   $('comp-modal-title').textContent = c.nome;
-   $('comp-modal').classList.remove('hidden');
-   $('comp-modal').classList.add('flex');
-};
+window.editComp = (id) => { const c = DB.finComprovantes.find(x => x.id === id); if (!c) return; $('comp-id').value = c.id; $('comp-nome').value = c.nome; $('comp-cat').value = c.categoria; $('comp-val').value = c.valor; $('comp-data').value = c.data; $('comp-nome').focus(); };
+window.resetCompForm = () => { $('form-comp').reset(); $('comp-id').value = ''; };
+window.viewComp = (id) => { const c = DB.finComprovantes.find(x => x.id === id); if (!c || !c.arquivo) return; const ct = $('comp-modal-content'); if (c.arquivo.startsWith('data:application/pdf')) { ct.innerHTML = `<iframe src="${c.arquivo}" class="w-full h-full border-none"></iframe>`; } else { ct.innerHTML = `<img src="${c.arquivo}" class="max-w-full max-h-full object-contain p-2">`; } $('comp-modal-title').textContent = c.nome; $('comp-modal').classList.remove('hidden'); $('comp-modal').classList.add('flex'); };
 
 const mv = $('mod-view');
 mv.addEventListener('submit', async (e) => {
   const f = e.target.closest('form[data-add]');
-  if (!f) return;
-  e.preventDefault();
-  const o = { id: uid() };
-  new FormData(f).forEach((v, k) => { o[k] = ['valor', 'capacidade'].includes(k) ? parseFloat(v) || 0 : v; });
-  (DB[f.dataset.add] ||= []).push(o);
-  save(); render();
+  if (!f) return; e.preventDefault();
+  const o = { id: uid() }; new FormData(f).forEach((v, k) => { o[k] = ['valor', 'capacidade'].includes(k) ? parseFloat(v) || 0 : v; });
+  (DB[f.dataset.add] ||= []).push(o); save(); render();
 });
 
 mv.addEventListener('click', (e) => {
   const g = (a) => e.target.closest(`[${a}]`);
-  if (g('data-del')) {
-    const [k, id] = g('data-del').dataset.del.split('|');
-    DB[k] = (DB[k] || []).filter((x) => x.id !== id);
-    save(); render();
-  } else if (g('data-go')) { go(g('data-go').dataset.go); }
+  if (g('data-del')) { const [k, id] = g('data-del').dataset.del.split('|'); DB[k] = (DB[k] || []).filter((x) => x.id !== id); save(); render(); } 
+  else if (g('data-go')) { go(g('data-go').dataset.go); }
 });
 
 loadDB().then(() => { nav('bar-view', document.querySelector('[data-v="bar-view"]')); });
