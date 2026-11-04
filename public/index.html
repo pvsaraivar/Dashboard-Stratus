@@ -20,9 +20,11 @@
 <div id="login-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-black backdrop-blur-md hidden">
   <div class="bg-zinc-950 border border-zinc-800 p-8 md:p-10 rounded-3xl w-[90%] max-w-sm shadow-2xl relative overflow-hidden">
     <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-teal-500 to-emerald-500"></div>
-    <div class="text-center mb-8">
-      <span class="text-2xl font-black tracking-[0.25em] text-white">STRATUS</span>
-      <p class="text-xs text-zinc-500 mt-2">Acesso Restrito ao Sistema</p>
+    <div class="text-center mb-8 flex flex-col items-center">
+      <!-- Logo no Login -->
+      <img src="logo-stratus.png" alt="STRATUS" class="h-8 object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+      <span class="text-3xl font-black tracking-[0.25em] text-white hidden">STRATUS</span>
+      <p class="text-xs text-zinc-500 mt-3">Acesso Restrito ao Sistema</p>
     </div>
     <form onsubmit="doLogin(event)" class="space-y-4">
       <label class="block text-[11px] text-zinc-400 space-y-1"><span>E-mail</span>
@@ -42,20 +44,29 @@
 <div id="app-container" class="flex h-screen w-full hidden">
   <div id="overlay" class="fixed inset-0 bg-black/60 z-30 hidden md:hidden"></div>
   <aside id="aside" class="fixed md:static inset-y-0 left-0 z-40 w-64 -translate-x-full md:translate-x-0 transition-transform duration-200 overflow-y-auto bg-zinc-950 border-r border-zinc-800 flex flex-col justify-start select-none shrink-0">
-      <div class="px-5 py-4 border-b border-zinc-900 flex justify-center items-center">
-        <div class="flex justify-center items-center w-full">
-      <span class="text-lg font-black tracking-[0.25em] text-white">STRATUS</span>
-        </div>
+      <div class="px-5 py-6 border-b border-zinc-900 flex justify-center items-center h-20">
+        <!-- Logo na Sidebar -->
+        <img src="logo-stratus.png" alt="STRATUS" class="h-6 object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+        <span class="text-xl font-black tracking-[0.25em] text-white hidden">STRATUS</span>
       </div>
       <div id="sidebar" class="px-4 py-4 space-y-6"></div>
   </aside>
 
   <main class="flex-1 h-screen overflow-y-auto bg-zinc-950 pb-32 md:pb-8">
-      <header class="h-16 border-b border-zinc-900 px-4 md:px-8 flex justify-between items-center bg-zinc-950/80 backdrop-blur sticky top-0 z-20">
-      <div class="flex items-center space-x-3 text-sm text-zinc-400"><button id="menu-btn" class="md:hidden w-9 h-9 rounded-lg bg-zinc-900 border border-zinc-800 text-teal-400"><i class="fas fa-bars"></i></button><i class="far fa-clock text-teal-400 hidden md:block"></i><span id="today" class="hidden md:block"></span></div>
+      <header class="h-20 border-b border-zinc-900 px-4 md:px-8 flex justify-between items-center bg-zinc-950/80 backdrop-blur sticky top-0 z-20">
+      <div class="flex items-center space-x-4">
+        <button id="menu-btn" class="md:hidden w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 text-teal-400 flex items-center justify-center"><i class="fas fa-bars"></i></button>
+        <!-- Logo no Mobile Header -->
+        <img src="logo-stratus.png" alt="STRATUS" class="h-5 md:hidden object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+        <span class="text-sm font-black tracking-[0.2em] text-white md:hidden hidden">STRATUS</span>
+        
+        <div class="hidden md:flex items-center space-x-2 text-sm text-zinc-400">
+          <i class="far fa-clock text-teal-400"></i><span id="today"></span>
+        </div>
+      </div>
       <div class="flex items-center gap-3">
-        <div id="user-avatar" class="w-9 h-9 rounded-lg bg-teal-500/20 border border-teal-500/40 flex items-center justify-center text-teal-400 font-bold text-xs">PV</div>
-        <button onclick="doLogout()" class="w-9 h-9 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-500 hover:text-red-400 hover:border-red-500/30 hover:bg-red-500/10 transition-all flex items-center justify-center" title="Encerrar Sessão"><i class="fas fa-sign-out-alt"></i></button>
+        <div id="user-avatar" class="w-10 h-10 rounded-xl bg-teal-500/20 border border-teal-500/40 flex items-center justify-center text-teal-400 font-bold text-sm">PV</div>
+        <button onclick="doLogout()" class="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-500 hover:text-red-400 hover:border-red-500/30 hover:bg-red-500/10 transition-all flex items-center justify-center" title="Encerrar Sessão"><i class="fas fa-sign-out-alt"></i></button>
       </div>
     </header>
 
@@ -64,8 +75,6 @@
 
     <!-- LISTA DE CARDS - OPERAÇÃO DE BAR -->
     <div id="bar-view" class="view p-4 md:p-8 max-w-7xl mx-auto space-y-8 hidden">
-      
-      <!-- Cabeçalho e Barra de Pesquisa -->
       <div class="pt-4 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-800 pb-6">
         <div>
           <h2 class="text-2xl font-bold text-white">Operação de Bar - Eventos</h2>
@@ -77,15 +86,12 @@
         </div>
       </div>
 
-      <!-- Módulo Mestre (Lucro Bar) Sempre no Topo -->
       <div class="space-y-4">
         <h3 class="text-sm font-bold text-amber-400 uppercase tracking-widest flex items-center"><i class="fas fa-crown mr-2"></i>Lucro Bar Geral</h3>
         <div id="master-cards" class="grid grid-cols-1 gap-4"></div>
       </div>
 
-      <!-- Grade de 3 Colunas: Clientes, Interno e Estoque -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Clientes -->
         <div class="space-y-4">
           <div class="flex items-center space-x-3 pb-2 border-b border-zinc-800">
             <div class="w-8 h-8 rounded-lg bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400"><i class="fas fa-file-invoice-dollar"></i></div>
@@ -93,8 +99,6 @@
           </div>
           <div id="producer-cards" class="grid grid-cols-1 gap-3"></div>
         </div>
-        
-        <!-- Interno Stratus -->
         <div class="space-y-4">
           <div class="flex items-center space-x-3 pb-2 border-b border-zinc-800">
             <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400"><i class="fas fa-lock"></i></div>
@@ -102,8 +106,6 @@
           </div>
           <div id="stratus-cards" class="grid grid-cols-1 gap-3"></div>
         </div>
-
-        <!-- Estoque -->
         <div class="space-y-4">
           <div class="flex items-center space-x-3 pb-2 border-b border-zinc-800">
             <div class="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400"><i class="fas fa-boxes"></i></div>
@@ -145,9 +147,8 @@ const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '
 const R = (v) => 'R$ ' + (Number(v) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const P = (a, b) => (b && a != null && !isNaN(a) ? ((a / b) * 100).toFixed(1).replace('.', ',') + '%' : '0,0%');
 const fd = (d) => (d ? String(d).split('-').reverse().join('/') : '');
-const sheetUrl = (id) => 'https://docs.google.com/spreadsheets/d/' + id;
 
-// Variáveis Globais de Estado
+// Variáveis Globais
 let files = [];
 let fileMap = {};
 let sheetFiles = { master: [], internal: [], client: [], estoque: [] };
@@ -342,6 +343,7 @@ function makeCard(f, type) {
 }
 
 window.renderCards = () => {
+  if(!$('master-cards')) return;
   const q = searchQuery.toLowerCase();
   const filter = (arr) => arr.filter(f => f.name.toLowerCase().includes(q));
   
@@ -613,7 +615,6 @@ MODS.reports = () => head('Relatórios', 'Módulo temporariamente minimizado.');
 /* ---------- MÓDULO DASHBOARD (TELA INICIAL) ---------- */
 MODS['dash-view'] = () => {
     const evs = DB.calendario || [];
-    // Hoje, convertendo timezone BR
     const hojeIso = new Date(Date.now() - new Date().getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
     const proximos = evs.filter(e => e.data >= hojeIso).sort((a,b) => new Date(a.data) - new Date(b.data)).slice(0, 5);
     
@@ -643,7 +644,6 @@ MODS['dash-view'] = () => {
     return head('Início', `Olá, ${esc(currentUser?.nome.split(' ')[0] || 'Usuário')}! Bem-vindo(a) ao painel Stratus.`) + 
     `<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-6">
         
-        <!-- Próximos Eventos -->
         <div class="lg:col-span-1 space-y-4">
             <div class="flex items-center justify-between pb-2 border-b border-zinc-800">
                 <div class="flex items-center gap-2"><i class="fas fa-calendar-alt text-teal-400"></i><h3 class="text-sm font-bold text-white">Próximos Eventos</h3></div>
@@ -655,17 +655,20 @@ MODS['dash-view'] = () => {
             </div>
         </div>
 
-        <!-- Painel de Acesso Rápido -->
         <div class="lg:col-span-2 space-y-4">
             <div class="flex items-center gap-2 pb-2 border-b border-zinc-800">
                 <i class="fas fa-th-large text-zinc-400"></i>
                 <h3 class="text-sm font-bold text-white">Acesso Rápido aos Módulos</h3>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-                ${dashMod('bar-view', 'Operação de Bar', 'fa-glass-cheers', 'bg-teal-500/10 border border-teal-500/30', 'border-teal-500/50', 'text-teal-400', 'Planilhas de lucros, clientes e resumos internos.')}
-                ${dashMod('ticketeira', 'Ticketeira', 'fa-ticket-alt', 'bg-purple-500/10 border border-purple-500/30', 'border-purple-500/50', 'text-purple-400', 'Gestão de bilheteria, faturamento e repasses ao produtor.')}
-                ${dashMod('est', 'Estabelecimentos', 'fa-store', 'bg-amber-500/10 border border-amber-500/30', 'border-amber-500/50', 'text-amber-400', 'Cadastro de casas parceiras e simulador de viabilidade comercial.')}
-                ${dashMod('people', 'Pessoas & Staff', 'fa-users', 'bg-emerald-500/10 border border-emerald-500/30', 'border-emerald-500/50', 'text-emerald-400', 'Diretório de fornecedores, staff da operação e contatos chave.')}
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mt-2">
+                ${dashMod('bar-view', 'Operação de Bar', 'fa-glass-cheers', 'bg-teal-500/10 border border-teal-500/30', 'border-teal-500/50', 'text-teal-400', 'Planilhas, DRE e estoque.')}
+                ${dashMod('ticketeira', 'Ticketeira', 'fa-ticket-alt', 'bg-purple-500/10 border border-purple-500/30', 'border-purple-500/50', 'text-purple-400', 'Gestão, faturamento e repasses.')}
+                ${dashMod('est', 'Estabelecimentos', 'fa-store', 'bg-amber-500/10 border border-amber-500/30', 'border-amber-500/50', 'text-amber-400', 'Parceiros e simulador comercial.')}
+                ${dashMod('fin', 'Financeiro', 'fa-wallet', 'bg-emerald-500/10 border border-emerald-500/30', 'border-emerald-500/50', 'text-emerald-400', 'Extratos e subpastas de cliente.')}
+                ${dashMod('demands', 'Demandas', 'fa-tasks', 'bg-blue-500/10 border border-blue-500/30', 'border-blue-500/50', 'text-blue-400', 'Quadro Kanban e backlog.')}
+                ${dashMod('meetings', 'Reuniões', 'fa-handshake', 'bg-indigo-500/10 border border-indigo-500/30', 'border-indigo-500/50', 'text-indigo-400', 'Atas e registros de decisões.')}
+                ${dashMod('calendar', 'Calendário', 'fa-calendar-alt', 'bg-pink-500/10 border border-pink-500/30', 'border-pink-500/50', 'text-pink-400', 'Visão geral da agenda local.')}
+                ${dashMod('people', 'Pessoas & Staff', 'fa-users', 'bg-zinc-500/10 border border-zinc-500/30', 'border-zinc-500/50', 'text-zinc-400', 'Fornecedores e contatos.')}
             </div>
         </div>
     </div>`;
@@ -674,7 +677,8 @@ MODS['dash-view'] = () => {
 /* ---------- MÓDULO TICKETEIRA ---------- */
 MODS.ticketeira = () => {
     const tkts = DB.ticketeira || [];
-    const totLiq = tkts.reduce((a,b) => a + Number(b.lucro), 0);
+    const totLiqStratus = tkts.reduce((a,b) => a + Number(b.lucro_stratus || 0), 0);
+    const totBaseAcumulado = tkts.reduce((a,b) => a + Number(b.base || 0), 0);
     
     const formHtml = `
     <div class="mb-8 mt-4 bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6">
@@ -684,13 +688,25 @@ MODS.ticketeira = () => {
         <label class="text-[11px] text-zinc-500 space-y-1 block"><span>Data do Evento</span><input required type="date" name="data" class="${inp}"></label>
         <label class="text-[11px] text-zinc-500 space-y-1 block"><span>Ingressos Vendidos</span><input required type="number" name="ingressos" class="${inp}"></label>
         
-        <label class="text-[11px] text-zinc-500 space-y-1 block"><span>Receita Bruta (R$)</span><input required type="number" step="0.01" name="bruto" id="tkt-bruto" oninput="calcTkt()" class="${inp}"></label>
-        <label class="text-[11px] text-zinc-500 space-y-1 block"><span>Repasse ao Produtor (R$)</span><input required type="number" step="0.01" name="repasse" id="tkt-repasse" oninput="calcTkt()" class="${inp} text-amber-400 font-bold"></label>
+        <label class="text-[11px] text-zinc-500 space-y-1 block md:col-span-2"><span>Total Arrecadado c/ Taxa (R$)</span><input required type="number" step="0.01" id="tkt-arrecadacao" name="arrecadacao" oninput="calcTkt()" class="${inp}"></label>
+        <label class="text-[11px] text-zinc-500 space-y-1 block md:col-span-2"><span>Reembolsos Totais c/ Taxa (R$)</span><input type="number" step="0.01" id="tkt-reembolsos" name="reembolsos" oninput="calcTkt()" class="${inp}"></label>
         
-        <div class="md:col-span-2 flex flex-col justify-center bg-zinc-950 border border-zinc-800 rounded-lg p-2 md:p-3 text-right">
-           <span class="text-[10px] text-zinc-500">Lucro Líquido Stratus</span>
-           <span id="tkt-lucro-display" class="text-lg md:text-xl font-bold text-emerald-400">R$ 0,00</span>
-           <input type="hidden" name="lucro" id="tkt-lucro-val" value="0">
+        <label class="text-[11px] text-zinc-500 space-y-1 block"><span>Volume Crédito (R$)</span><input type="number" step="0.01" id="tkt-cred" name="v_credito" oninput="calcTkt()" class="${inp}"></label>
+        <label class="text-[11px] text-zinc-500 space-y-1 block"><span>Volume Débito (R$)</span><input type="number" step="0.01" id="tkt-deb" name="v_debito" oninput="calcTkt()" class="${inp}"></label>
+        <label class="text-[11px] text-zinc-500 space-y-1 block"><span>Volume PIX (R$)</span><input type="number" step="0.01" id="tkt-pix" name="v_pix" oninput="calcTkt()" class="${inp}"></label>
+        <div class="block"></div>
+
+        <div class="md:col-span-4 bg-zinc-950 border border-zinc-800 rounded-lg p-4 grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
+           <div><span class="text-[10px] text-zinc-500">Base S/ Taxa (100%)</span><div id="tkt-base-display" class="text-sm font-bold text-white">R$ 0,00</div></div>
+           <div><span class="text-[10px] text-zinc-500">Cashback Produtor (3%)</span><div id="tkt-cashback-display" class="text-sm font-bold text-amber-400">R$ 0,00</div></div>
+           <div><span class="text-[10px] text-zinc-500">Repasse Total Produtor</span><div id="tkt-repasse-display" class="text-sm font-bold text-white">R$ 0,00</div></div>
+           <div><span class="text-[10px] text-zinc-500">Lucro Líq. Stratus (Pós Custos)</span><div id="tkt-lucro-display" class="text-lg font-bold text-emerald-400">R$ 0,00</div></div>
+           
+           <input type="hidden" name="base" id="tkt-base-val">
+           <input type="hidden" name="cashback" id="tkt-cashback-val">
+           <input type="hidden" name="repasse_produtor" id="tkt-repasse-val">
+           <input type="hidden" name="custos_pgto" id="tkt-custos-val">
+           <input type="hidden" name="lucro_stratus" id="tkt-lucro-val">
         </div>
         
         <div class="md:col-span-4 flex justify-end pt-3 border-t border-zinc-800 mt-2">
@@ -706,19 +722,20 @@ MODS.ticketeira = () => {
             <span class="text-[9px] font-bold uppercase border px-2 py-0.5 rounded-md bg-purple-500/10 border-purple-500/30 text-purple-400"><i class="fas fa-ticket-alt mr-1"></i>${esc(t.ingressos)} Ingressos</span>
             <span class="text-[9px] font-bold text-zinc-400 bg-zinc-800 border border-zinc-700 rounded-md px-2 py-0.5">${fd(t.data)}</span>
         </div>
-        <h4 class="text-base font-bold text-white leading-tight pr-6">${esc(t.evento)}</h4>
-        <div class="mt-4 pt-3 border-t border-zinc-800/50 space-y-1.5 text-[11px]">
-            <div class="flex justify-between text-zinc-400"><span>Receita Bruta:</span><span class="font-mono">${R(t.bruto)}</span></div>
-            <div class="flex justify-between text-amber-400/80"><span>Repasse Produtor:</span><span class="font-mono text-amber-400">- ${R(t.repasse)}</span></div>
-            <div class="flex justify-between text-white font-bold mt-1 pt-1 border-t border-zinc-800/50"><span>Lucro Líquido:</span><span class="text-emerald-400 font-mono">${R(t.lucro)}</span></div>
+        <h4 class="text-base font-bold text-white leading-tight pr-6 mb-4">${esc(t.evento)}</h4>
+        <div class="mt-auto pt-3 border-t border-zinc-800/50 space-y-1.5 text-[11px]">
+            <div class="flex justify-between text-zinc-400"><span>Faturamento Base:</span><span class="font-mono">${R(t.base)}</span></div>
+            <div class="flex justify-between text-amber-400/80"><span>Repasse + Cashback (3%):</span><span class="font-mono text-amber-400">${R(t.repasse_produtor)}</span></div>
+            <div class="flex justify-between text-zinc-500 text-[10px]"><span>Custos de Pgto (Cartão/Pix):</span><span class="font-mono">- ${R(t.custos_pgto)}</span></div>
+            <div class="flex justify-between text-white font-bold mt-1 pt-1 border-t border-zinc-800/50"><span>Lucro Stratus (Pós-Taxas):</span><span class="text-emerald-400 font-mono">${R(t.lucro_stratus)}</span></div>
         </div>
     </div>`).join('');
 
     return head('Ticketeira', 'Controle financeiro de bilheteria e repasses ao produtor.') + 
       `<div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4 mt-4">
           ${kpi('Eventos Registrados', tkts.length, 'text-white')}
-          ${kpi('Lucro Líq. Acumulado', R(totLiq), 'text-emerald-400')}
-          ${kpi('Ingressos Vendidos', tkts.reduce((a,b)=>a+Number(b.ingressos),0), 'text-purple-400', 'Total acumulado')}
+          ${kpi('Faturamento Base Acumulado', R(totBaseAcumulado), 'text-purple-400')}
+          ${kpi('Lucro Stratus Acumulado', R(totLiqStratus), 'text-emerald-400', 'Livre de taxas do cartão')}
       </div>` + formHtml + 
       `<div class="flex items-center justify-between mb-4 mt-6">
          <h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fas fa-list text-purple-400"></i>Histórico de Fechamentos</h3>
@@ -727,11 +744,37 @@ MODS.ticketeira = () => {
 };
 
 window.calcTkt = () => {
-    const b = parseFloat($('tkt-bruto')?.value) || 0;
-    const r = parseFloat($('tkt-repasse')?.value) || 0;
-    const l = b - r;
-    if($('tkt-lucro-display')) $('tkt-lucro-display').textContent = R(l);
-    if($('tkt-lucro-val')) $('tkt-lucro-val').value = l;
+    const v = (id) => parseFloat($(id)?.value.replace(',', '.')) || 0;
+    const arrecadacao = v('tkt-arrecadacao');
+    const reembolsos = v('tkt-reembolsos');
+    const vCred = v('tkt-cred');
+    const vDeb = v('tkt-deb');
+    const vPix = v('tkt-pix');
+
+    const liquidoArrecadado = arrecadacao - reembolsos;
+    const base = liquidoArrecadado / 1.10; // Extraindo a taxa de 10%
+    const cashback = base * 0.03;
+    const stratusBruto = base * 0.07;
+    
+    // Custos operacionais do arranjo de pagamentos
+    const custoCred = vCred * 0.032;
+    const custoDeb = vDeb * 0.0114;
+    const custoPix = vPix * 0.0049;
+    const custosTotais = custoCred + custoDeb + custoPix;
+
+    const lucroLiquidoStratus = stratusBruto - custosTotais;
+    const repasseProdutor = base + cashback;
+
+    if($('tkt-base-display')) $('tkt-base-display').textContent = R(base);
+    if($('tkt-cashback-display')) $('tkt-cashback-display').textContent = R(cashback);
+    if($('tkt-repasse-display')) $('tkt-repasse-display').textContent = R(repasseProdutor);
+    if($('tkt-lucro-display')) $('tkt-lucro-display').textContent = R(lucroLiquidoStratus);
+    
+    if($('tkt-base-val')) $('tkt-base-val').value = base;
+    if($('tkt-cashback-val')) $('tkt-cashback-val').value = cashback;
+    if($('tkt-repasse-val')) $('tkt-repasse-val').value = repasseProdutor;
+    if($('tkt-custos-val')) $('tkt-custos-val').value = custosTotais;
+    if($('tkt-lucro-val')) $('tkt-lucro-val').value = lucroLiquidoStratus;
 };
 
 window.addTicketeira = (e) => {
@@ -743,9 +786,16 @@ window.addTicketeira = (e) => {
         evento: fdForm.get('evento'),
         data: fdForm.get('data'),
         ingressos: Number(fdForm.get('ingressos')),
-        bruto: Number(fdForm.get('bruto')),
-        repasse: Number(fdForm.get('repasse')),
-        lucro: Number(fdForm.get('lucro'))
+        arrecadacao: Number(fdForm.get('arrecadacao')),
+        reembolsos: Number(fdForm.get('reembolsos')),
+        v_credito: Number(fdForm.get('v_credito')),
+        v_debito: Number(fdForm.get('v_debito')),
+        v_pix: Number(fdForm.get('v_pix')),
+        base: Number(fdForm.get('base')),
+        cashback: Number(fdForm.get('cashback')),
+        repasse_produtor: Number(fdForm.get('repasse_produtor')),
+        custos_pgto: Number(fdForm.get('custos_pgto')),
+        lucro_stratus: Number(fdForm.get('lucro_stratus'))
     });
     save(); render();
 };
@@ -1074,7 +1124,6 @@ function showApp() {
    const initials = currentUser.nome.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
    $('user-avatar').textContent = initials;
    
-   // Redireciona para o novo Dashboard!
    nav('dash-view', document.querySelector('[data-v="dash-view"]'));
    loadFiles();
 }
