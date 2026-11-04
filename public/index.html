@@ -59,10 +59,11 @@
       </div>
     </header>
 
+      <!-- VIEW MODULAR DINÂMICA -->
       <div id="mod-view" class="view p-4 md:p-8 max-w-7xl mx-auto space-y-6 hidden"></div>
 
     <!-- LISTA DE CARDS - OPERAÇÃO DE BAR -->
-    <div id="bar-view" class="view p-4 md:p-8 max-w-7xl mx-auto space-y-8">
+    <div id="bar-view" class="view p-4 md:p-8 max-w-7xl mx-auto space-y-8 hidden">
       
       <!-- Cabeçalho e Barra de Pesquisa -->
       <div class="pt-4 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-800 pb-6">
@@ -169,10 +170,10 @@ function nav(id, el) {
 
 const item = (id, icon, label, on) => `<a href="#" data-v="${id}" class="nav flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm text-zinc-400 hover:text-white hover:bg-zinc-900 ${on ? 'on' : ''}"><i class="fas ${icon} w-5"></i><span>${label}</span></a>`;
 const groups = [
-  ['Painel Principal', [['bar-view', 'fa-glass-cheers', 'Op. de Bar - Eventos'], ['meetings', 'fa-calendar-alt', 'Reuniões'], ['demands', 'fa-tasks', 'Demandas Gerais'], ['calendar', 'fa-calendar', 'Calendário'], ['people', 'fa-users', 'Pessoas'], ['users', 'fa-user-shield', 'Acessos']]],
+  ['Painel Principal', [['dash-view', 'fa-home', 'Início'], ['bar-view', 'fa-glass-cheers', 'Op. de Bar - Eventos'], ['ticketeira', 'fa-ticket-alt', 'Ticketeira'], ['meetings', 'fa-calendar-alt', 'Reuniões'], ['demands', 'fa-tasks', 'Demandas Gerais'], ['calendar', 'fa-calendar', 'Calendário'], ['people', 'fa-users', 'Pessoas'], ['users', 'fa-user-shield', 'Acessos']]],
   ['Operacional', [['est', 'fa-store', 'Estabelecimentos'], ['contracts', 'fa-file-contract', 'Contratos'], ['fin', 'fa-wallet', 'Financeiro'], ['reports', 'fa-chart-bar', 'Relatórios']]],
 ];
-$('sidebar').innerHTML = groups.map(([t, l]) => `<div><p class="px-3 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-2">${t}</p><nav class="space-y-1">${l.map((x) => item(x[0], x[1], x[2], x[0] === 'bar-view')).join('')}</nav></div>`).join('');
+$('sidebar').innerHTML = groups.map(([t, l]) => `<div><p class="px-3 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-2">${t}</p><nav class="space-y-1">${l.map((x) => item(x[0], x[1], x[2], x[0] === 'dash-view')).join('')}</nav></div>`).join('');
 
 $('sidebar').addEventListener('click', (e) => {
   const a = e.target.closest('.nav');
@@ -300,7 +301,9 @@ async function loadFiles() {
 
     if (!files.length) {
       const msg = '<p class="text-xs text-amber-400 col-span-full py-4 px-2 border border-amber-500/20 bg-amber-500/5 rounded-xl">Nenhuma planilha encontrada. Compartilhe as planilhas com o robô da Stratus.</p>';
-      $('master-cards').innerHTML = msg; $('producer-cards').innerHTML = msg; $('stratus-cards').innerHTML = msg; $('estoque-cards').innerHTML = msg;
+      if($('master-cards')) {
+          $('master-cards').innerHTML = msg; $('producer-cards').innerHTML = msg; $('stratus-cards').innerHTML = msg; $('estoque-cards').innerHTML = msg;
+      }
       return;
     }
 
@@ -313,10 +316,9 @@ async function loadFiles() {
       else sheetFiles.client.push(f);
     });
     
-    renderCards();
+    if($('master-cards')) renderCards();
   } catch (e) {
-    const msg = `<p class="text-xs text-red-400 col-span-full py-4 px-2 border border-red-500/20 bg-red-500/5 rounded-xl">Erro: ${esc(e.message)}</p>`;
-    $('master-cards').innerHTML = msg; $('producer-cards').innerHTML = msg; $('stratus-cards').innerHTML = msg; $('estoque-cards').innerHTML = msg;
+    console.error(e);
   }
 }
 
@@ -586,7 +588,7 @@ function renderMaster(parsed, rawGrade) {
 }
 
 /* ---------- BANCO DE DADOS E MÓDULOS BASE ---------- */
-let DB = {}, cur = 'bar-view', calM = 0, curFile = null, activeEstId = null;
+let DB = {}, cur = 'dash-view', calM = 0, curFile = null, activeEstId = null;
 const uid = () => Math.random().toString(36).slice(2, 9);
 const TIPOS_EST = ['Boate / Club', 'Pub / Bar', 'Casa de Shows', 'Restaurante', 'Eventos Fixo', 'Espaço Multiúso'];
 const STATUS_NEG = ['Prospecção', 'Em Negociação', 'Proposta Enviada', 'Cliente Ativo', 'Contrato Fechado', 'Perdido'];
@@ -607,6 +609,146 @@ const del = (key, r) => `<button data-del="${key}|${r.id}" title="Excluir" class
 const MODS = {};
 MODS.contracts = () => head('Contratos', 'Módulo temporariamente minimizado.');
 MODS.reports = () => head('Relatórios', 'Módulo temporariamente minimizado.');
+
+/* ---------- MÓDULO DASHBOARD (TELA INICIAL) ---------- */
+MODS['dash-view'] = () => {
+    const evs = DB.calendario || [];
+    // Hoje, convertendo timezone BR
+    const hojeIso = new Date(Date.now() - new Date().getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
+    const proximos = evs.filter(e => e.data >= hojeIso).sort((a,b) => new Date(a.data) - new Date(b.data)).slice(0, 5);
+    
+    const nextCards = proximos.map(e => `
+    <div class="bg-zinc-900/60 border border-zinc-800 rounded-xl p-4 flex justify-between items-center hover:border-teal-500/30 transition-colors">
+       <div>
+          <h4 class="text-sm font-bold text-white mb-1">${esc(e.titulo)}</h4>
+          <span class="text-[10px] text-zinc-400 bg-zinc-950 border border-zinc-800 px-2 py-0.5 rounded-md"><i class="fas fa-calendar-day mr-1"></i>${fd(e.data)}</span>
+          <span class="text-[10px] text-teal-400 ml-2">${esc(e.operacao)}</span>
+       </div>
+       <i class="fas fa-chevron-right text-zinc-700"></i>
+    </div>
+    `).join('');
+
+    const dashMod = (id, title, icon, colorClass, borderClass, textClass, desc) => `
+    <button onclick="nav('${id}', document.querySelector('[data-v=\\'${id}\\']'))" class="bg-zinc-900/60 border border-zinc-800 hover:${borderClass} transition-all rounded-2xl p-6 text-left group flex flex-col justify-between h-32 relative overflow-hidden shadow-sm">
+        <div class="absolute -right-4 -top-4 opacity-5 group-hover:opacity-10 transition-opacity">
+            <i class="fas ${icon} text-8xl ${textClass}"></i>
+        </div>
+        <div class="flex items-center gap-3 relative z-10">
+            <div class="w-10 h-10 rounded-xl ${colorClass} flex items-center justify-center ${textClass}"><i class="fas ${icon}"></i></div>
+            <h3 class="text-base font-bold text-white group-hover:${textClass} transition-colors">${title}</h3>
+        </div>
+        <p class="text-[11px] text-zinc-400 mt-2 relative z-10">${desc}</p>
+    </button>`;
+
+    return head('Início', `Olá, ${esc(currentUser?.nome.split(' ')[0] || 'Usuário')}! Bem-vindo(a) ao painel Stratus.`) + 
+    `<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-6">
+        
+        <!-- Próximos Eventos -->
+        <div class="lg:col-span-1 space-y-4">
+            <div class="flex items-center justify-between pb-2 border-b border-zinc-800">
+                <div class="flex items-center gap-2"><i class="fas fa-calendar-alt text-teal-400"></i><h3 class="text-sm font-bold text-white">Próximos Eventos</h3></div>
+                <span class="text-[9px] bg-teal-500/10 text-teal-400 border border-teal-500/30 px-2 py-0.5 rounded font-bold uppercase">Agenda</span>
+            </div>
+            <div class="flex flex-col gap-3">
+                ${proximos.length ? nextCards : '<div class="text-center text-[11px] text-zinc-600 py-6 border border-zinc-800 border-dashed rounded-xl">Nenhum evento futuro no calendário.</div>'}
+                <button onclick="nav('calendar', document.querySelector('[data-v=\\'calendar\\']'))" class="w-full py-2.5 mt-2 bg-zinc-900/40 hover:bg-zinc-800 border border-zinc-800 text-teal-400 text-xs font-bold rounded-xl transition-colors">Ver Calendário Completo</button>
+            </div>
+        </div>
+
+        <!-- Painel de Acesso Rápido -->
+        <div class="lg:col-span-2 space-y-4">
+            <div class="flex items-center gap-2 pb-2 border-b border-zinc-800">
+                <i class="fas fa-th-large text-zinc-400"></i>
+                <h3 class="text-sm font-bold text-white">Acesso Rápido aos Módulos</h3>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                ${dashMod('bar-view', 'Operação de Bar', 'fa-glass-cheers', 'bg-teal-500/10 border border-teal-500/30', 'border-teal-500/50', 'text-teal-400', 'Planilhas de lucros, clientes e resumos internos.')}
+                ${dashMod('ticketeira', 'Ticketeira', 'fa-ticket-alt', 'bg-purple-500/10 border border-purple-500/30', 'border-purple-500/50', 'text-purple-400', 'Gestão de bilheteria, faturamento e repasses ao produtor.')}
+                ${dashMod('est', 'Estabelecimentos', 'fa-store', 'bg-amber-500/10 border border-amber-500/30', 'border-amber-500/50', 'text-amber-400', 'Cadastro de casas parceiras e simulador de viabilidade comercial.')}
+                ${dashMod('people', 'Pessoas & Staff', 'fa-users', 'bg-emerald-500/10 border border-emerald-500/30', 'border-emerald-500/50', 'text-emerald-400', 'Diretório de fornecedores, staff da operação e contatos chave.')}
+            </div>
+        </div>
+    </div>`;
+};
+
+/* ---------- MÓDULO TICKETEIRA ---------- */
+MODS.ticketeira = () => {
+    const tkts = DB.ticketeira || [];
+    const totLiq = tkts.reduce((a,b) => a + Number(b.lucro), 0);
+    
+    const formHtml = `
+    <div class="mb-8 mt-4 bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6">
+      <h3 class="text-sm font-bold text-white mb-4"><i class="fas fa-plus text-purple-400 mr-2"></i>Novo Fechamento - Ticketeira</h3>
+      <form onsubmit="addTicketeira(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+        <label class="text-[11px] text-zinc-500 space-y-1 block md:col-span-2"><span>Nome do Evento</span><input required name="evento" class="${inp}"></label>
+        <label class="text-[11px] text-zinc-500 space-y-1 block"><span>Data do Evento</span><input required type="date" name="data" class="${inp}"></label>
+        <label class="text-[11px] text-zinc-500 space-y-1 block"><span>Ingressos Vendidos</span><input required type="number" name="ingressos" class="${inp}"></label>
+        
+        <label class="text-[11px] text-zinc-500 space-y-1 block"><span>Receita Bruta (R$)</span><input required type="number" step="0.01" name="bruto" id="tkt-bruto" oninput="calcTkt()" class="${inp}"></label>
+        <label class="text-[11px] text-zinc-500 space-y-1 block"><span>Repasse ao Produtor (R$)</span><input required type="number" step="0.01" name="repasse" id="tkt-repasse" oninput="calcTkt()" class="${inp} text-amber-400 font-bold"></label>
+        
+        <div class="md:col-span-2 flex flex-col justify-center bg-zinc-950 border border-zinc-800 rounded-lg p-2 md:p-3 text-right">
+           <span class="text-[10px] text-zinc-500">Lucro Líquido Stratus</span>
+           <span id="tkt-lucro-display" class="text-lg md:text-xl font-bold text-emerald-400">R$ 0,00</span>
+           <input type="hidden" name="lucro" id="tkt-lucro-val" value="0">
+        </div>
+        
+        <div class="md:col-span-4 flex justify-end pt-3 border-t border-zinc-800 mt-2">
+           <button type="submit" class="bg-purple-500/15 border border-purple-500/40 text-purple-400 rounded-lg px-6 py-2.5 text-sm font-bold hover:bg-purple-500/25 transition-colors"><i class="fas fa-save mr-2"></i>Registrar Fechamento de Bilheteria</button>
+        </div>
+      </form>
+    </div>`;
+
+    const cards = tkts.sort((a,b)=>new Date(b.data)-new Date(a.data)).map(t => `
+    <div class="bg-zinc-900/60 border border-zinc-800 hover:border-purple-500/30 transition-all rounded-2xl p-5 relative group flex flex-col justify-between shadow-sm">
+        <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">${del('ticketeira', t)}</div>
+        <div class="flex items-center gap-2 mb-3">
+            <span class="text-[9px] font-bold uppercase border px-2 py-0.5 rounded-md bg-purple-500/10 border-purple-500/30 text-purple-400"><i class="fas fa-ticket-alt mr-1"></i>${esc(t.ingressos)} Ingressos</span>
+            <span class="text-[9px] font-bold text-zinc-400 bg-zinc-800 border border-zinc-700 rounded-md px-2 py-0.5">${fd(t.data)}</span>
+        </div>
+        <h4 class="text-base font-bold text-white leading-tight pr-6">${esc(t.evento)}</h4>
+        <div class="mt-4 pt-3 border-t border-zinc-800/50 space-y-1.5 text-[11px]">
+            <div class="flex justify-between text-zinc-400"><span>Receita Bruta:</span><span class="font-mono">${R(t.bruto)}</span></div>
+            <div class="flex justify-between text-amber-400/80"><span>Repasse Produtor:</span><span class="font-mono text-amber-400">- ${R(t.repasse)}</span></div>
+            <div class="flex justify-between text-white font-bold mt-1 pt-1 border-t border-zinc-800/50"><span>Lucro Líquido:</span><span class="text-emerald-400 font-mono">${R(t.lucro)}</span></div>
+        </div>
+    </div>`).join('');
+
+    return head('Ticketeira', 'Controle financeiro de bilheteria e repasses ao produtor.') + 
+      `<div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4 mt-4">
+          ${kpi('Eventos Registrados', tkts.length, 'text-white')}
+          ${kpi('Lucro Líq. Acumulado', R(totLiq), 'text-emerald-400')}
+          ${kpi('Ingressos Vendidos', tkts.reduce((a,b)=>a+Number(b.ingressos),0), 'text-purple-400', 'Total acumulado')}
+      </div>` + formHtml + 
+      `<div class="flex items-center justify-between mb-4 mt-6">
+         <h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fas fa-list text-purple-400"></i>Histórico de Fechamentos</h3>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">${cards || '<div class="col-span-full py-10 text-center text-zinc-500 bg-zinc-900/30 border border-zinc-800 border-dashed rounded-2xl">Nenhum fechamento registrado na ticketeira.</div>'}</div>`;
+};
+
+window.calcTkt = () => {
+    const b = parseFloat($('tkt-bruto')?.value) || 0;
+    const r = parseFloat($('tkt-repasse')?.value) || 0;
+    const l = b - r;
+    if($('tkt-lucro-display')) $('tkt-lucro-display').textContent = R(l);
+    if($('tkt-lucro-val')) $('tkt-lucro-val').value = l;
+};
+
+window.addTicketeira = (e) => {
+    e.preventDefault();
+    const fdForm = new FormData(e.target);
+    DB.ticketeira = DB.ticketeira || [];
+    DB.ticketeira.push({
+        id: uid(),
+        evento: fdForm.get('evento'),
+        data: fdForm.get('data'),
+        ingressos: Number(fdForm.get('ingressos')),
+        bruto: Number(fdForm.get('bruto')),
+        repasse: Number(fdForm.get('repasse')),
+        lucro: Number(fdForm.get('lucro'))
+    });
+    save(); render();
+};
 
 /* ---------- MÓDULO DE ACESSOS ---------- */
 MODS.users = () => {
@@ -932,7 +1074,8 @@ function showApp() {
    const initials = currentUser.nome.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
    $('user-avatar').textContent = initials;
    
-   nav('bar-view', document.querySelector('[data-v="bar-view"]'));
+   // Redireciona para o novo Dashboard!
+   nav('dash-view', document.querySelector('[data-v="dash-view"]'));
    loadFiles();
 }
 
