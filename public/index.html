@@ -340,9 +340,9 @@ function makeCard(f, type) {
        <span class="text-[9px] mt-2 inline-block font-bold text-emerald-400 uppercase tracking-wider"><i class="fas fa-lock mr-1"></i>Resumo Interno &rarr;</span>
     </div>`;
   } else if (type === 'estoque') {
-    return `<div class="bg-blue-950/10 border border-blue-500/30 hover:border-blue-500/60 hover:bg-blue-500/10 transition-all rounded-xl p-4 cursor-pointer flex flex-col justify-between" onclick="openEvent(fileMap['${f.id}'], null, 'client')">
+    return `<div class="bg-blue-950/10 border border-blue-500/30 hover:border-blue-500/60 hover:bg-blue-500/10 transition-all rounded-xl p-4 cursor-pointer flex flex-col justify-between" onclick="openEvent(fileMap['${f.id}'], null, 'estoque')">
        <h4 class="text-sm font-bold text-white mb-1 leading-tight line-clamp-2">${esc(f.name)}</h4>
-       <span class="text-[9px] mt-2 inline-block font-bold text-blue-400 uppercase tracking-wider"><i class="fas fa-boxes mr-1"></i>Planilha Estoque &rarr;</span>
+       <span class="text-[9px] mt-2 inline-block font-bold text-blue-400 uppercase tracking-wider"><i class="fas fa-boxes mr-1"></i>Painel de Inventário &rarr;</span>
     </div>`;
   } else {
     return `<div class="bg-zinc-900/40 border border-zinc-800 hover:border-teal-500/50 hover:bg-zinc-800/50 transition-all rounded-xl p-4 cursor-pointer flex flex-col justify-between" onclick="openEvent(fileMap['${f.id}'], null, 'client')">
@@ -458,10 +458,13 @@ async function openEvent(f, tab, type) {
   
   if(type === 'internal') {
       $('ev-sub').textContent = 'Resumo interno Stratus: onde estamos ganhando';
-      $('ev-title').classList.replace('text-white', 'text-emerald-400');
+      $('ev-title').className = 'text-2xl font-bold text-emerald-400';
+  } else if (type === 'estoque') {
+      $('ev-sub').textContent = 'Resumo de Inventário e Reposição';
+      $('ev-title').className = 'text-2xl font-bold text-blue-400';
   } else {
       $('ev-sub').textContent = 'Resumo da apuração';
-      $('ev-title').classList.replace('text-emerald-400', 'text-white');
+      $('ev-title').className = 'text-2xl font-bold text-white';
   }
 
   try {
@@ -469,6 +472,8 @@ async function openEvent(f, tab, type) {
     if (type === 'internal') {
         const mst = await getMasterData();
         $('ev-body').innerHTML = renderInternal(d, f, mst);
+    } else if (type === 'estoque') {
+        $('ev-body').innerHTML = renderEstoque(d, f);
     } else {
         $('ev-body').innerHTML = renderClient(d, f);
     }
@@ -566,6 +571,82 @@ function renderInternal(d, f, mst) {
   <div class="mt-10 mb-2">
     <h4 class="text-sm font-bold text-white"><i class="fas fa-table text-teal-400 mr-2"></i>Detalhamento da Operação</h4>
     <p class="text-[11px] text-zinc-500 mt-1">Comparativo de entrada (compras) e saída (consumo real).</p>
+  </div>
+  ${cleanGridHtml(d.grade)}`;
+}
+
+function renderEstoque(d, f) {
+  const tabs = `<div class="flex flex-wrap gap-2 items-center text-[11px] mb-6 font-bold"><span class="text-zinc-500 mr-2">Aba:</span>` + 
+    (d.abas || []).map((a) => `<button onclick="openEvent(curFile, '${esc(a)}', 'estoque')" class="px-4 py-1.5 rounded-lg border transition-colors ${a === d.tab ? 'border-blue-500 text-blue-400 bg-blue-500/10' : 'border-zinc-800 text-zinc-400 hover:bg-zinc-900 hover:text-white'}">${esc(a)}</button>`).join('') + `</div>`;
+
+  let items = [];
+  let H = { item: -1, qtd: -1, custo: -1, retorno: -1, valor: -1 };
+  let inData = false;
+
+  d.grade.forEach(row => {
+    let strRow = row.join(' ').toUpperCase();
+    
+    // Identificar a linha de cabeçalho dinamicamente
+    if (!inData && strRow.includes('ITEM') && (strRow.includes('QTD') || strRow.includes('QUANTIDADE'))) {
+       row.forEach((col, i) => {
+          let t = String(col).toUpperCase().trim();
+          if (t === 'ITEM' || t === 'PRODUTO') H.item = i;
+          if (t === 'QTD' || t === 'QUANTIDADE') H.qtd = i;
+          if (t === 'TOTAL CUSTO' || t === 'CUSTO') H.custo = i;
+          if (t === 'RETORNO' || t === 'TOTAL RETORNO') H.retorno = i;
+          if (t === 'VALOR' || t === 'CUSTO UNIT') H.valor = i;
+       });
+       if(H.item !== -1 && H.qtd !== -1) inData = true;
+       return;
+    }
+
+    // Ler as linhas de dados dos produtos
+    if (inData && row[H.item]) {
+       let nome = String(row[H.item]).trim();
+       const nomeUp = nome.toUpperCase();
+       
+       // Pular linhas de totais ou sujeira da planilha
+       if (!nome || ['TOTAL', 'ITEM', 'INICIAL', 'ESTOQUE', 'FINAL'].includes(nomeUp) || nomeUp.includes('CBV') || nomeUp.includes('ADB')) return;
+
+       let qtd = parseNum(row[H.qtd]);
+       let custo = H.custo !== -1 ? parseNum(row[H.custo]) : (H.valor !== -1 ? parseNum(row[H.valor]) * qtd : 0);
+       let retorno = H.retorno !== -1 ? parseNum(row[H.retorno]) : 0;
+
+       if(nome && (qtd > 0 || custo > 0)) {
+           items.push({ nome, qtd, custo, retorno });
+       }
+    }
+  });
+
+  // Fallback caso a tabela não tenha o formato esperado
+  if(items.length === 0) {
+      return tabs + `<p class="text-xs text-amber-400 mb-4 bg-amber-950/20 border border-amber-900/50 p-4 rounded-xl">Não foi possível montar o dashboard de estoque automaticamente (certifique-se de que a aba tem as colunas ITEM e QTD). Exibindo visualização em grade bruta.</p>` + cleanGridHtml(d.grade);
+  }
+
+  let totalQtd = items.reduce((a, b) => a + b.qtd, 0);
+  let totalCusto = items.reduce((a, b) => a + b.custo, 0);
+  let totalRetorno = items.reduce((a, b) => a + b.retorno, 0);
+
+  // Considera "Crítico" qualquer bebida/insumo que tenha 12 unidades ou menos em estoque
+  let critical = items.filter(x => x.qtd <= 12).sort((a,b) => a.qtd - b.qtd);
+  let highestCost = [...items].sort((a,b) => b.custo - a.custo).slice(0, 5);
+
+  const listHtml = (arr, fmt) => arr.length ? arr.map(x => line(x.nome, fmt(x))).join('') : '<p class="text-[11px] text-zinc-500">Nenhum item nesta lista.</p>';
+
+  return tabs + `
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    ${kpi('Itens Cadastrados', items.length, 'text-blue-400')}
+    ${kpi('Volume Total (Unidades)', totalQtd, 'text-white')}
+    ${kpi('Capital Imobilizado (Custo)', R(totalCusto), 'text-red-400')}
+    ${kpi('Potencial de Retorno', R(totalRetorno), 'text-emerald-400')}
+  </div>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+     ${box('⚠️ Atenção / Estoque Crítico (≤ 12 un)', 'fa-exclamation-triangle text-amber-400', listHtml(critical, x => `<span class="text-amber-400 font-bold">${x.qtd} un</span>`), 'border-amber-500/20 bg-amber-950/10')}
+     ${box('💰 Maior Capital Imobilizado', 'fa-boxes text-blue-400', listHtml(highestCost, x => `${x.qtd} un - ${R(x.custo)}`))}
+  </div>
+  <div class="mt-8 mb-2">
+    <h4 class="text-sm font-bold text-white"><i class="fas fa-table text-blue-400 mr-2"></i>Inventário Completo</h4>
+    <p class="text-[11px] text-zinc-500 mt-1">Grade detalhada lida direto da planilha do Drive.</p>
   </div>
   ${cleanGridHtml(d.grade)}`;
 }
