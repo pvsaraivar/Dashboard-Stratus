@@ -34,7 +34,6 @@
   <div class="bg-zinc-950 border border-zinc-800 p-8 md:p-10 rounded-3xl w-[90%] max-w-sm shadow-2xl relative overflow-hidden">
     <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-teal-500 to-emerald-500"></div>
     <div class="text-center mb-8 flex flex-col items-center">
-      <!-- Logo no Login aumentada e com blend mode para remover fundo preto -->
       <img src="logo-stratus.png" alt="STRATUS" class="h-16 w-auto object-contain mix-blend-screen" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
       <span class="text-3xl font-black tracking-[0.25em] text-white hidden">STRATUS</span>
       <p class="text-xs text-zinc-500 mt-4">Acesso Restrito ao Sistema</p>
@@ -58,7 +57,6 @@
   <div id="overlay" class="fixed inset-0 bg-black/60 z-30 hidden md:hidden"></div>
   <aside id="aside" class="fixed md:static inset-y-0 left-0 z-40 w-64 -translate-x-full md:translate-x-0 transition-transform duration-200 overflow-y-auto bg-zinc-950 border-r border-zinc-800 flex flex-col justify-start select-none shrink-0">
       <div class="px-5 py-6 border-b border-zinc-900 flex justify-center items-center h-24">
-        <!-- Logo na Sidebar aumentada -->
         <img src="logo-stratus.png" alt="STRATUS" class="h-10 w-auto object-contain mix-blend-screen" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
         <span class="text-xl font-black tracking-[0.25em] text-white hidden">STRATUS</span>
       </div>
@@ -69,7 +67,6 @@
       <header class="h-20 border-b border-zinc-900 px-4 md:px-8 flex justify-between items-center bg-zinc-950/80 backdrop-blur sticky top-0 z-20">
       <div class="flex items-center space-x-4">
         <button id="menu-btn" class="md:hidden w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 text-teal-400 flex items-center justify-center"><i class="fas fa-bars"></i></button>
-        <!-- Logo no Mobile Header aumentada -->
         <img src="logo-stratus.png" alt="STRATUS" class="h-8 w-auto md:hidden object-contain mix-blend-screen" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
         <span class="text-sm font-black tracking-[0.2em] text-white md:hidden hidden">STRATUS</span>
         
@@ -526,10 +523,26 @@ function renderClient(d, f) {
 }
 
 function renderInternal(d, f, mst) {
-  const nm = (s) => String(s).toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const nm = (s) => String(s).toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
   const ordenado = mst ? [...mst.evs].sort((a, b) => b.lucroFinal - a.lucroFinal) : [];
-  const ev = ordenado.find((x) => nm(f.name).includes(nm(x.evento)));
-  if (!ev) return `<p class="text-xs text-amber-400 bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-3 mb-4">Atenção: não achei este evento na planilha LUCRO BAR GERAL.</p>` + cleanGridHtml(d.grade);
+  
+  // SOLUÇÃO: Prevenindo conflito BATEUZINHA vs BAILE DA BATEU
+  let ev = null;
+  
+  // 1. Tenta achar o nome exato removendo strings comuns da Stratus (Mais seguro)
+  const cleanFName = nm(f.name).replace(/STRATUS/g, '').replace(/INTERNO/g, '').replace(/-/g, '').trim();
+  ev = ordenado.find(x => cleanFName === nm(x.evento).trim());
+  
+  // 2. Se não achar, usa ".includes" filtrando todas as opções e pegando a mais longa
+  // Isso garante que se "BATEU" e "BATEUZINHA" derem match, ele escolherá "BATEUZINHA"
+  if (!ev) {
+      const evMatches = ordenado.filter((x) => nm(f.name).includes(nm(x.evento)));
+      if (evMatches.length > 0) {
+          ev = evMatches.sort((a, b) => nm(b.evento).length - nm(a.evento).length)[0];
+      }
+  }
+
+  if (!ev) return `<p class="text-xs text-amber-400 bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-3 mb-4">Atenção: não encontrei este evento na planilha LUCRO BAR GERAL.</p>` + cleanGridHtml(d.grade);
 
   const pos = ordenado.indexOf(ev) + 1, tot = ordenado.reduce((a, x) => a + x.lucroFinal, 0), media = tot / ordenado.length;
   const comp = [['Lucro da operação', ev.lucroBase, 1], ['Sistema 2%', ev.sistema, 1], ['Consumação', ev.consumo, 0], ['Pirulitos caixa', ev.pirulitos, 0], ['Chapéus', ev.chapeus, 0], ['Estoque', ev.estoque, 0]].filter((c) => c[1]);
@@ -588,7 +601,7 @@ function renderMaster(parsed, rawGrade) {
   <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
     ${kpi('Total saída (bar)', R(tot.saida), 'text-white')}
     ${kpi('Total retornado', R(tot.ret), 'text-white')}
-    ${kpi('Sistema 2% acumulado', R(tot.sis), 'text-amber-400')}
+    ${kpi('Líquido Sistema', R(tot.sis), 'text-amber-400')}
     ${kpi('Deduções (consumo, pirulitos, etc)', '- ' + R(tot.ded), 'text-red-400')}
   </div>
   <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">${monthCards}</div>
@@ -757,7 +770,7 @@ MODS.ticketeira = () => {
 };
 
 window.calcTkt = () => {
-    const v = (id) => parseFloat($(id)?.value.replace(',', '.')) || 0;
+    const v = (id) => parseFloat($(id)?.value) || 0;
     const arrecadacao = v('tkt-arrecadacao');
     const reembolsos = v('tkt-reembolsos');
     const vCred = v('tkt-cred');
@@ -988,7 +1001,7 @@ MODS.est = () => {
 
 window.calcSim = () => {
   if(!$('sim-results')) return;
-  const v = (id) => parseFloat($(id).value.replace(',','.')) || 0;
+  const v = (id) => parseFloat($(id).value) || 0;
   const fat = v('sim-fat'), mc = v('sim-mc')/100, mp = v('sim-mp')/100, md = v('sim-md')/100, mdi = v('sim-mdi')/100;
   const tc = v('sim-tc')/100, tp = v('sim-tp')/100, td = v('sim-td')/100, tdi = v('sim-tdi')/100;
   const custoCred = 0.032, custoPix = 0.0049, custoDeb = 0.0114, custoDin = 0;
