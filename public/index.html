@@ -1035,15 +1035,39 @@ MODS.demands = () => {
 window.addDemanda = (e) => { e.preventDefault(); const fdForm = new FormData(e.target); DB.demandas = DB.demandas || []; DB.demandas.push({ id: uid(), titulo: fdForm.get('titulo'), descricao: fdForm.get('descricao'), responsavel: fdForm.get('responsavel'), urgencia: fdForm.get('urgencia'), tipo: fdForm.get('tipo'), status: 'Pendente', dataCriacao: new Date().toISOString() }); save(); render(); };
 window.moveDemanda = (id, newStatus) => { const d = (DB.demandas || []).find(x => x.id === id); if (d) { d.status = newStatus; save(); render(); } };
 
-/* ---------- MÓDULOS DE FINANCEIRO E SIMULADOR ---------- */
-let activeFinClient = null, activeFinEvent = null;
+/* ---------- MÓDULOS DE ESTABELECIMENTOS, IA COMERCIAL E SIMULADOR ---------- */
 
 MODS.est = () => {
   const ests = DB.estabelecimentos || [];
   setTimeout(() => { if($('sim-fat')) calcSim(); }, 50);
 
+  // NOVO: Interface do Copiloto IA integrado
+  const aiCopilotHtml = `
+  <div class="bg-zinc-900/40 border border-zinc-800 rounded-2xl mb-8 mt-4 flex flex-col h-[400px] shadow-sm relative overflow-hidden">
+    <div class="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-teal-500 to-emerald-500"></div>
+    <div class="bg-zinc-950/80 border-b border-zinc-800 p-4 flex items-center justify-between">
+       <div class="flex items-center gap-3">
+         <div class="w-8 h-8 rounded-lg bg-teal-500/10 text-teal-400 flex items-center justify-center border border-teal-500/30"><i class="fas fa-robot"></i></div>
+         <div><h3 class="text-sm font-bold text-white">Copiloto Stratus (IA Comercial)</h3><p class="text-[10px] text-zinc-400">Treinado com seu Plano Comercial e Rotas</p></div>
+       </div>
+       <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-teal-500/10 text-teal-400 border border-teal-500/20 uppercase tracking-wider">Online</span>
+    </div>
+    <div id="ai-chat-box" class="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar text-[11px]">
+       <div class="flex gap-3">
+          <div class="w-6 h-6 rounded bg-teal-500/20 flex-shrink-0 flex items-center justify-center text-teal-400 border border-teal-500/30 mt-1"><i class="fas fa-robot text-[10px]"></i></div>
+          <div class="bg-zinc-800/50 border border-zinc-700 rounded-xl rounded-tl-none p-3 text-zinc-300 leading-relaxed shadow-sm">
+             Olá, Paulo! Sou sua IA de apoio focada na captação de 10 clientes fixos. Digite o nome de um alvo (ex: <b>Arrumação Bar</b>, <b>Radar Pub</b>, <b>KAZA</b>), pergunte sobre <b>Taxas</b> (ex: <i>Outgo</i>), ou peça ajuda com <b>Objeções</b>.
+          </div>
+       </div>
+    </div>
+    <form onsubmit="askCopilot(event)" class="p-3 border-t border-zinc-800 bg-zinc-950/50 flex gap-2">
+       <input type="text" id="ai-input" class="flex-1 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-[11px] text-white outline-none focus:border-teal-500 transition-colors" placeholder="Pesquisar alvo, concorrente ou estratégia..." required autocomplete="off">
+       <button type="submit" class="bg-teal-500/15 border border-teal-500/40 text-teal-400 rounded-lg px-4 py-2 hover:bg-teal-500/25 transition-colors"><i class="fas fa-paper-plane"></i></button>
+    </form>
+  </div>`;
+
   const simulatorHtml = `
-  <details class="bg-zinc-900/40 border border-zinc-800 rounded-2xl mb-8 mt-4 group">
+  <details class="bg-zinc-900/40 border border-zinc-800 rounded-2xl mb-8 group">
     <summary class="flex items-center justify-between p-4 md:p-6 cursor-pointer outline-none">
       <div class="flex items-center space-x-3">
         <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center"><i class="fas fa-chart-line"></i></div>
@@ -1066,10 +1090,10 @@ MODS.est = () => {
         <div>
           <h4 class="text-[11px] font-bold text-teal-400 mb-4 uppercase tracking-widest">2. Taxas Propostas (%)</h4>
           <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <label class="block text-[11px] text-zinc-400">Tx Crédito<input type="number" step="0.01" id="sim-tc" value="2.80" class="mt-2 w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-white outline-none focus:border-teal-500" oninput="calcSim()"></label>
+            <label class="block text-[11px] text-zinc-400">Tx Crédito<input type="number" step="0.01" id="sim-tc" value="3.00" class="mt-2 w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-white outline-none focus:border-teal-500" oninput="calcSim()"></label>
             <label class="block text-[11px] text-zinc-400">Tx Pix<input type="number" step="0.01" id="sim-tp" value="1.25" class="mt-2 w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-white outline-none focus:border-teal-500" oninput="calcSim()"></label>
             <label class="block text-[11px] text-zinc-400">Tx Débito<input type="number" step="0.01" id="sim-td" value="2.60" class="mt-2 w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-white outline-none focus:border-teal-500" oninput="calcSim()"></label>
-            <label class="block text-[11px] text-zinc-400">Tx Dinheiro<input type="number" step="0.01" id="sim-tdi" value="1.00" class="mt-2 w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-white outline-none focus:border-teal-500" oninput="calcSim()"></label>
+            <label class="block text-[11px] text-zinc-400">Tx Dinheiro<input type="number" step="0.01" id="sim-tdi" value="0.00" class="mt-2 w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-white outline-none focus:border-teal-500" oninput="calcSim()"></label>
           </div>
         </div>
       </div>
@@ -1078,9 +1102,58 @@ MODS.est = () => {
   </details>`;
 
   const formFields = [{ k: 'nome', label: 'Nome', req: 1, full: true }, { k: 'tipo', label: 'Tipo', opts: TIPOS_EST }, { k: 'statusNegociacao', label: 'Status', opts: STATUS_NEG }, { k: 'capacidade', label: 'Capacidade', type: 'number' }, { k: 'responsavel', label: 'Responsável' }, { k: 'telefone', label: 'WhatsApp' }, { k: 'endereco', label: 'Endereço', full: true }];
-  const estCards = ests.map((e) => `<div class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-5 relative"><div class="flex justify-between items-start"><div class="flex items-center space-x-3"><div class="w-10 h-10 rounded-xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400"><i class="fas fa-store"></i></div><div><h3 class="text-base font-bold text-white">${esc(e.nome)}</h3><p class="text-[11px] text-zinc-400">${esc(e.tipo)}</p></div></div>${del('estabelecimentos', e)}</div></div>`).join('');
+  
+  const estCards = ests.map((e) => `<div class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-5 relative"><div class="flex justify-between items-start"><div class="flex items-center space-x-3"><div class="w-10 h-10 rounded-xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400"><i class="fas fa-store"></i></div><div><h3 class="text-base font-bold text-white">${esc(e.nome)}</h3><p class="text-[11px] text-zinc-400">${esc(e.tipo)}</p></div></div>${del('estabelecimentos', e)}</div><div class="mt-4 pt-3 border-t border-zinc-800/50 flex justify-between items-center text-[10px] uppercase font-bold text-zinc-500"><span>Status:</span><span class="text-amber-400">${esc(e.statusNegociacao)}</span></div></div>`).join('');
 
-  return head('Estabelecimentos', 'Gestão de casas parceiras.') + simulatorHtml + `<div class="mb-8"><h3 class="text-sm font-bold text-white mb-3">Cadastrar Novo</h3>${form('estabelecimentos', formFields, 'Cadastrar')}</div>` + (ests.length > 0 ? `<h3 class="text-sm font-bold text-white mb-3">Cadastrados</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-6">${estCards}</div>` : '');
+  return head('Estabelecimentos', 'Prospecção, simulador e gestão de parceiros.') + aiCopilotHtml + simulatorHtml + `<div class="mb-8"><h3 class="text-sm font-bold text-white mb-3">Cadastrar Novo Alvo</h3>${form('estabelecimentos', formFields, 'Cadastrar')}</div>` + (ests.length > 0 ? `<h3 class="text-sm font-bold text-white mb-3">CRM Comercial - Cadastrados</h3><div class="grid grid-cols-1 md:grid-cols-3 gap-6">${estCards}</div>` : '');
+};
+
+// IA COPILOT LOGIC
+window.askCopilot = (e) => {
+   e.preventDefault();
+   const input = $('ai-input');
+   const text = input.value.trim();
+   if(!text) return;
+   
+   const box = $('ai-chat-box');
+   box.innerHTML += `<div class="flex gap-3 justify-end"><div class="bg-teal-900/30 border border-teal-800/50 rounded-xl rounded-tr-none p-3 text-teal-100">${esc(text)}</div></div>`;
+   input.value = '';
+   box.scrollTop = box.scrollHeight;
+   
+   const id = uid();
+   box.innerHTML += `<div id="msg-${id}" class="flex gap-3 mt-4"><div class="w-6 h-6 rounded bg-teal-500/20 flex-shrink-0 flex items-center justify-center text-teal-400 border border-teal-500/30 mt-1"><i class="fas fa-robot text-[10px]"></i></div><div class="bg-zinc-800/50 border border-zinc-700 rounded-xl rounded-tl-none p-3 text-zinc-300"><i class="fas fa-ellipsis-h fa-fade text-teal-400"></i></div></div>`;
+   box.scrollTop = box.scrollHeight;
+   
+   setTimeout(() => {
+      const q = text.toLowerCase();
+      let reply = '';
+      
+      const db = [
+         { k: ['arrumação', 'arrumacao'], r: "<b>Arrumação Bar (Rota 1)</b><br>Prioridade: <i>Piloto</i>.<br><b>Argumento Chave:</b> Eles já cobram entrada na porta e abrem qua a dom. Apresente o painel integrado de portaria + bar para eliminar fila na entrada[cite: 8]." },
+         { k: ['vibe 085', 'vibe'], r: "<b>Vibe 085 (Rota 1)</b><br>Prioridade: <i>Volume / Grande Porte</i>.<br><b>Argumento Chave:</b> Casa noturna com alto fluxo. Enfatizar velocidade de atendimento no balcão e suporte 24h presencial[cite: 8]." },
+         { k: ['valentina'], r: "<b>Valentina Club (Rota 1)</b><br>Prioridade: <i>Volume</i>.<br><b>Argumento Chave:</b> Boate de 3 ambientes. Foque no controle de permissões por operador e relatórios em tempo real individualizados por bar[cite: 8]." },
+         { k: ['radar pub', 'radar'], r: "<b>Radar Pub (Rota 2)</b><br>Prioridade: <i>Piloto Prioritário</i>.<br><b>Argumento Chave:</b> Destacar a solução cashless, totem e disparo de WhatsApp promocional para a base de contatos da Stratus na região[cite: 8]." },
+         { k: ['luzes'], r: "<b>Bar das Luzes (Rota 2)</b><br>Prioridade: <i>Aguardando Retorno</i>.<br><b>Ação de Campo:</b> Levar máquina para demonstração prática de 20 min. Resaltar taxa zero no dinheiro e menor taxa no Pix/débito[cite: 8]." },
+         { k: ['fuzuê', 'fuzue'], r: "<b>Fuzuê Bar (Rota 2)</b><br>Prioridade: <i>Prospecção Ativa</i>.<br><b>Argumento Chave:</b> Alta rotatividade. Apresentar o controle de estoque em tempo real com alerta automático de falta de item[cite: 8]." },
+         { k: ['floresta'], r: "<b>Floresta Hall (Rota 2)</b><br>Prioridade: <i>Grande Porte</i>.<br><b>Argumento Chave:</b> Espaço enorme. Mostrar o grande impacto financeiro da redução de taxas em grande faturamento e o modelo sem custo de adesão[cite: 8]." },
+         { k: ['laje', 'head shop'], r: "<b>Laje Head Shop (Rota 3)</b><br>Prioridade: <i>Piloto Prioritário</i>.<br><b>Argumento Chave:</b> Propor pacote de software + máquinas em comodato sem taxa de adesão ou custo de suporte técnico[cite: 8]." },
+         { k: ['kaza', 'shotgun'], r: "<b>KAZA drink&pub (Rota 4)</b><br>Situação: Já possui contrato com a Shotgun.<br><b>Argumento Chave:</b> Não focar no ingresso. <b>Vender exclusivamente o Software de Bar e Estoque (R$ 250/mês)</b> para controle interno sem conflito com a Shotgun[cite: 9]." },
+         { k: ['jass'], r: "<b>Jass Bar Pista (Rota 4)</b><br>Prioridade: <i>Prospecção Ativa</i>.<br><b>Argumento Chave:</b> Apresentar o fechamento de caixa simplificado por operador e o histórico de vendas unificado[cite: 9]." },
+         { k: ['outgo', 'concorrente', 'taxas', 'comparativo'], r: "<b>Comparativo vs Concorrência (Ex: Outgo):</b><br>• <b>Pix:</b> Stratus vence (1,25% vs 1,5%)<br>• <b>Débito:</b> Stratus vence (2,60% vs 3,0%)<br>• <b>Dinheiro:</b> Stratus vence com isenção (0% vs 1,5%)<br>• <b>Crédito:</b> Empate técnico (3%)<br><i>Frase de bolso: 'Você paga menos em débito, Pix e dinheiro. Só no crédito a gente empata, mas aqui você leva ingresso, cashless, e bar no mesmo lugar.'</i>[cite: 12, 13]" },
+         { k: ['objeção', 'objecao', 'objeções', 'não quer', 'migrar', 'testar'], r: "<b>Quebra de Objeções:</b><br>• <i>'Já uso ticketeira':</i> Focar no Cashback de 3% para o produtor.<br>• <i>'Dá trabalho migrar':</i> A Stratus faz todo o cadastro inicial e acompanha a 1ª noite de operação no local.<br>• <i>'Já tenho máquina':</i> Oferecer o modelo apenas de Software por R$ 250/mês (ou R$ 450 p/ 10 máq).<br>• <i>'Quero testar antes':</i> Proponha uma operação Piloto em uma noite de menor risco[cite: 16]." },
+         { k: ['rota', 'rotas', 'roteiro'], r: "<b>Resumo das Rotas Comerciais:</b><br>📍 <b>Rota 1 (Iracema):</b> Arrumação, Vibe 085, Valentina, Gandaia.<br>📍 <b>Rota 2 (Meireles/Aldeota):</b> Radar Pub, Fuzuê, Bar das Luzes, Floresta Hall.<br>📍 <b>Rota 3 (Benfica):</b> Laje Head Shop, Casarão Benfica, Covil.<br>📍 <b>Rota 4 (Tauape/SUL):</b> KAZA, Jass Bar, Budega do Raul.<br>⏱️ <i>Horário de Abordagem Ideal:</i> Terça a Quinta, 15h às 18h[cite: 8, 9]." }
+      ];
+
+      const match = db.find(item => item.k.some(kw => q.includes(kw)));
+      if (match) {
+         reply = match.r;
+      } else {
+         reply = "Para essa pesquisa específica, baseie-se nos <b>Pilares do Pitch da Stratus</b>:<br>1. Disparo de WhatsApp p/ base Stratus.<br>2. Presença e Suporte presencial local (24h).<br>3. Adesão e implementação R$ 0.<br>Tente pesquisar o nome de um alvo, 'taxas', 'rotas' ou 'objeções'[cite: 8].";
+      }
+      
+      $(`msg-${id}`).innerHTML = `<div class="w-6 h-6 rounded bg-teal-500/20 flex-shrink-0 flex items-center justify-center text-teal-400 border border-teal-500/30 mt-1"><i class="fas fa-robot text-[10px]"></i></div><div class="bg-zinc-800/50 border border-zinc-700 rounded-xl rounded-tl-none p-3 text-zinc-300 leading-relaxed shadow-sm">${reply}</div>`;
+      box.scrollTop = box.scrollHeight;
+   }, 600); // Simulando delay de pensamento da IA
 };
 
 window.calcSim = () => {
