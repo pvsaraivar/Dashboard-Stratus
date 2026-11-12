@@ -881,18 +881,19 @@ MODS.calendar = () => {
 
   let cells = '';
   const daysOfWeek = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-  const headerCells = daysOfWeek.map(day => `<div class="text-center font-bold text-[9px] md:text-[11px] text-zinc-500 uppercase tracking-wider py-1 md:py-2">${day}</div>`).join('');
+  const headerCells = daysOfWeek.map(day => `<div class="text-center font-bold text-[10px] md:text-[11px] text-zinc-500 uppercase tracking-wider py-1 md:py-2">${day}</div>`).join('');
   
-  for (let i = 0; i < firstDay; i++) { cells += `<div class="min-h-[60px] md:min-h-[100px] lg:min-h-[120px] bg-zinc-950/30 border border-zinc-800/30 rounded-md md:rounded-xl"></div>`; }
+  for (let i = 0; i < firstDay; i++) { cells += `<div class="min-h-[90px] md:min-h-[100px] lg:min-h-[120px] bg-zinc-950/30 border border-zinc-800/30 rounded-md md:rounded-xl"></div>`; }
   
   for (let i = 1; i <= daysInMonth; i++) {
     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
     const isToday = dateStr === todayStr;
+    const isPast = dateStr < todayStr;
     const dayEvents = eventosCal.filter(ev => ev.data === dateStr);
     
-    const eventChips = dayEvents.map(ev => `<div class="mt-1 flex flex-col relative group"><div class="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 z-10 bg-zinc-900 rounded-md shadow-lg border border-zinc-700">${del('calendario', ev)}</div><div class="px-1 md:px-2 py-0.5 md:py-1 text-[8px] md:text-[9px] font-bold uppercase rounded md:rounded-lg border truncate transition-all ${opColors[ev.operacao] || 'bg-zinc-800 border-zinc-700 text-zinc-400'}" title="${esc(ev.titulo)}"><i class="fas ${opIcons[ev.operacao] || 'fa-calendar'} mr-1"></i>${esc(ev.titulo)}</div></div>`).join('');
+    const eventChips = dayEvents.map(ev => `<div class="mt-1 flex flex-col relative group"><div class="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 z-10 bg-zinc-900 rounded-md shadow-lg border border-zinc-700">${del('calendario', ev)}</div><div class="px-1.5 md:px-2 py-1 md:py-1.5 text-[9.5px] md:text-[10px] leading-tight whitespace-normal break-words font-bold uppercase rounded md:rounded-lg border transition-all ${isPast ? 'opacity-60 grayscale-[50%]' : ''} ${opColors[ev.operacao] || 'bg-zinc-800 border-zinc-700 text-zinc-400'}" title="${esc(ev.titulo)}"><i class="fas ${opIcons[ev.operacao] || 'fa-calendar'} mr-1"></i>${esc(ev.titulo)}</div></div>`).join('');
     
-    cells += `<div class="min-h-[60px] md:min-h-[100px] lg:min-h-[120px] bg-zinc-900/40 border ${isToday ? 'border-teal-500/50 bg-teal-950/10' : 'border-zinc-800'} rounded-md md:rounded-xl p-1 md:p-2 flex flex-col transition-colors hover:border-zinc-600 overflow-hidden"><span class="text-[9px] md:text-xs font-bold ${isToday ? 'text-teal-400 bg-teal-500/20 px-1 md:px-2 py-0.5 rounded md:rounded-md self-start' : 'text-zinc-500'}">${i}</span><div class="flex-1 overflow-y-auto custom-scrollbar mt-0.5 space-y-1">${eventChips}</div></div>`;
+    cells += `<div class="min-h-[90px] md:min-h-[100px] lg:min-h-[120px] bg-zinc-900/40 border ${isToday ? 'border-teal-500/50 bg-teal-950/10' : 'border-zinc-800'} rounded-md md:rounded-xl p-1 md:p-2 flex flex-col transition-colors hover:border-zinc-600 overflow-hidden"><span class="text-[10px] md:text-xs font-bold ${isToday ? 'text-teal-400 bg-teal-500/20 px-1.5 md:px-2 py-0.5 rounded md:rounded-md self-start' : 'text-zinc-500'}">${i}</span><div class="flex-1 overflow-y-auto custom-scrollbar mt-1 space-y-1.5">${eventChips}</div></div>`;
   }
 
   return head('Calendário de Eventos', 'Visão geral da agenda de operações.') + 
