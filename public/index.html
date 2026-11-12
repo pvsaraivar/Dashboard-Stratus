@@ -656,16 +656,15 @@ MODS['dash-view'] = () => {
     `).join('');
 
     const dashMod = (id, title, icon, colorClass, borderClass, textClass, desc) => `
-    <button onclick="nav('${id}', document.querySelector('[data-v=\\'${id}\\']'))" class="bg-zinc-900/60 border border-zinc-800 hover:${borderClass} transition-all rounded-2xl p-6 text-left group flex flex-col justify-between h-32 relative overflow-hidden shadow-sm">
+    <button onclick="nav('${id}', document.querySelector('[data-v=\\'${id}\\']'))" class="bg-zinc-900/60 border border-zinc-800 hover:${borderClass} transition-all rounded-2xl p-4 xl:p-5 text-left group flex flex-col justify-between h-32 relative overflow-hidden shadow-sm">
         <div class="absolute -right-4 -top-4 opacity-5 group-hover:opacity-10 transition-opacity">
             <i class="fas ${icon} text-8xl ${textClass}"></i>
         </div>
-        <div class="flex items-center gap-3 relative z-10">
-            <!-- shrink-0 adicionado aqui para o ícone não amassar -->
-            <div class="w-10 h-10 rounded-xl ${colorClass} flex items-center justify-center ${textClass} shrink-0"><i class="fas ${icon}"></i></div>
-            <h3 class="text-base font-bold text-white group-hover:${textClass} transition-colors leading-tight">${title}</h3>
+        <div class="flex items-center gap-2.5 relative z-10 w-full">
+            <div class="w-9 h-9 md:w-10 md:h-10 rounded-xl ${colorClass} flex items-center justify-center ${textClass} shrink-0"><i class="fas ${icon}"></i></div>
+            <h3 class="text-sm font-bold text-white group-hover:${textClass} transition-colors leading-tight tracking-tight flex-1 break-words">${title}</h3>
         </div>
-        <p class="text-[11px] text-zinc-400 mt-2 relative z-10">${desc}</p>
+        <p class="text-[10px] xl:text-[11px] text-zinc-400 mt-2 relative z-10 line-clamp-2">${desc}</p>
     </button>`;
 
     return head('Início', `Olá, ${esc(currentUser?.nome.split(' ')[0] || 'Usuário')}! Bem-vindo(a) ao painel Stratus.`) + 
@@ -700,6 +699,7 @@ MODS['dash-view'] = () => {
         </div>
     </div>`;
 };
+
 
 /* ---------- MÓDULO TICKETEIRA ---------- */
 MODS.ticketeira = () => {
@@ -866,6 +866,7 @@ window.editPessoa = (id) => {
    p.nome = n; p.telefone = t; p.pix = px;
    save(); render();
 };
+
 
 /* ---------- MÓDULO DE CALENDÁRIO ---------- */
 MODS.calendar = () => {
