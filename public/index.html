@@ -322,7 +322,7 @@ async function loadFiles() {
       fileMap[f.id] = f;
       const n = f.name.toUpperCase();
       if (n.includes('LUCRO BAR GERAL')) sheetFiles.master.push(f);
-      else if (n.includes('ESTOQUE')) sheetFiles.estoque.push(f);
+      else if (n.includes('ESTOQUE') || n.includes('COMPRA')) sheetFiles.estoque.push(f);
       else if (n.includes('STRATUS')) sheetFiles.internal.push(f);
       else sheetFiles.client.push(f);
     });
