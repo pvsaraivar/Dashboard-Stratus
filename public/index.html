@@ -697,7 +697,7 @@ function renderMaster(parsed, rawGrade) {
 }
 
 /* ---------- BANCO DE DADOS E MÓDULOS BASE ---------- */
-let DB = {}, cur = 'dash-view', calM = 0, curFile = null, activeEstId = null;
+let DB = {}, cur = 'dash-view', calM = 0, curFile = null, activeEstId = null, activeFinClient = null, activeFinEvent = null;
 const uid = () => Math.random().toString(36).slice(2, 9);
 const TIPOS_EST = ['Boate / Club', 'Pub / Bar', 'Casa de Shows', 'Restaurante', 'Eventos Fixo', 'Espaço Multiúso'];
 const STATUS_NEG = ['Prospecção', 'Em Negociação', 'Proposta Enviada', 'Cliente Ativo', 'Contrato Fechado', 'Perdido'];
